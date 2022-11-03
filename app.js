@@ -23,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/sample_data', sampledataRouter);
 app.use('/hj9h8765qzf5jizwwnua', adminLoginRouter);
+app.use('/hj9h8765qzf5jizwwnua/register-election', adminLoginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
