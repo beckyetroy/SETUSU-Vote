@@ -5,8 +5,7 @@ const bcrypt = require("bcrypt");
 var mysql = require('mysql');
 var adminLoggedIn = false;
 
-function renderDashboard(req, res, next) {
-    console.log('test');
+function renderDashboard(res, title, action) {
     database.getConnection ( async (err, connection)=> {
         if (err) throw (err)
         const sqlSearch = "Select * from Election"
@@ -19,7 +18,7 @@ function renderDashboard(req, res, next) {
             //TODO
             }
             else {
-                res.render('admin_dashboard', { title: 'Admin Dashboard' , action:'list', electionData:result});
+                res.render('admin_dashboard', { title: title, action:action, electionData:result});
             }
         })
     })
@@ -27,13 +26,13 @@ function renderDashboard(req, res, next) {
 
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
-    if (adminLoggedIn) renderDashboard(req, res, next);
+    if (adminLoggedIn) renderDashboard(res, 'Admin Dashboard', 'list');
     else res.render('admin_login', { title: 'Login' });
 });
 
 /* Login Authentication. */
 router.post('/', async function(req, res, next) {
-    if (adminLoggedIn) renderDashboard(req, res, next);
+    if (adminLoggedIn) renderDashboard(res, 'Admin Dashboard', 'list');
     else {
         //Handle user log in
         const user = req.body.username;
@@ -57,7 +56,7 @@ router.post('/', async function(req, res, next) {
                     if (await bcrypt.compare(password, hashedPassword)) {
                     console.log("Login Successful")
                     adminLoggedIn = true;
-                    renderDashboard(req, res, next);
+                    renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
                     } 
                     else {
                     console.log("Password Incorrect")
@@ -71,7 +70,7 @@ router.post('/', async function(req, res, next) {
 
 /* Open Register Election Form */
 router.post('/register-election', async function(req, res, next) {
-    res.render('admin_register_election', { title: 'Register Election' });
+    renderDashboard(res, 'Register Election','add');
 });
 
 /* Register Election */

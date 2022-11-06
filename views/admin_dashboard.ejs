@@ -13,13 +13,32 @@
     <body>
     <div class="container">
         <h1 class="text-center mt-3 mb-3"><%= title %></h1>
+
+        <% if(action == 'add') { %>
+            <div class="card">
+                <div class="card-header">Sample Form</div>
+                <div class="card-body">
+                    <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST">  
+                        <div class="container">   
+                            <label>Election Description: </label>
+                            <input type="text" placeholder="Enter Description" name="electiondescription" required>
+                            <label>Election Date: </label>
+                            <input type="date" name="electiondate" required>
+                            <label>Election Opening Time: </label>
+                            <input type="time" name="electionopeningtime" required>
+                            <label>Election Closing Time: </label>
+                            <input type="time" name="electionclosingtime" required>
+                            <button type="submit" value="add">Add</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+
+        <% } else if(action == 'list'){ %>
         <form action="/hj9h8765qzf5jizwwnua/register-election" method="POST">
             <button type="submit">Register a New Election</button>
         </form>
-        
-        <% if(action == 'add') { %>
-
-        <% } else if(action == 'list'){ %>
             
         <div class="card">
             <div class="card-header">
