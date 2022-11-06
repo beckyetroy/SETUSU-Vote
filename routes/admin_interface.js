@@ -5,16 +5,37 @@ const bcrypt = require("bcrypt");
 var mysql = require('mysql');
 var adminLoggedIn = false;
 
+function renderDashboard(req, res, next) {
+    console.log('test');
+    database.getConnection ( async (err, connection)=> {
+        if (err) throw (err)
+        const sqlSearch = "Select * from Election"
+        await connection.query (sqlSearch, async (err, result) => {
+            connection.release()
+            
+            if (err) throw (err)
+            if (result.length == 0) {
+            console.log("No Elections Registered.")
+            //TODO
+            }
+            else {
+                res.render('admin_dashboard', { title: 'Admin Dashboard' , action:'list', electionData:result});
+            }
+        })
+    })
+}
+
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
-    if (adminLoggedIn) res.render('admin_dashboard', { title: 'Dashboard' });
+    if (adminLoggedIn) renderDashboard(req, res, next);
     else res.render('admin_login', { title: 'Login' });
 });
 
 /* Login Authentication. */
 router.post('/', async function(req, res, next) {
-    if (adminLoggedIn) res.render('admin_dashboard', { title: 'Dashboard' });
+    if (adminLoggedIn) renderDashboard(req, res, next);
     else {
+        //Handle user log in
         const user = req.body.username;
         const password = req.body.password;
 
@@ -36,7 +57,7 @@ router.post('/', async function(req, res, next) {
                     if (await bcrypt.compare(password, hashedPassword)) {
                     console.log("Login Successful")
                     adminLoggedIn = true;
-                    res.render('admin_dashboard', { title: 'Dashboard' });
+                    renderDashboard(req, res, next);
                     } 
                     else {
                     console.log("Password Incorrect")
