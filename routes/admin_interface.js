@@ -171,4 +171,23 @@ router.post('/edit/:id', function(req, res, next){
     else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
+/* Delete Election */
+router.get('/delete/:id', function(req, res, next){
+    if (adminLoggedIn) {
+        var id = req.params.id;
+        var query = `delete from Election where Id = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Deleted Election");
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
 module.exports = router;
