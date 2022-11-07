@@ -82,7 +82,12 @@
 
         <% } else if(action == 'view') { %>
             <div class="card">
-                <div class="card-header">Election</div>
+                <div class="card-header">
+                    <%= data[0].Description %>
+                    <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="GET">
+                        <button type="submit">Edit</button>
+                    </form>
+                </div>
                 <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
@@ -128,7 +133,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">                                        
+                                <div class="mb-3">
                                     <ul>
                                     <%
                                         data.forEach(function(data){
@@ -152,9 +157,60 @@
                         </div>
                 </div>
             </div>
+            <% } else if(action == 'edit') { %>
+                <div class="card">
+                    <div class="card-header">Edit</div>
+                    <div class="card-body">
+                        <form action="/hj9h8765qzf5jizwwnua/edit/<%= data.Id %>" method="POST">  
+                            <div class="container">
+                                <label>Election Description:</label>
+                                <input type="text" name="electiondescription" value="<%= data.Description %>" required>
+                                <label>Election Date: </label>
+                                <input type="date" name="electiondate" id="electiondate" required>
+                                <label>Election Opening Time: </label>
+                                <input type="time" name="electionopeningtime" id="electionopeningtime" required>
+                                <label>Election Closing Time: </label>
+                                <input type="time" name="electionclosingtime" id="electionclosingtime" required>
+                                <button type="submit" value="edit">Save Changes</button>
+                            </div>
+                        </form>
+                        <script>
+                            //Format date
+                            var splits = "<%= data.ElectionDate %>".split(" ");
+                            var monthAbbr = splits[1];
+                            var day = splits[2];
+                            var year = splits[3];
+                            var month = '';
+                            monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+
+                            for (i=0; i<12; i++){
+                                if (monthAbbr === monthNames[i]){
+                                    if (i>10){
+                                        month = String(i + 1);
+                                    }
+                                    else {
+                                        month = '0' + String(i + 1);
+                                    }
+                                }
+                            }
+                            
+                            var date = year + '-' + month + '-' + day;
+                            document.getElementById("electiondate").valueAsDate = new Date(date);
+
+                            //Format times
+                            var opentimesplits = "<%= data.OpenTime %>".split(" ");
+                            var opentime = opentimesplits[4];
+                            document.getElementById("electionopeningtime").value = opentime;
+
+                            var closetimesplits = "<%= data.CloseTime %>".split(" ");
+                            var closetime = closetimesplits[4];
+                            document.getElementById("electionclosingtime").value = closetime;
+                        </script> 
+                    </div>
+                    </div>
+                </div>
             <% } %>
     </div>
     </body>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </html>

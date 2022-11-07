@@ -95,11 +95,9 @@ router.post('/election-add', async function(req, res, next) {
 });
 
 /* View Election Details */
-
-//TODO -- CREATE ONE QUERY THAT RETURNS ELECTION DETAILS AND REGISTERED CANDIDATES
 router.get('/view/:id', function(req, res, next){
 	var id = req.params.id;
-	var query = `select concat(fName, ' ', lName) AS 'CandidateName', Description, ElectionDate, OpenTime, CloseTime
+	var query = `select concat(fName, ' ', lName) AS 'CandidateName', Id, Description, ElectionDate, OpenTime, CloseTime
     from Candidate join Election
     on Election.Id = Candidate.ElectionId
     where Id = "${id}";`;
@@ -111,6 +109,51 @@ router.get('/view/:id', function(req, res, next){
                 throw (err);
             console.log("Viewing Election");
             res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
+        })
+    })
+});
+
+/* View Edit Election Details */
+router.get('/edit/:id', function(req, res, next){
+	var id = req.params.id;
+	var query = `select * from Election where Id = "${id}";`;
+    database.getConnection( async (err, connection) => {
+        if (err) console.log(err)
+        connection.query(query, async (err, result) => {
+            connection.release();
+            if (err)
+                throw (err);
+            console.log("Editing Election");
+            res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result[0]});
+        })
+    })
+});
+
+/* Edit Election Details */
+router.post('/edit/:id', function(req, res, next){
+	var id = req.params.id;
+    console.log(id);
+	var description = req.body.electiondescription;
+    var date = req.body.electiondate;
+    var opentime = date + ' ' + req.body.electionopeningtime + ':00';
+    var closetime = date + ' ' + req.body.electionclosingtime + ':00';
+
+    var query = `
+	UPDATE Election
+	SET Description = "${description}", 
+	ElectionDate = "${date}", 
+	OpenTime = "${opentime}", 
+	CloseTime = "${closetime}" 
+	WHERE id = "${id}"
+	`;
+    database.getConnection( async (err, connection) => {
+        if (err) console.log(err)
+        connection.query(query, async (err, result) => {
+            connection.release();
+            if (err)
+                throw (err);
+            console.log ("Edited Election");
+            res.redirect('/hj9h8765qzf5jizwwnua');
         })
     })
 });
