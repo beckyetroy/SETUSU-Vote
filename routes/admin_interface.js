@@ -103,7 +103,7 @@ router.get('/view/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
         var query = `select concat(fName, ' ', lName) AS 'CandidateName', Id, Description, ElectionDate, OpenTime, CloseTime
-        from Candidate join Election
+        from Candidate right join Election
         on Election.Id = Candidate.ElectionId
         where Id = "${id}";`;
         database.getConnection( async (err, connection) => {
