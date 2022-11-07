@@ -15,7 +15,7 @@ function renderDashboard(res, title, action) {
             if (err) throw (err)
             if (result.length == 0) {
             console.log("No Elections Registered.")
-            //TODO
+            res.render('admin_dashboard', { title: title, action:action, electionData:result});
             }
             else {
                 res.render('admin_dashboard', { title: title, action:action, electionData:result});
@@ -90,6 +90,27 @@ router.post('/election-add', async function(req, res, next) {
         if (err) throw (err)
         console.log ("Created Election");
         res.redirect('/hj9h8765qzf5jizwwnua');
+        })
+    })
+});
+
+/* View Election Details */
+
+//TODO -- CREATE ONE QUERY THAT RETURNS ELECTION DETAILS AND REGISTERED CANDIDATES
+router.get('/view/:id', function(req, res, next){
+	var id = req.params.id;
+	var query = `select concat(fName, ' ', lName) AS 'CandidateName', Description, ElectionDate, OpenTime, CloseTime
+    from Candidate join Election
+    on Election.Id = Candidate.ElectionId
+    where Id = "${id}";`;
+    database.getConnection( async (err, connection) => {
+        if (err) console.log(err)
+        connection.query(query, async (err, result) => {
+            connection.release();
+            if (err)
+                throw (err);
+            console.log("Viewing Election");
+            res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
         })
     })
 });

@@ -53,8 +53,6 @@
                         <tr>
                             <th>Election</th>
                             <th>Date</th>
-                            <th>Open Time</th>
-                            <th>Close Time</th>
                         </tr>
                         <%
                         if(electionData.length > 0)
@@ -62,11 +60,8 @@
                             electionData.forEach(function(data){
                         %>
                         <tr>
-                            <td><%= data.Description %></td>
+                            <td><a href="/hj9h8765qzf5jizwwnua/view/<%= data.Id %>" class="btn btn-primary btn-sm"><%= data.Description %></a></td>
                             <td><%= data.ElectionDate %></td>
-                            <td><%= data.OpenTime %></td>
-                            <td><%= data.CloseTime %></td>
-                            <td></td>
                         </tr>
                         <%
                             });
@@ -85,7 +80,79 @@
             </div>
         </div>
 
-        <% } %>
+        <% } else if(action == 'view') { %>
+            <div class="card">
+                <div class="card-header">Election</div>
+                <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Date:</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <%= data[0].ElectionDate %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Opens:</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <%= data[0].OpenTime %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Closes:</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <%= data[0].CloseTime %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <!--TODO: CANDIDATE VIEW LINKS HERE-->
+                                    <strong>Candidates</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">                                        
+                                    <ul>
+                                    <%
+                                        data.forEach(function(data){
+                                            if (data.CandidateName) {
+                                    %>
+                                        <li><%= data.CandidateName %></li>
+                                    <%
+                                    }
+                                    else if (!data.CandidateName)
+                                    {
+                                    %>
+                                    No Candidates Found for this Election
+                                    <%
+                                    }});
+                                    %>
+                                    </ul>
+                                    </td>
+                                    </tr>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <% } %>
     </div>
     </body>
 
