@@ -190,4 +190,35 @@ router.get('/delete/:id', function(req, res, next){
     else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
+/* Open Register Candidate Form */
+router.post('/register-candidate', async function(req, res, next) {
+    if (adminLoggedIn) renderDashboard(res, 'Register Candidate','addCandidate');
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
+/* Register Candidate */
+router.post('/candidate-add', async function(req, res, next) {
+    if (adminLoggedIn) {
+        const fname = req.body.candidatefname;
+        const lname = req.body.candidatelname;
+        const email = req.body.candidateemail;
+        const election = req.body.election;
+        console.log(req.body.election);
+
+        database.getConnection( async (err, connection) => {
+            if (err) throw (err)
+            const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
+            const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
+
+            await connection.query (insert_query, (err, result)=> {
+            connection.release();
+            if (err) throw (err)
+            console.log ("Created Candidate");
+            res.redirect('/hj9h8765qzf5jizwwnua');
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
 module.exports = router;

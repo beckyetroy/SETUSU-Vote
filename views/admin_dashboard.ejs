@@ -35,6 +35,50 @@
                 </div>
             </div>
 
+        <% } else if(action == 'addCandidate') { %>
+            <div class="card">
+                <div class="card-header">Add Candidate</div>
+                <div class="card-body">
+                    <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST">  
+                        <div class="container">
+                            <label>First Name(s): </label>
+                            <input type="text" placeholder="Enter First Name" name="candidatefname" required>
+                            <label>Surname: </label>
+                            <input type="text" placeholder="Enter Surname" name="candidatelname" required>
+                            <label>Email Address: </label>
+                            <input type="text" placeholder="Enter Email" name="candidateemail" required>
+                            <label>Registering for Election: </label>
+                                <%
+                                if(electionData.length > 0)
+                                {
+                                    %>
+                                    <select name="election">
+                                        <%
+                                        electionData.forEach(function(data){
+                                        %>
+                                            <option value=<%= data.Id %>> <%= data.Description %> </option>
+                                        <%
+                                        });
+                                        %>
+                                    </select>
+                                    <%
+                                }
+                                else
+                                {
+                                    %>
+                                    <tr>
+                                        <td colspan="5">No Data Found</td>
+                                    </tr>
+                                <%
+                                }
+                                %>
+                            <button type="submit" value="addCandidate">Add</button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+
         <% } else if(action == 'list'){ %>
         <form action="/hj9h8765qzf5jizwwnua/register-election" method="POST">
             <button type="submit">Register a New Election</button>
@@ -79,6 +123,9 @@
                 </div>
             </div>
         </div>
+        <form action="/hj9h8765qzf5jizwwnua/register-candidate" method="POST">
+            <button type="submit">Register a New Candidate</button>
+        </form>
 
         <% } else if(action == 'view') { %>
             <div class="card">
