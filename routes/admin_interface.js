@@ -109,7 +109,7 @@ router.post('/election-add', async function(req, res, next) {
 router.get('/view/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select concat(fName, ' ', lName) AS 'CandidateName', Id, Description, ElectionDate, OpenTime, CloseTime
+        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime
         from Candidate right join Election
         on Election.Id = Candidate.ElectionId
         where Id = "${id}";`;
@@ -210,7 +210,6 @@ router.post('/candidate-add', async function(req, res, next) {
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
         const election = req.body.election;
-        console.log(req.body.election);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
@@ -222,6 +221,37 @@ router.post('/candidate-add', async function(req, res, next) {
             if (err) throw (err)
             console.log ("Created Candidate");
             res.redirect('/hj9h8765qzf5jizwwnua');
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
+
+/* View Candidate Details */
+router.get('/viewcandidate/:id', function(req, res, next){
+    if (adminLoggedIn) {
+        var id = req.params.id;
+        var query = `select fName, lName, Email,
+        CategoryName, NumVotes,
+        Description, Username, Password
+        from Candidate join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        left join Category
+        on Candidate_Category.CategoryId = Category.CategoryId
+        left join Election
+        on Candidate.ElectionId = Election.Id
+        left join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        where Candidate.CandidateId = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Viewing Candidate");
+                res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
         })
     }

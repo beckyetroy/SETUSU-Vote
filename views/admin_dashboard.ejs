@@ -8,6 +8,7 @@
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
         <title></title>
     </head>
     <body>
@@ -151,7 +152,7 @@
                                 if (candidate.CandidateId) {
                         %>
                         <tr>
-                            <td><a href="/hj9h8765qzf5jizwwnua/view/<%= candidate.CandidateId %>" class="btn btn-primary btn-sm"><%= candidate.fName %> <%= candidate.lName %></a></td>
+                            <td><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= candidate.CandidateId %>" class="btn btn-primary btn-sm"><%= candidate.fName %> <%= candidate.lName %></a></td>
                             <td><%= candidate.Email %></td>
                         </tr>
                         <%
@@ -234,7 +235,7 @@
                                         data.forEach(function(data){
                                             if (data.CandidateName) {
                                     %>
-                                        <li><%= data.CandidateName %></li>
+                                        <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
                                     <%
                                     }
                                     else if (!data.CandidateName)
@@ -252,6 +253,102 @@
                         </div>
                 </div>
             </div>
+
+            <% } else if(action == 'viewcandidate') { %>
+                <div class="card">
+                    <div class="card-header">
+                        <%= data[0].fName %> <%= data[0].lName %>
+                        <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data.CandidateId %>" method="GET">
+                            <button type="submit">Edit</button>
+                        </form>
+                        <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data.CandidateId %>" method="GET">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Email:</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <%= data[0].Email %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Category Running For:</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <%= data[0].CategoryName %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Election:</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <%= data[0].Description %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Number of Votes:</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <%= data[0].NumVotes %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Credentials:</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        Username: <%= data[0].Username %>
+                                    </div>
+                                    <div class="mb-3">
+                                        Password: <div id ="CandidatePW">●●●●●●●●●●</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <button id="PWBtn" type="button">Show Password</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <script>
+                            //Toggle candidate password view
+                            $(document).on("click", "#PWBtn", function(){
+                                var pw = $("#CandidatePW");
+                                var btn = $("#PWBtn");
+                                if ($("#CandidatePW").html() =="●●●●●●●●●●") {
+                                    $("#CandidatePW").html("<%= data[0].Password %>");
+                                    $("#PWBtn").html("Hide Password");
+                                } else {
+                                    $("#CandidatePW").html("●●●●●●●●●●")
+                                    $("#PWBtn").html("Show Password");
+                                }
+                            })
+                        </script>
+                    </div>
+                </div>
+
             <% } else if(action == 'edit') { %>
                 <div class="card">
                     <div class="card-header">Edit</div>
