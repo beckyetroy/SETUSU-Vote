@@ -8,17 +8,24 @@ var adminLoggedIn = false;
 function renderDashboard(res, title, action) {
     database.getConnection ( async (err, connection)=> {
         if (err) throw (err)
-        const sqlSearch = "Select * from Election"
+        const sqlSearch =
+            `select * from Election
+            left outer join Candidate
+            on Election.Id = Candidate.ElectionId
+            union
+            select * from Election
+            right outer join Candidate
+            on Election.Id = Candidate.ElectionId;`
         await connection.query (sqlSearch, async (err, result) => {
             connection.release()
             
             if (err) throw (err)
             if (result.length == 0) {
-            console.log("No Elections Registered.")
-            res.render('admin_dashboard', { title: title, action:action, electionData:result});
+            console.log("Nothing Registered.")
+            res.render('admin_dashboard', { title: title, action:action, data:result});
             }
             else {
-                res.render('admin_dashboard', { title: title, action:action, electionData:result});
+                res.render('admin_dashboard', { title: title, action:action, data:result});
             }
         })
     })

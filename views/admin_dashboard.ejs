@@ -49,14 +49,15 @@
                             <input type="text" placeholder="Enter Email" name="candidateemail" required>
                             <label>Registering for Election: </label>
                                 <%
-                                if(electionData.length > 0)
+                                if(data.length > 0)
                                 {
                                     %>
                                     <select name="election">
                                         <%
-                                        electionData.forEach(function(data){
+                                        electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                                        electionData.forEach(function(election){
                                         %>
-                                            <option value=<%= data.Id %>> <%= data.Description %> </option>
+                                            <option value=<%= election.Id %>> <%= election.Description %> </option>
                                         <%
                                         });
                                         %>
@@ -99,13 +100,14 @@
                             <th>Date</th>
                         </tr>
                         <%
-                        if(electionData.length > 0)
+                        if(data.length > 0)
                         {
-                            electionData.forEach(function(data){
+                            electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                            electionData.forEach(function(election){
                         %>
                         <tr>
-                            <td><a href="/hj9h8765qzf5jizwwnua/view/<%= data.Id %>" class="btn btn-primary btn-sm"><%= data.Description %></a></td>
-                            <td><%= data.ElectionDate %></td>
+                            <td><a href="/hj9h8765qzf5jizwwnua/view/<%= election.Id %>" class="btn btn-primary btn-sm"><%= election.Description %></a></td>
+                            <td><%= election.ElectionDate %></td>
                         </tr>
                         <%
                             });
@@ -126,6 +128,49 @@
         <form action="/hj9h8765qzf5jizwwnua/register-candidate" method="POST">
             <button type="submit">Register a New Candidate</button>
         </form>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">Elections</div>
+                    <div class="col"></div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                        </tr>
+                        <%
+                        if(data.length > 0)
+                        {
+                            candidateData = data.filter((v, i, a) => a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                            candidateData.forEach(function(candidate){
+                                if (candidate.CandidateId) {
+                        %>
+                        <tr>
+                            <td><a href="/hj9h8765qzf5jizwwnua/view/<%= candidate.CandidateId %>" class="btn btn-primary btn-sm"><%= candidate.fName %> <%= candidate.lName %></a></td>
+                            <td><%= candidate.Email %></td>
+                        </tr>
+                        <%
+                                } else {}
+                            });
+                        }
+                        else
+                        {
+                        %>
+                        <tr>
+                            <td colspan="5">No Data Found</td>
+                        </tr>
+                        <%
+                        }
+                        %>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <% } else if(action == 'view') { %>
             <div class="card">
