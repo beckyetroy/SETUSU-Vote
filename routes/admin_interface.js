@@ -199,7 +199,30 @@ router.get('/delete/:id', function(req, res, next){
 
 /* Open Register Candidate Form */
 router.post('/register-candidate', async function(req, res, next) {
-    if (adminLoggedIn) renderDashboard(res, 'Register Candidate','addCandidate');
+    if (adminLoggedIn) {
+        database.getConnection ( async (err, connection)=> {
+            if (err) throw (err)
+            const sqlSearch =
+                `select * from Election
+                left outer join Candidate
+                on Election.Id = Candidate.ElectionId
+                left outer join Category
+                on Election.Id = Category.ElectionId
+                union
+                select * from Election
+                right outer join Candidate
+                on Election.Id = Candidate.ElectionId
+				right outer join Category
+                on Election.Id = Category.ElectionId;`
+            await connection.query (sqlSearch, async (err, result) => {
+                connection.release()
+                
+                if (err) throw (err)
+                res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
+            })
+        })
+    }
+    //renderDashboard(res, 'Register Candidate','addCandidate');
     else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
@@ -210,6 +233,8 @@ router.post('/candidate-add', async function(req, res, next) {
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
         const election = req.body.election;
+
+        console.log(req.body.category);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
