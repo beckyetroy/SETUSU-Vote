@@ -258,10 +258,10 @@
                 <div class="card">
                     <div class="card-header">
                         <%= data[0].fName %> <%= data[0].lName %>
-                        <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data.CandidateId %>" method="GET">
+                        <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET">
                             <button type="submit">Edit</button>
                         </form>
-                        <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data.CandidateId %>" method="GET">
+                        <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data[0].CandidateId %>" method="GET">
                             <button type="submit">Delete</button>
                         </form>
                     </div>
@@ -401,6 +401,80 @@
                     </div>
                     </div>
                 </div>
+                <% } else if(action == 'editcandidate') { %>
+                    <div class="card">
+                        <div class="card-header">Edit</div>
+                        <div class="card-body">
+                            <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="POST">  
+                                <div class="container">
+                                    <label>First Name(s): </label>
+                                    <input type="text" name="candidatefname" value="<%= data[0].fName %>"required>
+                                    <label>Surname: </label>
+                                    <input type="text" name="candidatelname" value="<%= data[0].lName %>" required>
+                                    <label>Email Address: </label>
+                                    <input type="text" name="candidateemail" value="<%= data[0].Email %>" required>
+                                    <label>Registering for Election: </label>
+                                        <%
+                                        if(data.length > 0)
+                                        {
+                                            %>
+                                            <select name="election">
+                                                <%
+                                                electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                                                electionData.forEach(function(election){
+                                                    if (election.Id) {
+                                                %>
+                                                    <option value=<%= election.Id %>> <%= election.Description %> </option>
+                                                <%
+                                                } 
+                                                    else {}
+                                                });
+                                                %>
+                                            </select>
+                                            <select name="category">
+                                                <%
+                                                categoryData = data.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                                                categoryData.forEach(function(category){
+                                                    if (category.CategoryId) {
+                                                %>
+                                                    <option value=<%= category.CategoryId %>> <%= category.CategoryName %> </option>
+                                                <%
+                                                }
+                                                    else {}
+                                                });
+                                                %>
+                                            </select>
+                                            <%
+                                        }
+                                        else
+                                        {
+                                            %>
+                                            <tr>
+                                                <td colspan="5">No Data Found</td>
+                                            </tr>
+                                        <%
+                                        }
+                                        %>
+                                        <label>Username: </label>
+                                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" required>
+                                        <input type="password" name="candidatepassword" id ="candidatepassword" value="<%= data[0].Password %>" required>
+                                        <input type="checkbox" onclick="showPW()">Show Password
+                                    <button type="submit" value="edit">Save Changes</button>
+                                </div>
+                            </form>
+                            <script>
+                                function showPW() {
+                                    var pw = document.getElementById("candidatepassword");
+                                    if (pw.type === "password") {
+                                        pw.type = "text";
+                                    } else {
+                                        pw.type = "password";
+                                    }
+                                }
+                            </script>
+                        </div>
+                        </div>
+                    </div>
             <% } %>
     </div>
     </body>

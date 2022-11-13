@@ -232,7 +232,7 @@ router.post('/candidate-add', async function(req, res, next) {
 router.get('/viewcandidate/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select fName, lName, Email,
+        var query = `select Candidate.CandidateId, fName, lName, Email,
         CategoryName, NumVotes,
         Description, Username, Password
         from Candidate join Candidate_Category
@@ -252,6 +252,100 @@ router.get('/viewcandidate/:id', function(req, res, next){
                     throw (err);
                 console.log("Viewing Candidate");
                 res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
+/* View Edit Candidate Details */
+router.get('/editcandidate/:id', function(req, res, next){
+    if (adminLoggedIn) {
+        var id = req.params.id;
+        var query = `select fName, lName, Email, CategoryName, Candidate.CandidateId,
+        Category.CategoryId, Id, Description, Username, Password
+        from Candidate left outer join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        left outer join Category
+        on Candidate_Category.CategoryId = Category.CategoryId
+        left outer join Election
+        on Candidate.ElectionId = Election.Id
+        left join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        where Candidate.CandidateId = "${id}"
+        union
+        select fName, lName, Email, CategoryName, Candidate.CandidateId,
+        Category.CategoryId, Id, Description, Username, Password
+        from Candidate
+        right outer join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        right outer join Category
+        on Candidate_Category.CategoryId = Category.CategoryId
+        right outer join Election
+        on Candidate.ElectionId = Election.Id
+        left join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        union
+        select fName, lName, Email, CategoryName, Candidate.CandidateId,
+        Category.CategoryId, Id, Description, Username, Password
+        from Candidate
+        right outer join Election
+        on Candidate.ElectionId = Election.Id
+        left join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        right outer join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        right outer join Category
+        on Candidate_Category.CategoryId = Category.CategoryId;`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Editing Candidate");
+                res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: result});
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
+/* Edit Candidate Details */
+router.post('/editcandidate/:id', function(req, res, next){
+    if (adminLoggedIn) {
+        var id = req.params.id;
+        console.log(id);
+        var fname = req.body.candidatefname;
+        var lname = req.body.candidatelname;
+        var email = req.body.candidateemail;
+        var election = req.body.election;
+        var category = req.body.category;
+        var username = req.body.candidateusername;
+        var password = req.body.candidatepassword;
+
+        var query = `UPDATE Candidate
+        inner join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        inner join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        SET fName = "${fname}", 
+        lName = "${lname}", 
+        Email = "${email}", 
+        ElectionId = "${election}",
+        CategoryId = "${category}",
+        Username = "${username}",
+        Password = "${password}"
+        WHERE Candidate.CandidateId = "${id}"
+        `;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log ("Edited Candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
             })
         })
     }
