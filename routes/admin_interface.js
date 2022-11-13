@@ -352,4 +352,23 @@ router.post('/editcandidate/:id', function(req, res, next){
     else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
+/* Delete Candidate */
+router.get('/deletecandidate/:id', function(req, res, next){
+    if (adminLoggedIn) {
+        var id = req.params.id;
+        var query = `delete from Candidate where CandidateId = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Deleted Candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            })
+        })
+    }
+    else res.redirect('/hj9h8765qzf5jizwwnua');
+});
+
 module.exports = router;
