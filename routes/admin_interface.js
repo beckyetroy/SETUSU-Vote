@@ -239,6 +239,7 @@ router.post('/candidate-add', async function(req, res, next) {
             if (err) throw (err)
             const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
             const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
+            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
             await connection.query (insert_query, async (err, result)=> {
@@ -247,10 +248,14 @@ router.post('/candidate-add', async function(req, res, next) {
             console.log ("Created Candidate");
             const candidateId = result.insertId;
             const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
-            await connection.query(insert_category_query, (err, result) => {
+            await connection.query(insert_category_query, async (err, result) => {
                 if (err) throw (err);
-                console.log("Added category to candidate");
-                res.redirect('/hj9h8765qzf5jizwwnua');
+                const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, "User123", "Password123"]);
+                await connection.query(insert_credentials_query, (err, result) => {
+                    if (err) throw (err);
+                    console.log("Added category to candidate");
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
             });
         })
