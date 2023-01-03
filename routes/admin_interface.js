@@ -199,7 +199,30 @@ router.get('/delete/:id', function(req, res, next){
 
 /* Open Register Candidate Form */
 router.post('/register-candidate', async function(req, res, next) {
-    if (adminLoggedIn) renderDashboard(res, 'Register Candidate','addCandidate');
+    if (adminLoggedIn) {
+        database.getConnection ( async (err, connection)=> {
+            if (err) throw (err)
+            const sqlSearch =
+                `select * from Election
+                left outer join Candidate
+                on Election.Id = Candidate.ElectionId
+                left outer join Category
+                on Election.Id = Category.ElectionId
+                union
+                select * from Election
+                right outer join Candidate
+                on Election.Id = Candidate.ElectionId
+				right outer join Category
+                on Election.Id = Category.ElectionId;`
+            await connection.query (sqlSearch, async (err, result) => {
+                connection.release()
+                
+                if (err) throw (err)
+                res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
+            })
+        })
+    }
+    //renderDashboard(res, 'Register Candidate','addCandidate');
     else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
@@ -210,18 +233,26 @@ router.post('/candidate-add', async function(req, res, next) {
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
         const election = req.body.election;
+        const category = req.body.category;
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
+            const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
-            await connection.query (insert_query, (err, result)=> {
+            await connection.query (insert_query, async (err, result)=> {
             connection.release();
             if (err) throw (err)
             console.log ("Created Candidate");
-            res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+            const candidateId = result.insertId;
+            const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
+            await connection.query(insert_category_query, (err, result) => {
+                if (err) throw (err);
+                console.log("Added category to candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+            });
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');
