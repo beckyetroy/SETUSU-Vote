@@ -233,20 +233,26 @@ router.post('/candidate-add', async function(req, res, next) {
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
         const election = req.body.election;
-
-        console.log(req.body.category);
+        const category = req.body.category;
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
+            const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
-            await connection.query (insert_query, (err, result)=> {
+            await connection.query (insert_query, async (err, result)=> {
             connection.release();
             if (err) throw (err)
             console.log ("Created Candidate");
-            res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+            const candidateId = result.insertId;
+            const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
+            await connection.query(insert_category_query, (err, result) => {
+                if (err) throw (err);
+                console.log("Added category to candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+            });
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');
