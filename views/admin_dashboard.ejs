@@ -322,7 +322,39 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <!--TODO: CANDIDATE VIEW LINKS HERE-->
+                                    <strong>Categories</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <ul>
+                                        <%
+                                            var categoriesFound = false;
+                                            data.forEach(function(data){
+                                                if (data.CategoryName) {
+                                                    categoriesFound = true;
+                                        %>
+                                                <%= data.CategoryName %> <br>
+                                                <%= data.CategoryDescription %> <br>
+                                        <%
+                                                }
+                                            });
+                                            if (!categoriesFound)
+                                            {
+                                        %>
+                                                No Categories Found for this Election
+                                        <%
+                                            }
+                                        %>
+                                    </ul>
+                                    </td>
+                                    </tr>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <strong>Candidates</strong>
                                 </div>
                             </div>
@@ -330,18 +362,21 @@
                                 <div class="mb-3">
                                     <ul>
                                     <%
+                                        var candidatesFound = false;
                                         data.forEach(function(data){
                                             if (data.CandidateName) {
+                                                candidatesFound = true;
                                     %>
-                                        <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
+                                            <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
                                     <%
-                                    }
-                                    else if (!data.CandidateName)
-                                    {
+                                            }
+                                        });
+                                        if (!candidatesFound)
+                                        {
                                     %>
-                                    No Candidates Found for this Election
+                                            No Candidates Found for this Election
                                     <%
-                                    }});
+                                        }
                                     %>
                                     </ul>
                                     </td>

@@ -122,9 +122,12 @@ router.post('/election-add', async function(req, res, next) {
 router.get('/view/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime
+        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
+        CategoryName, CategoryDescription
         from Candidate right join Election
         on Election.Id = Candidate.ElectionId
+        right join Category
+        on Election.Id = Category.ElectionId
         where Id = "${id}";`;
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
@@ -311,41 +314,14 @@ router.get('/viewcandidate/:id', function(req, res, next){
 router.get('/editcandidate/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select fName, lName, Email, CategoryName, Candidate.CandidateId,
+        var query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
         Category.CategoryId, Id, Description, Username, Password
-        from Candidate left outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        left outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId
-        left outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        where Candidate.CandidateId = "${id}"
-        union
-        select fName, lName, Email, CategoryName, Candidate.CandidateId,
-        Category.CategoryId, Id, Description, Username, Password
-        from Candidate
-        right outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        right outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId
-        right outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        union
-        select fName, lName, Email, CategoryName, Candidate.CandidateId,
-        Category.CategoryId, Id, Description, Username, Password
-        from Candidate
-        right outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        right outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        right outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId;`;
+        FROM (SELECT * FROM Candidate WHERE CandidateId = "${id}") AS candidate
+        LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
+        LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
+        LEFT JOIN Election ON candidate.ElectionId = Election.Id
+        LEFT JOIN Candidate_Credentials ON candidate.CandidateId = Candidate_Credentials.CandidateId`;
+
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
