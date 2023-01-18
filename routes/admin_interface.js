@@ -88,18 +88,31 @@ router.post('/election-add', async function(req, res, next) {
         const date = req.body.electiondate;
         const opentime = date + ' ' + req.body.electionopeningtime + ':00';
         const closetime = date + ' ' + req.body.electionclosingtime + ':00';
+        const categories = JSON.parse(req.body.categories);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime) values (?,?,?,?)";
             const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime]);
+            const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
 
-            await connection.query (insert_query, (err, result)=> {
-            connection.release();
-            if (err) throw (err)
-            console.log ("Created Election");
-            res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+            await connection.query (insert_query, async (err, result)=> {
+                connection.release();
+                if (err) throw (err)
+                console.log ("Created Election");
+                const electionId = result.insertId;
+                for (let i = 0; i < categories.length; i++) {
+                    const category = categories[i];
+                    const categoryName = category.name;
+                    const categoryDescription = category.description;
+        
+                    const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, electionId]);
+                    await connection.query(insert_category_query, async (err, result) => {
+                        if (err) throw (err);
+                    });
+                }
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');

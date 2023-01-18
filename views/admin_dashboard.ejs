@@ -20,10 +20,10 @@
 
         <% if(action == 'add') { %>
             <div class="card">
-                <div class="card-header">Sample Form</div>
+                <div class="card-header"></div>
                 <div class="card-body">
-                    <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST">  
-                        <div class="container">   
+                    <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm">  
+                        <div class="container">
                             <label>Election Description: </label>
                             <input type="text" placeholder="Enter Description" name="electiondescription" required>
                             <label>Election Date: </label>
@@ -32,7 +32,70 @@
                             <input type="time" name="electionopeningtime" required>
                             <label>Election Closing Time: </label>
                             <input type="time" name="electionclosingtime" required>
-                            <button type="submit" value="add">Add</button>
+                            <h5>Categories</h5>
+                            <label>Category name: </label>
+                            <input type="text" placeholder="Enter Name" name="categoryname" id="categoryname">
+                            <label>Brief description: </label>
+                            <input type="text" placeholder="Enter Description" name="categorydescription" id="categorydescription">
+                            <input type="button" value="Add" class="addCategory"></button>
+                            <ul class="categoryList"></ul>
+                            <button type="submit" value="add">Register</button>
+                            <script>
+                                const categoryList = document.querySelector('.categoryList');
+                                const addBtn = document.querySelector(".addCategory");
+                                const categoryName = document.querySelector('#categoryname');
+                                const categoryDescription = document.querySelector('#categorydescription');
+                                let categories = [];
+
+                                function deleteCategory(e) {
+                                const parent = e.target.parentNode;
+                                parent.remove();
+                                }
+
+
+                                function addCategory() {
+                                    const name = categoryName.value;
+                                    const description = categoryDescription.value;
+
+                                    if(name.length === 0 || description.length === 0) return;
+
+                                    const category = { name: name, description: description };
+                                    categories.push(category);
+
+                                    const btn = document.createElement('button');
+                                    btn.type = 'button';
+                                    btn.textContent = 'Remove';
+                                    btn.addEventListener("click", (e) => deleteCategory(e));
+
+                                    const li = document.createElement('li');
+                                    li.textContent = `${name}: ${description} `;
+                                    li.appendChild(btn);
+
+                                    categoryList.appendChild(li);
+
+                                    categoryName.value = "";
+                                    categoryDescription.value = "";
+                                }
+
+                                addBtn.addEventListener("click", addCategory);
+
+                                const form = document.getElementById("addElectionForm");
+
+                                form.addEventListener("submit", function(e) {
+                                    e.preventDefault();
+
+                                    const hiddenInput = document.createElement("input");
+                                    hiddenInput.type = "hidden";
+                                    hiddenInput.name = "categories";
+                                    hiddenInput.value = JSON.stringify(categories);
+                                    console.log(categories);
+
+                                    form.appendChild(hiddenInput);
+
+                                    // Submit the form
+                                    form.submit();
+                                });
+                            </script>
                         </div>
                     </form>
                 </div>
