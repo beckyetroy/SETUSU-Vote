@@ -124,11 +124,10 @@ router.get('/view/:id', function(req, res, next){
         var id = req.params.id;
         var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
         CategoryName, CategoryDescription
-        from Candidate right join Election
-        on Election.Id = Candidate.ElectionId
-        right join Category
-        on Election.Id = Category.ElectionId
-        where Id = "${id}";`;
+        from Election
+        left join Candidate on Election.Id = Candidate.ElectionId
+        left join Category on Election.Id = Category.ElectionId
+        where Election.Id = "${id}";`;
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -147,7 +146,10 @@ router.get('/view/:id', function(req, res, next){
 router.get('/edit/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select * from Election where Id = "${id}";`;
+        var query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+        from Election left join Category
+        on Election.Id = Category.ElectionId
+        where Id = "${id}";`;
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -155,7 +157,7 @@ router.get('/edit/:id', function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Editing Election");
-                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result[0]});
+                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
             })
         })
     }
@@ -166,11 +168,11 @@ router.get('/edit/:id', function(req, res, next){
 router.post('/edit/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        console.log(id);
         var description = req.body.electiondescription;
         var date = req.body.electiondate;
         var opentime = date + ' ' + req.body.electionopeningtime + ':00';
         var closetime = date + ' ' + req.body.electionclosingtime + ':00';
+        const categories = JSON.parse(req.body.updatedCategories);
 
         var query = `
         UPDATE Election
@@ -180,12 +182,27 @@ router.post('/edit/:id', function(req, res, next){
         CloseTime = "${closetime}" 
         WHERE id = "${id}"
         `;
+        const removeCategories = `DELETE FROM Category WHERE ElectionId = "${id}"`
+        const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
+
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
+                if (err) throw (err);
+                await connection.query(removeCategories, async (err, result) => {
+                    if (err) throw (err);
+                    for (let i = 0; i < categories.length; i++) {
+                        const category = categories[i];
+                        const categoryName = category.name;
+                        const categoryDescription = category.description;
+            
+                        const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                        await connection.query(insert_category_query, async (err, result) => {
+                            if (err) throw (err);
+                        });
+                    }
+                });
                 connection.release();
-                if (err)
-                    throw (err);
                 console.log ("Edited Election");
                 res.redirect('/hj9h8765qzf5jizwwnua');
             })
