@@ -249,7 +249,7 @@ router.post('/register-candidate', async function(req, res, next) {
                 on Election.Id = Category.ElectionId;`
             await connection.query (sqlSearch, async (err, result) => {
                 connection.release()
-                
+
                 if (err) throw (err)
                 res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
             })
@@ -267,6 +267,7 @@ router.post('/candidate-add', async function(req, res, next) {
         const email = req.body.candidateemail;
         const election = req.body.election;
         const category = req.body.category;
+        console.log(category);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)

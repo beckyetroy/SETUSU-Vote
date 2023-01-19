@@ -120,12 +120,13 @@
                             {
                                 %>
                                 <select name="election" id="electionSelect">
+                                    <option value="" disabled selected>Select an option</option>
                                     <%
                                     electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
                                     electionData.forEach(function(election){
                                         if (election.Id) {
                                     %>
-                                        <option value=<%= election.Id %>> <%= election.Description %> </option>
+                                        <option value="<%= election.Id %>"> <%= election.Description %> </option>
                                     <%
                                     } 
                                         else {}
@@ -138,8 +139,8 @@
                                     categoryData.forEach(function(category){
                                         if (category.CategoryId) {
                                     %>
-                                        <option value=<%= category.CategoryId %>> <%= category.CategoryName %> </option>
-                                    <%
+                                        <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %> </option>
+                                        <%
                                     }
                                         else {}
                                     });
@@ -160,20 +161,24 @@
                         </div>
                     </form>
                     <script>
-                        $(document).ready(function() {
-                            $('.categorySelect').select2();
-                            var election = $('#electionSelect').find(":selected").val();
-                            $("#electionSelect").on("change", function() {
-                                var values = $(this).val().split(',') //split value which is selected
-                                $("#beta option").hide() //hide all options from slect box
-                                //loop through values
-                                for (var i = 0; i < values.length; i++) {
-                                    var vals = values[i]
-                                    $("#beta option[value=" + vals + "]").show()//show that option
+                    $(document).ready(function(){
+                        const electionSelect = document.querySelector("#electionSelect");
+                        const categorySelect = document.querySelector(".categorySelect");
+                        $('.categorySelect').hide();
+                        const originalOptions = Array.from(categorySelect.options);
 
-                                }
-                            })
+                        electionSelect.addEventListener("change", e => {
+                            $('.categorySelect').show();
+                            const selectedElectionId = e.target.value;
+
+                            const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
+
+                            categorySelect.innerHTML = "";
+                            console.log(filteredOptions);
+
+                            filteredOptions.forEach(option => categorySelect.add(option));
                         });
+                    });
                     </script>
                 </div>
                 </div>
