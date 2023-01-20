@@ -332,23 +332,42 @@ router.get('/viewcandidate/:id', function(req, res, next){
 router.get('/editcandidate/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
+        var candidateQuery = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
         Category.CategoryId, Id, Description, Username, Password
         FROM (SELECT * FROM Candidate WHERE CandidateId = "${id}") AS candidate
         LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
         LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
         LEFT JOIN Election ON candidate.ElectionId = Election.Id
         LEFT JOIN Candidate_Credentials ON candidate.CandidateId = Candidate_Credentials.CandidateId`;
+        var categoryQuery = `SELECT * FROM Category`;
+        var electionQuery = `SELECT * FROM Election`;
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
-                connection.release();
-                if (err)
-                    throw (err);
-                console.log("Editing Candidate");
-                res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: result});
-            })
+            const [candidateResult, categoryResult, electionResult] = await Promise.all([
+                new Promise((resolve, reject) => {
+                    connection.query(candidateQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                }),
+                new Promise((resolve, reject) => {
+                    connection.query(categoryQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                }),
+                new Promise((resolve, reject) => {
+                    connection.query(electionQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                })
+            ]);
+            connection.release();
+            console.log("Editing Candidate");
+            res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
+                categoryData: categoryResult, electionData: electionResult});
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');
