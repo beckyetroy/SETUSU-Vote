@@ -88,18 +88,31 @@ router.post('/election-add', async function(req, res, next) {
         const date = req.body.electiondate;
         const opentime = date + ' ' + req.body.electionopeningtime + ':00';
         const closetime = date + ' ' + req.body.electionclosingtime + ':00';
+        const categories = JSON.parse(req.body.categories);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime) values (?,?,?,?)";
             const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime]);
+            const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
 
-            await connection.query (insert_query, (err, result)=> {
-            connection.release();
-            if (err) throw (err)
-            console.log ("Created Election");
-            res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+            await connection.query (insert_query, async (err, result)=> {
+                connection.release();
+                if (err) throw (err)
+                console.log ("Created Election");
+                const electionId = result.insertId;
+                for (let i = 0; i < categories.length; i++) {
+                    const category = categories[i];
+                    const categoryName = category.name;
+                    const categoryDescription = category.description;
+        
+                    const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, electionId]);
+                    await connection.query(insert_category_query, async (err, result) => {
+                        if (err) throw (err);
+                    });
+                }
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');
@@ -109,10 +122,12 @@ router.post('/election-add', async function(req, res, next) {
 router.get('/view/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime
-        from Candidate right join Election
-        on Election.Id = Candidate.ElectionId
-        where Id = "${id}";`;
+        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
+        CategoryName, CategoryDescription
+        from Election
+        left join Candidate on Election.Id = Candidate.ElectionId
+        left join Category on Election.Id = Category.ElectionId
+        where Election.Id = "${id}";`;
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -131,7 +146,10 @@ router.get('/view/:id', function(req, res, next){
 router.get('/edit/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select * from Election where Id = "${id}";`;
+        var query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+        from Election left join Category
+        on Election.Id = Category.ElectionId
+        where Id = "${id}";`;
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -139,7 +157,7 @@ router.get('/edit/:id', function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Editing Election");
-                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result[0]});
+                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
             })
         })
     }
@@ -150,11 +168,11 @@ router.get('/edit/:id', function(req, res, next){
 router.post('/edit/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        console.log(id);
         var description = req.body.electiondescription;
         var date = req.body.electiondate;
         var opentime = date + ' ' + req.body.electionopeningtime + ':00';
         var closetime = date + ' ' + req.body.electionclosingtime + ':00';
+        const categories = JSON.parse(req.body.updatedCategories);
 
         var query = `
         UPDATE Election
@@ -164,12 +182,27 @@ router.post('/edit/:id', function(req, res, next){
         CloseTime = "${closetime}" 
         WHERE id = "${id}"
         `;
+        const removeCategories = `DELETE FROM Category WHERE ElectionId = "${id}"`
+        const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
+
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
+                if (err) throw (err);
+                await connection.query(removeCategories, async (err, result) => {
+                    if (err) throw (err);
+                    for (let i = 0; i < categories.length; i++) {
+                        const category = categories[i];
+                        const categoryName = category.name;
+                        const categoryDescription = category.description;
+            
+                        const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                        await connection.query(insert_category_query, async (err, result) => {
+                            if (err) throw (err);
+                        });
+                    }
+                });
                 connection.release();
-                if (err)
-                    throw (err);
                 console.log ("Edited Election");
                 res.redirect('/hj9h8765qzf5jizwwnua');
             })
@@ -216,7 +249,7 @@ router.post('/register-candidate', async function(req, res, next) {
                 on Election.Id = Category.ElectionId;`
             await connection.query (sqlSearch, async (err, result) => {
                 connection.release()
-                
+
                 if (err) throw (err)
                 res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
             })
@@ -234,6 +267,7 @@ router.post('/candidate-add', async function(req, res, next) {
         const email = req.body.candidateemail;
         const election = req.body.election;
         const category = req.body.category;
+        console.log(category);
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
@@ -298,50 +332,42 @@ router.get('/viewcandidate/:id', function(req, res, next){
 router.get('/editcandidate/:id', function(req, res, next){
     if (adminLoggedIn) {
         var id = req.params.id;
-        var query = `select fName, lName, Email, CategoryName, Candidate.CandidateId,
+        var candidateQuery = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
         Category.CategoryId, Id, Description, Username, Password
-        from Candidate left outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        left outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId
-        left outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        where Candidate.CandidateId = "${id}"
-        union
-        select fName, lName, Email, CategoryName, Candidate.CandidateId,
-        Category.CategoryId, Id, Description, Username, Password
-        from Candidate
-        right outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        right outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId
-        right outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        union
-        select fName, lName, Email, CategoryName, Candidate.CandidateId,
-        Category.CategoryId, Id, Description, Username, Password
-        from Candidate
-        right outer join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        right outer join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        right outer join Category
-        on Candidate_Category.CategoryId = Category.CategoryId;`;
+        FROM (SELECT * FROM Candidate WHERE CandidateId = "${id}") AS candidate
+        LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
+        LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
+        LEFT JOIN Election ON candidate.ElectionId = Election.Id
+        LEFT JOIN Candidate_Credentials ON candidate.CandidateId = Candidate_Credentials.CandidateId`;
+        var categoryQuery = `SELECT * FROM Category`;
+        var electionQuery = `SELECT * FROM Election`;
+
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
-                connection.release();
-                if (err)
-                    throw (err);
-                console.log("Editing Candidate");
-                res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: result});
-            })
+            const [candidateResult, categoryResult, electionResult] = await Promise.all([
+                new Promise((resolve, reject) => {
+                    connection.query(candidateQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                }),
+                new Promise((resolve, reject) => {
+                    connection.query(categoryQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                }),
+                new Promise((resolve, reject) => {
+                    connection.query(electionQuery, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                })
+            ]);
+            connection.release();
+            console.log("Editing Candidate");
+            res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
+                categoryData: categoryResult, electionData: electionResult});
         })
     }
     else res.redirect('/hj9h8765qzf5jizwwnua');

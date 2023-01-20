@@ -20,10 +20,10 @@
 
         <% if(action == 'add') { %>
             <div class="card">
-                <div class="card-header">Sample Form</div>
+                <div class="card-header"></div>
                 <div class="card-body">
-                    <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST">  
-                        <div class="container">   
+                    <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm">  
+                        <div class="container">
                             <label>Election Description: </label>
                             <input type="text" placeholder="Enter Description" name="electiondescription" required>
                             <label>Election Date: </label>
@@ -32,7 +32,70 @@
                             <input type="time" name="electionopeningtime" required>
                             <label>Election Closing Time: </label>
                             <input type="time" name="electionclosingtime" required>
-                            <button type="submit" value="add">Add</button>
+                            <h5>Categories</h5>
+                            <label>Category name: </label>
+                            <input type="text" placeholder="Enter Name" name="categoryname" id="categoryname">
+                            <label>Brief description: </label>
+                            <input type="text" placeholder="Enter Description" name="categorydescription" id="categorydescription">
+                            <input type="button" value="Add" class="addCategory"></button>
+                            <ul class="categoryList"></ul>
+                            <button type="submit" value="add">Register</button>
+                            <script>
+                                const categoryList = document.querySelector('.categoryList');
+                                const addBtn = document.querySelector(".addCategory");
+                                const categoryName = document.querySelector('#categoryname');
+                                const categoryDescription = document.querySelector('#categorydescription');
+                                let categories = [];
+
+                                function deleteCategory(e) {
+                                const parent = e.target.parentNode;
+                                parent.remove();
+                                }
+
+
+                                function addCategory() {
+                                    const name = categoryName.value;
+                                    const description = categoryDescription.value;
+
+                                    if(name.length === 0 || description.length === 0) return;
+
+                                    const category = { name: name, description: description };
+                                    categories.push(category);
+
+                                    const btn = document.createElement('button');
+                                    btn.type = 'button';
+                                    btn.textContent = 'Remove';
+                                    btn.addEventListener("click", (e) => deleteCategory(e));
+
+                                    const li = document.createElement('li');
+                                    li.textContent = `${name}: ${description} `;
+                                    li.appendChild(btn);
+
+                                    categoryList.appendChild(li);
+
+                                    categoryName.value = "";
+                                    categoryDescription.value = "";
+                                }
+
+                                addBtn.addEventListener("click", addCategory);
+
+                                const form = document.getElementById("addElectionForm");
+
+                                form.addEventListener("submit", function(e) {
+                                    e.preventDefault();
+
+                                    const hiddenInput = document.createElement("input");
+                                    hiddenInput.type = "hidden";
+                                    hiddenInput.name = "categories";
+                                    hiddenInput.value = JSON.stringify(categories);
+                                    console.log(categories);
+
+                                    form.appendChild(hiddenInput);
+
+                                    // Submit the form
+                                    form.submit();
+                                });
+                            </script>
                         </div>
                     </form>
                 </div>
@@ -57,12 +120,13 @@
                             {
                                 %>
                                 <select name="election" id="electionSelect">
+                                    <option value="" disabled selected>Select an option</option>
                                     <%
                                     electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
                                     electionData.forEach(function(election){
                                         if (election.Id) {
                                     %>
-                                        <option value=<%= election.Id %>> <%= election.Description %> </option>
+                                        <option value="<%= election.Id %>"> <%= election.Description %> </option>
                                     <%
                                     } 
                                         else {}
@@ -75,8 +139,8 @@
                                     categoryData.forEach(function(category){
                                         if (category.CategoryId) {
                                     %>
-                                        <option value=<%= category.CategoryId %>> <%= category.CategoryName %> </option>
-                                    <%
+                                        <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %> </option>
+                                        <%
                                     }
                                         else {}
                                     });
@@ -97,20 +161,24 @@
                         </div>
                     </form>
                     <script>
-                        $(document).ready(function() {
-                            $('.categorySelect').select2();
-                            var election = $('#electionSelect').find(":selected").val();
-                            $("#electionSelect").on("change", function() {
-                                var values = $(this).val().split(',') //split value which is selected
-                                $("#beta option").hide() //hide all options from slect box
-                                //loop through values
-                                for (var i = 0; i < values.length; i++) {
-                                    var vals = values[i]
-                                    $("#beta option[value=" + vals + "]").show()//show that option
+                    $(document).ready(function(){
+                        const electionSelect = document.querySelector("#electionSelect");
+                        const categorySelect = document.querySelector(".categorySelect");
+                        $('.categorySelect').hide();
+                        const originalOptions = Array.from(categorySelect.options);
 
-                                }
-                            })
+                        electionSelect.addEventListener("change", e => {
+                            $('.categorySelect').show();
+                            const selectedElectionId = e.target.value;
+
+                            const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
+
+                            categorySelect.innerHTML = "";
+                            console.log(filteredOptions);
+
+                            filteredOptions.forEach(option => categorySelect.add(option));
                         });
+                    });
                     </script>
                 </div>
                 </div>
@@ -168,7 +236,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="row">
-                    <div class="col">Elections</div>
+                    <div class="col">Candidates</div>
                     <div class="col"></div>
                 </div>
             </div>
@@ -259,7 +327,39 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <!--TODO: CANDIDATE VIEW LINKS HERE-->
+                                    <strong>Categories</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <ul>
+                                        <%
+                                            var categoriesFound = false;
+                                            data.forEach(function(data){
+                                                if (data.CategoryName) {
+                                                    categoriesFound = true;
+                                        %>
+                                                <%= data.CategoryName %> <br>
+                                                <%= data.CategoryDescription %> <br>
+                                        <%
+                                                }
+                                            });
+                                            if (!categoriesFound)
+                                            {
+                                        %>
+                                                No Categories Found for this Election
+                                        <%
+                                            }
+                                        %>
+                                    </ul>
+                                    </td>
+                                    </tr>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <strong>Candidates</strong>
                                 </div>
                             </div>
@@ -267,18 +367,21 @@
                                 <div class="mb-3">
                                     <ul>
                                     <%
+                                        var candidatesFound = false;
                                         data.forEach(function(data){
                                             if (data.CandidateName) {
+                                                candidatesFound = true;
                                     %>
-                                        <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
+                                            <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
                                     <%
-                                    }
-                                    else if (!data.CandidateName)
-                                    {
+                                            }
+                                        });
+                                        if (!candidatesFound)
+                                        {
                                     %>
-                                    No Candidates Found for this Election
+                                            No Candidates Found for this Election
                                     <%
-                                    }});
+                                        }
                                     %>
                                     </ul>
                                     </td>
@@ -388,16 +491,140 @@
                 <div class="card">
                     <div class="card-header">Edit</div>
                     <div class="card-body">
-                        <form action="/hj9h8765qzf5jizwwnua/edit/<%= data.Id %>" method="POST">  
+                        <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="POST" id ="editElectionForm">  
                             <div class="container">
                                 <label>Election Description:</label>
-                                <input type="text" name="electiondescription" value="<%= data.Description %>" required>
+                                <input type="text" name="electiondescription" value="<%= data[0].Description %>" required>
                                 <label>Election Date: </label>
                                 <input type="date" name="electiondate" id="electiondate" required>
                                 <label>Election Opening Time: </label>
                                 <input type="time" name="electionopeningtime" id="electionopeningtime" required>
                                 <label>Election Closing Time: </label>
                                 <input type="time" name="electionclosingtime" id="electionclosingtime" required>
+                                <h5>Categories</h5>
+                                <div class="col-md-6">
+                                <div class="mb-3">
+                                    <strong>Categories</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <ul class ="updatedCategoryList">
+                                        <%
+                                            var categoriesFound = false;
+                                            data.forEach(function(data){
+                                                if (data.CategoryName) {
+                                                    categoriesFound = true;
+                                        %>
+                                                <li>
+                                                <label>Category name: </label>
+                                                <input type="text" value="<%= data.CategoryName %>" name="addedcategoryname" id="addedcategoryname">
+                                                <label>Brief description: </label>
+                                                <input type="textarea" value="<%= data.CategoryDescription %>" name="addedcategorydescription" id="addedcategorydescription">
+                                                <br>
+                                                <button type="button">Remove</button>
+                                                </li>
+                                        <%
+                                                }
+                                            });
+                                            if (!categoriesFound)
+                                            {
+                                        %>
+                                                Add Categories below
+                                        <%
+                                            }
+                                        %>
+                                    </ul>
+                                    </td>
+                                    </tr>
+                                </div>
+                                <label>Category name: </label>
+                                <input type="text" placeholder="Enter Name" name="newcategoryname" id="newcategoryname">
+                                <label>Brief description: </label>
+                                <input type="textarea" placeholder="Enter Description" name="newcategorydescription" id="newcategorydescription">
+                                <input type="button" value="Add" class="addNewCategory"></button>
+                            <script>
+                                const updatedCategoryList = document.querySelector('.updatedCategoryList');
+                                const addNewBtn = document.querySelector(".addNewCategory");
+                                const newCategoryName = document.querySelector('#newcategoryname');
+                                const newCategoryDescription = document.querySelector('#newcategorydescription');
+                                const buttons = document.getElementsByTagName("button");
+                                for (let i = 0; i < buttons.length; i++) {
+                                    if (buttons[i].textContent === "Remove") {
+                                        buttons[i].addEventListener("click", e => deleteCategory(e));
+                                    }
+                                }
+                                let updatedCategories = [];
+
+                                function deleteCategory(e) {
+                                const parent = e.target.parentNode;
+                                parent.remove();
+                                }
+
+                                function addCategory() {
+                                    const name = newCategoryName.value;
+                                    const description = newCategoryDescription.value;
+
+                                    if(name.length === 0 || description.length === 0) return;
+
+                                    const li = document.createElement('li');
+
+                                    const btn = document.createElement('button');
+                                    btn.type = 'button';
+                                    btn.textContent = 'Remove';
+                                    btn.addEventListener("click", (e) => deleteCategory(e));
+
+                                    const nameLabel = document.createElement('label');
+                                    nameLabel.textContent = "Category Name";
+                                    const nameField = document.createElement('input');
+                                    nameField.setAttribute("type","text");
+                                    nameField.setAttribute("value", name);
+                                    nameField.setAttribute("name","addedcategoryname");
+                                    nameField.setAttribute("id","addedcategoryname");
+
+                                    const descriptionLabel = document.createElement('label');
+                                    descriptionLabel.textContent = "Brief description: ";
+                                    const descriptionField = document.createElement('input');
+                                    descriptionField.setAttribute("type","textarea");
+                                    descriptionField.setAttribute("value", description);
+                                    descriptionField.setAttribute("name","addedcategorydescription");
+                                    descriptionField.setAttribute("id","addedcategorydescription");
+
+                                    updatedCategoryList.append(li);
+                                    li.appendChild(nameLabel);
+                                    li.appendChild(nameField);
+                                    li.appendChild(descriptionLabel);
+                                    li.appendChild(descriptionField);
+                                    li.appendChild(btn);
+
+                                    newcategoryname.value = "";
+                                    newcategorydescription.value = "";
+                                }
+
+                                addNewBtn.addEventListener("click", addCategory);
+
+                                const updateForm = document.getElementById("editElectionForm");
+
+                                updateForm.addEventListener("submit", function(e) {
+                                    e.preventDefault();
+                                    const categoryNameInputs = document.querySelectorAll('input[name="addedcategoryname"]');
+                                    const categoryDescInputs = document.querySelectorAll('input[name="addedcategorydescription"]');
+
+                                    categoryNameInputs.forEach((input, index) => {
+                                        const name = input.value;
+                                        const description = categoryDescInputs[index].value;
+                                        updatedCategories.push({ name, description });
+                                    });
+
+                                    const hiddenInput = document.createElement("input");
+                                    hiddenInput.type = "hidden";
+                                    hiddenInput.name = "updatedCategories";
+                                    hiddenInput.value = JSON.stringify(updatedCategories);
+
+                                    updateForm.appendChild(hiddenInput);
+                                    updateForm.submit();
+                                });
+                            </script>
                                 <button type="submit" value="edit">Save Changes</button>
                             </div>
                         </form>
@@ -448,37 +675,29 @@
                                     <input type="text" name="candidatelname" value="<%= data[0].lName %>" required>
                                     <label>Email Address: </label>
                                     <input type="text" name="candidateemail" value="<%= data[0].Email %>" required>
-                                    <label>Registering for Election: </label>
+                                    <label>Registered for Election: </label>
                                         <%
                                         if(data.length > 0)
                                         {
                                             %>
-                                            <select name="election">
-                                                <%
-                                                electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
-                                                electionData.forEach(function(election){
-                                                    if (election.Id) {
-                                                %>
-                                                    <option value=<%= election.Id %>> <%= election.Description %> </option>
-                                                <%
-                                                } 
-                                                    else {}
-                                                });
-                                                %>
+                                            <select name="election" id="electionSelect">
+                                                <% electionData.forEach(function(election) { %>
+                                                  <% if (election.Id === data[0].ElectionId) { %>
+                                                    <option value="<%= election.Id %>" selected><%= election.Description %></option>
+                                                  <% } else { %>
+                                                    <option value="<%= election.Id %>"><%= election.Description %></option>
+                                                  <% } %>
+                                                <% }); %>
                                             </select>
-                                            <select name="category">
-                                                <%
-                                                categoryData = data.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
-                                                categoryData.forEach(function(category){
-                                                    if (category.CategoryId) {
-                                                %>
-                                                    <option value=<%= category.CategoryId %>> <%= category.CategoryName %> </option>
-                                                <%
-                                                }
-                                                    else {}
-                                                });
-                                                %>
-                                            </select>
+                                            <select name="category" id="categorySelect">
+                                                <% categoryData.forEach(function(category) { %>
+                                                  <option value="<%= category.CategoryId %>"
+                                                    data-election-id="<%= category.ElectionId %>"
+                                                  <% if (category.CategoryId === data[0].CategoryId) { %>
+                                                    selected
+                                                  <% } %>><%= category.CategoryName %></option>
+                                                <% }); %>
+                                              </select>
                                             <%
                                         }
                                         else
@@ -506,6 +725,22 @@
                                         pw.type = "password";
                                     }
                                 }
+                                $(document).ready(function(){
+                                    const electionSelect = document.querySelector("#electionSelect");
+                                    const categorySelect = document.querySelector("#categorySelect");
+                                    const originalOptions = Array.from(categorySelect.options);
+
+                                    function filterCategoryOptions() {
+                                        const selectedElectionId = electionSelect.value;
+                                        const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
+                                        categorySelect.innerHTML = "";
+                                        console.log(filteredOptions);
+                                        filteredOptions.forEach(option => categorySelect.add(option));
+                                    }
+
+                                    electionSelect.addEventListener("change", filterCategoryOptions);
+                                    filterCategoryOptions();
+                                });
                             </script>
                         </div>
                         </div>
