@@ -1,0 +1,93 @@
+<div class="card">
+    <div class="card-header">
+        <%= data[0].fName %> <%= data[0].lName %>
+        <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET">
+            <button type="submit">Edit</button>
+        </form>
+        <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data[0].CandidateId %>" method="GET">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Email:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].Email %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Category Running For:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].CategoryName %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Election:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].Description %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Number of Votes:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].NumVotes %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Credentials:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    Username: <%= data[0].Username %>
+                </div>
+                <div class="mb-3">
+                    Password: <div id ="CandidatePW">●●●●●●●●●●</div>
+                </div>
+                <div class="mb-3">
+                    <button id="PWBtn" type="button">Show Password</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            //Toggle candidate password view
+            $(document).on("click", "#PWBtn", function(){
+                var pw = $("#CandidatePW");
+                var btn = $("#PWBtn");
+                if ($("#CandidatePW").html() =="●●●●●●●●●●") {
+                    $("#CandidatePW").html("<%= data[0].Password %>");
+                    $("#PWBtn").html("Hide Password");
+                } else {
+                    $("#CandidatePW").html("●●●●●●●●●●")
+                    $("#PWBtn").html("Show Password");
+                }
+            })
+        </script>
+    </div>
+</div>

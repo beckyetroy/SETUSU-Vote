@@ -1,0 +1,46 @@
+<form action="/hj9h8765qzf5jizwwnua/register-candidate" method="POST">
+    <button type="submit">Register a New Candidate</button>
+</form>
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col">Candidates</div>
+            <div class="col"></div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+                <%
+                if(data.length > 0)
+                {
+                    candidateData = data.filter((v, i, a) => a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                    candidateData.forEach(function(candidate){
+                        if (candidate.CandidateId) {
+                %>
+                <tr>
+                    <td><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= candidate.CandidateId %>" class="btn btn-primary btn-sm"><%= candidate.fName %> <%= candidate.lName %></a></td>
+                    <td><%= candidate.Email %></td>
+                </tr>
+                <%
+                        } else {}
+                    });
+                }
+                else
+                {
+                %>
+                <tr>
+                    <td colspan="5">No Data Found</td>
+                </tr>
+                <%
+                }
+                %>
+            </table>
+        </div>
+    </div>
+</div>

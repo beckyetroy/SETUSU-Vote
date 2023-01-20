@@ -1,0 +1,80 @@
+<div class="card">
+    <div class="card-header">Add Candidate</div>
+    <div class="card-body">
+        <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST">  
+            <div class="container">
+                <label>First Name(s): </label>
+                <input type="text" placeholder="Enter First Name" name="candidatefname" required>
+                <label>Surname: </label>
+                <input type="text" placeholder="Enter Surname" name="candidatelname" required>
+                <label>Email Address: </label>
+                <input type="text" placeholder="Enter Email" name="candidateemail" required>
+                <label>Registering for Election: </label>
+                <%
+                if(data.length > 0)
+                {
+                    %>
+                    <select name="election" id="electionSelect">
+                        <option value="" disabled selected>Select an option</option>
+                        <%
+                        electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                        electionData.forEach(function(election){
+                            if (election.Id) {
+                        %>
+                            <option value="<%= election.Id %>"> <%= election.Description %> </option>
+                        <%
+                        } 
+                            else {}
+                        });
+                        %>
+                    </select>
+                    <select name="category" class="categorySelect">
+                        <%
+                        categoryData = data.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                        categoryData.forEach(function(category){
+                            if (category.CategoryId) {
+                        %>
+                            <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %> </option>
+                            <%
+                        }
+                            else {}
+                        });
+                        %>
+                    </select>
+                    <%
+                }
+                else
+                {
+                    %>
+                    <tr>
+                        <td colspan="5">No Data Found</td>
+                    </tr>
+                <%
+                }
+                %>
+                <button type="submit" value="addCandidate">Add</button>
+            </div>
+        </form>
+        <script>
+        $(document).ready(function(){
+            const electionSelect = document.querySelector("#electionSelect");
+            const categorySelect = document.querySelector(".categorySelect");
+            $('.categorySelect').hide();
+            const originalOptions = Array.from(categorySelect.options);
+
+            electionSelect.addEventListener("change", e => {
+                $('.categorySelect').show();
+                const selectedElectionId = e.target.value;
+
+                const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
+
+                categorySelect.innerHTML = "";
+                console.log(filteredOptions);
+
+                filteredOptions.forEach(option => categorySelect.add(option));
+            });
+        });
+        </script>
+    </div>
+    </div>
+</div>

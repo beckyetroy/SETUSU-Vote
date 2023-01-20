@@ -1,0 +1,44 @@
+<form action="/hj9h8765qzf5jizwwnua/register-election" method="POST">
+    <button type="submit">Register a New Election</button>
+</form>
+    
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col">Elections</div>
+            <div class="col"></div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Election</th>
+                    <th>Date</th>
+                </tr>
+                <%
+                if(data.length > 0)
+                {
+                    electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                    electionData.forEach(function(election){
+                %>
+                <tr>
+                    <td><a href="/hj9h8765qzf5jizwwnua/view/<%= election.Id %>" class="btn btn-primary btn-sm"><%= election.Description %></a></td>
+                    <td><%= election.ElectionDate %></td>
+                </tr>
+                <%
+                    });
+                }
+                else
+                {
+                %>
+                <tr>
+                    <td colspan="5">No Data Found</td>
+                </tr>
+                <%
+                }
+                %>
+            </table>
+        </div>
+    </div>
+</div>

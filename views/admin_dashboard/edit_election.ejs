@@ -1,0 +1,173 @@
+<div class="card">
+    <div class="card-header">Edit</div>
+        <div class="card-body">
+            <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="POST" id ="editElectionForm">  
+                <div class="container">
+                    <label>Election Description:</label>
+                    <input type="text" name="electiondescription" value="<%= data[0].Description %>" required>
+                    <label>Election Date: </label>
+                    <input type="date" name="electiondate" id="electiondate" required>
+                    <label>Election Opening Time: </label>
+                    <input type="time" name="electionopeningtime" id="electionopeningtime" required>
+                    <label>Election Closing Time: </label>
+                    <input type="time" name="electionclosingtime" id="electionclosingtime" required>
+                    <h5>Categories</h5>
+                    <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Categories</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <ul class ="updatedCategoryList">
+                            <%
+                                var categoriesFound = false;
+                                data.forEach(function(data){
+                                    if (data.CategoryName) {
+                                        categoriesFound = true;
+                            %>
+                                    <li>
+                                    <label>Category name: </label>
+                                    <input type="text" value="<%= data.CategoryName %>" name="addedcategoryname" id="addedcategoryname">
+                                    <label>Brief description: </label>
+                                    <input type="textarea" value="<%= data.CategoryDescription %>" name="addedcategorydescription" id="addedcategorydescription">
+                                    <br>
+                                    <button type="button">Remove</button>
+                                    </li>
+                            <%
+                                    }
+                                });
+                                if (!categoriesFound)
+                                {
+                            %>
+                                    Add Categories below
+                            <%
+                                }
+                            %>
+                        </ul>
+                    </div>
+                    <label>Category name: </label>
+                    <input type="text" placeholder="Enter Name" name="newcategoryname" id="newcategoryname">
+                    <label>Brief description: </label>
+                    <input type="textarea" placeholder="Enter Description" name="newcategorydescription" id="newcategorydescription">
+                    <input type="button" value="Add" class="addNewCategory"></button>
+                <script>
+                    const updatedCategoryList = document.querySelector('.updatedCategoryList');
+                    const addNewBtn = document.querySelector(".addNewCategory");
+                    const newCategoryName = document.querySelector('#newcategoryname');
+                    const newCategoryDescription = document.querySelector('#newcategorydescription');
+                    const buttons = document.getElementsByTagName("button");
+                    for (let i = 0; i < buttons.length; i++) {
+                        if (buttons[i].textContent === "Remove") {
+                            buttons[i].addEventListener("click", e => deleteCategory(e));
+                        }
+                    }
+                    let updatedCategories = [];
+
+                    function deleteCategory(e) {
+                    const parent = e.target.parentNode;
+                    parent.remove();
+                    }
+
+                    function addCategory() {
+                        const name = newCategoryName.value;
+                        const description = newCategoryDescription.value;
+
+                        if(name.length === 0 || description.length === 0) return;
+
+                        const li = document.createElement('li');
+
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = 'Remove';
+                        btn.addEventListener("click", (e) => deleteCategory(e));
+
+                        const nameLabel = document.createElement('label');
+                        nameLabel.textContent = "Category Name";
+                        const nameField = document.createElement('input');
+                        nameField.setAttribute("type","text");
+                        nameField.setAttribute("value", name);
+                        nameField.setAttribute("name","addedcategoryname");
+                        nameField.setAttribute("id","addedcategoryname");
+
+                        const descriptionLabel = document.createElement('label');
+                        descriptionLabel.textContent = "Brief description: ";
+                        const descriptionField = document.createElement('input');
+                        descriptionField.setAttribute("type","textarea");
+                        descriptionField.setAttribute("value", description);
+                        descriptionField.setAttribute("name","addedcategorydescription");
+                        descriptionField.setAttribute("id","addedcategorydescription");
+
+                        updatedCategoryList.append(li);
+                        li.appendChild(nameLabel);
+                        li.appendChild(nameField);
+                        li.appendChild(descriptionLabel);
+                        li.appendChild(descriptionField);
+                        li.appendChild(btn);
+
+                        newcategoryname.value = "";
+                        newcategorydescription.value = "";
+                    }
+
+                    addNewBtn.addEventListener("click", addCategory);
+
+                    const updateForm = document.getElementById("editElectionForm");
+
+                    updateForm.addEventListener("submit", function(e) {
+                        e.preventDefault();
+                        const categoryNameInputs = document.querySelectorAll('input[name="addedcategoryname"]');
+                        const categoryDescInputs = document.querySelectorAll('input[name="addedcategorydescription"]');
+
+                        categoryNameInputs.forEach((input, index) => {
+                            const name = input.value;
+                            const description = categoryDescInputs[index].value;
+                            updatedCategories.push({ name, description });
+                        });
+
+                        const hiddenInput = document.createElement("input");
+                        hiddenInput.type = "hidden";
+                        hiddenInput.name = "updatedCategories";
+                        hiddenInput.value = JSON.stringify(updatedCategories);
+
+                        updateForm.appendChild(hiddenInput);
+                        updateForm.submit();
+                    });
+                </script>
+                    <button type="submit" value="edit">Save Changes</button>
+                </div>
+            </form>
+            <script>
+                //Format date
+                var splits = "<%= data.ElectionDate %>".split(" ");
+                var monthAbbr = splits[1];
+                var day = splits[2];
+                var year = splits[3];
+                var month = '';
+                monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+
+                for (i=0; i<12; i++){
+                    if (monthAbbr === monthNames[i]){
+                        if (i>10){
+                            month = String(i + 1);
+                        }
+                        else {
+                            month = '0' + String(i + 1);
+                        }
+                    }
+                }
+                
+                var date = year + '-' + month + '-' + day;
+                document.getElementById("electiondate").valueAsDate = new Date(date);
+
+                //Format times
+                var opentimesplits = "<%= data.OpenTime %>".split(" ");
+                var opentime = opentimesplits[4];
+                document.getElementById("electionopeningtime").value = opentime;
+
+                var closetimesplits = "<%= data.CloseTime %>".split(" ");
+                var closetime = closetimesplits[4];
+                document.getElementById("electionclosingtime").value = closetime;
+            </script> 
+        </div>
+    </div>
+</div>
