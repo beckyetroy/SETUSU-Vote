@@ -12,14 +12,15 @@
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered">
+                <%
+                candidateData = data.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                if(candidateData.length > 0) {
+                %>
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
                 </tr>
                 <%
-                if(data.length > 0)
-                {
-                    candidateData = data.filter((v, i, a) => a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
                     candidateData.forEach(function(candidate){
                         if (candidate.CandidateId) {
                 %>
