@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var database = require('../database');
-const bcrypt = require("bcrypt");
+const argon2 = require('argon2');
+const randomstring = require("randomstring");
 var mysql = require('mysql');
 var adminLoggedIn = false;
 
@@ -46,9 +47,9 @@ router.post('/', async function(req, res, next) {
         const password = req.body.password;
 
         database.getConnection ( async (err, connection)=> {
-            if (err) throw (err)
-            const sqlSearch = "Select * from Admin_Credentials where UserName = ?"
-            const search_query = mysql.format(sqlSearch,[user])
+            if (err) throw (err);
+            const sqlSearch = "Select * from Admin_Credentials where UserName = ?";
+            const search_query = mysql.format(sqlSearch,[user]);
             await connection.query (search_query, async (err, result) => {
                 connection.release()
                 
@@ -58,16 +59,25 @@ router.post('/', async function(req, res, next) {
                 res.render('admin_login', { title: 'Login' });
                 }
                 else {
-                    const hashedPassword = await bcrypt.hash(result[0].Password,10);
+                    // Generate a new random salt for every password
+                    const salt = randomstring.generate(16);
 
-                    if (await bcrypt.compare(password, hashedPassword)) {
-                    console.log("Login Successful")
-                    adminLoggedIn = true;
-                    renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
+                    const hashedPasswordInDB = result[0].Password;
+                    const saltInDB = result[0].Salt;
+
+                    if (await argon2.verify(hashedPasswordInDB, password, { salt: saltInDB })) {
+                        console.log("Login Successful");
+                        const updateSalt = "UPDATE Admin_Credentials SET Salt = ? WHERE UserName = ?";
+                        const update_query = mysql.format(updateSalt, [salt, user]);
+                        await connection.query(update_query, async (err, result) => {
+                            if (err) throw err;
+                            adminLoggedIn = true;
+                            renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
+                        });
                     } 
                     else {
-                    console.log("Password Incorrect")
-                    res.render('admin_login', { title: 'Login' });
+                        console.log("Password Incorrect")
+                        res.render('admin_login', { title: 'Login' });
                     }
                 }
             })
