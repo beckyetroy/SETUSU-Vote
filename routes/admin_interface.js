@@ -6,6 +6,7 @@ const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 var adminLoggedIn = false;
+const blockTime = 15; //15 minutes
 
 function renderDashboard(res, title, action) {
     database.getConnection ( async (err, connection)=> {
@@ -63,9 +64,29 @@ router.post('/', async function(req, res, next) {
         //Handle user log in
         const user = req.body.username;
         const password = req.body.password;
+        const maxLoginAttempts = 3;
 
         database.getConnection ( async (err, connection)=> {
             if (err) throw (err);
+
+            async function blockUser(user) {
+                var now = new Date();
+                now.setMinutes(now.getMinutes()+blockTime);
+                const expiration = now;
+                const sql = "UPDATE Admin_Credentials SET BlockExpiration = ? WHERE UserName = ?";
+                const query = mysql.format(sql, [expiration, user]);
+                await connection.query(query, (err, result) => {
+                    if (err) throw err;
+                });
+            }
+
+            async function checkBlockedUser(user) {
+                if (user.BlockExpiration && user.BlockExpiration > Date.now()) {
+                    return true;
+                }
+                return false;
+            }
+
             const sqlSearch = "Select * from Admin_Credentials where UserName = ?";
             const search_query = mysql.format(sqlSearch,[user]);
             await connection.query (search_query, async (err, result) => {
@@ -73,19 +94,27 @@ router.post('/', async function(req, res, next) {
                 
                 if (err) throw (err)
                 if (result.length == 0) {
-                console.log("User does not exist")
-                res.render('admin_login', { title: 'Login' });
+                    console.log("User does not exist")
+                    res.render('admin_login', { title: 'Login' });
                 }
                 else {
+                    const blockedUser = await checkBlockedUser(result[0]);
+                    if (blockedUser) {
+                        console.log("User account is currently blocked")
+                        res.render('admin_login', { title: 'Login' });
+                        return;
+                    }
+
                     // Generate a new random salt for every password
                     const salt = randomstring.generate(16);
 
                     const hashedPasswordInDB = result[0].Password;
                     const saltInDB = result[0].Salt;
+                    let loginAttempts = result[0].LoginAttempts;
 
                     if (await argon2.verify(hashedPasswordInDB, password, { salt: saltInDB })) {
                         console.log("Login Successful");
-                        const updateSalt = "UPDATE Admin_Credentials SET Salt = ? WHERE UserName = ?";
+                        const updateSalt = "UPDATE Admin_Credentials SET Salt = ?, LoginAttempts = 0, BlockExpiration = NULL WHERE UserName = ?";
                         const update_query = mysql.format(updateSalt, [salt, user]);
                         await connection.query(update_query, async (err, result) => {
                             if (err) throw err;
@@ -94,10 +123,21 @@ router.post('/', async function(req, res, next) {
                             res.cookie('token', token);
                             renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
                         });
-                    } 
+                    }
                     else {
                         console.log("Password Incorrect")
-                        res.render('admin_login', { title: 'Login' });
+                        if (loginAttempts + 1 >= maxLoginAttempts) {
+                            // block user account and IP address
+                            await blockUser(user);
+                            console.log('User access blocked for 15 minutes.');
+                        }
+                        loginAttempts ++;
+                        const updateAttempts = "UPDATE Admin_Credentials SET LoginAttempts = ? WHERE UserName = ?";
+                        const update_query = mysql.format(updateAttempts, [loginAttempts, user]);
+                        await connection.query(update_query, async (err, result) => {
+                            if (err) throw err;
+                            res.render('admin_login', { title: 'Login' });
+                        });
                     }
                 }
             })
