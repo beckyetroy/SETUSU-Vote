@@ -1,3 +1,24 @@
 body {
     background-color: #e6e6e2 !important;
 }
+
+h1 {
+    font-family: 'Roboto Condensed';
+    font-size: 5em;
+    font-weight: bold !important;
+    color: white;
+    text-align: center;
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+}
+
+.navbar {
+    background-color: #eb2c5c !important;
+}
+
+.nav-link {
+    padding: 1.5em !important;
+    color: white !important;
+    font-family: 'Roboto Condensed';
+    font-size: 1.5em;
+}

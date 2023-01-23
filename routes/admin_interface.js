@@ -146,11 +146,13 @@ router.post('/register-election', async function(req, res, next) {
         }
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -200,11 +202,13 @@ router.post('/election-add', async function(req, res, next) {
         }
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -219,7 +223,7 @@ router.post('/election-add', async function(req, res, next) {
 router.get('/view/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const view_query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
                     CategoryName, CategoryDescription
@@ -240,11 +244,13 @@ router.get('/view/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -259,7 +265,7 @@ router.get('/view/:id', async function(req, res, next){
 router.get('/edit/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
                             from Election left join Category
@@ -278,11 +284,13 @@ router.get('/edit/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -342,11 +350,13 @@ router.post('/edit/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -361,7 +371,7 @@ router.post('/edit/:id', async function(req, res, next){
 router.get('/delete/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const remove_query = `delete from Election where Id = ?`;
         const query = mysql.format(remove_query, [id]);
@@ -377,11 +387,13 @@ router.get('/delete/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -396,7 +408,7 @@ router.get('/delete/:id', async function(req, res, next){
 router.post('/register-candidate', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         database.getConnection ( async (err, connection)=> {
             if (err) throw (err)
             const sqlSearch =
@@ -420,11 +432,13 @@ router.post('/register-candidate', async function(req, res, next) {
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -439,7 +453,7 @@ router.post('/register-candidate', async function(req, res, next) {
 router.post('/candidate-add', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         const fname = req.body.candidatefname;
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
@@ -473,11 +487,13 @@ router.post('/candidate-add', async function(req, res, next) {
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -493,7 +509,7 @@ router.post('/candidate-add', async function(req, res, next) {
 router.get('/viewcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
                             CategoryName, NumVotes,
@@ -520,11 +536,13 @@ router.get('/viewcandidate/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -539,7 +557,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
 router.get('/editcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const cand_query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
                             Category.CategoryId, Id, Description, Username, Password
@@ -581,11 +599,13 @@ router.get('/editcandidate/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -600,7 +620,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
 router.post('/editcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         var fname = req.body.candidatefname;
         var lname = req.body.candidatelname;
@@ -637,11 +657,13 @@ router.post('/editcandidate/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -656,7 +678,7 @@ router.post('/editcandidate/:id', async function(req, res, next){
 router.get('/deletecandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const delete_query = `delete from Candidate where CandidateId = ?`;
         const query = mysql.format(delete_query, [id]);
@@ -672,11 +694,13 @@ router.get('/deletecandidate/:id', async function(req, res, next){
         })
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-            const update_query = mysql.format(updateLogIn, [decoded.username]);
-            await connection.query(update_query, async (err, result) => {
-                if (err) throw err;
-                res.redirect('/hj9h8765qzf5jizwwnua');
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
@@ -691,21 +715,25 @@ router.get('/deletecandidate/:id', async function(req, res, next){
 router.get('/logout', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey);
         res.clearCookie('token');
-        const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-        const update_query = mysql.format(updateLogIn, [decoded.username]);
-        await connection.query(update_query, async (err, result) => {
-            if (err) throw err;
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        });
-    } catch (err) {
-        if (err.name === 'TokenExpiredError') {
+        database.getConnection( async (err, connection) => {
             const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
             const update_query = mysql.format(updateLogIn, [decoded.username]);
             await connection.query(update_query, async (err, result) => {
                 if (err) throw err;
                 res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        });
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            database.getConnection( async (err, connection) => {
+                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+                const update_query = mysql.format(updateLogIn, [decoded.username]);
+                await connection.query(update_query, async (err, result) => {
+                    if (err) throw err;
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                });
             });
         } else if (err.name === 'JsonWebTokenError') {
             res.redirect('/hj9h8765qzf5jizwwnua');
