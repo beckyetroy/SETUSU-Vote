@@ -5,7 +5,6 @@ const argon2 = require('argon2');
 const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
-var adminLoggedIn = false;
 const blockTime = 15; //15 minutes
 
 function renderDashboard(res, title, action) {
@@ -36,136 +35,138 @@ function renderDashboard(res, title, action) {
 
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            renderDashboard(res, 'Admin Dashboard!', 'list');
-        } catch (err) {
-            console.log(err);
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        if (decoded) {
+            renderDashboard(res, 'Admin Dashboard', 'list');
         }
-    } else {
-        res.render('admin_login', { title: 'Login' });
+    } catch (err) {
+        if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
+            res.render('admin_login', { title: 'Login' });
+        } else {
+            console.log(err);
+            res.render('admin_login', { title: 'Login' });
+        }
     }
 });
 
 /* Login Authentication. */
 router.post('/', async function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            renderDashboard(res, 'Admin Dashboard', 'list');
-        } catch (err) {
-            console.log(err);
+    //Handle user log in
+    const user = req.body.username;
+    const password = req.body.password;
+    const maxLoginAttempts = 3;
+
+    database.getConnection ( async (err, connection)=> {
+        if (err) throw (err);
+
+        async function blockUser(user) {
+            var now = new Date();
+            now.setMinutes(now.getMinutes()+blockTime);
+            const expiration = now;
+            const sql = "UPDATE Admin_Credentials SET BlockExpiration = ? WHERE UserName = ?";
+            const query = mysql.format(sql, [expiration, user]);
+            await connection.query(query, (err, result) => {
+                if (err) throw err;
+            });
         }
-    }
-    else {
-        //Handle user log in
-        const user = req.body.username;
-        const password = req.body.password;
-        const maxLoginAttempts = 3;
 
-        database.getConnection ( async (err, connection)=> {
+        async function checkBlockedUser(user) {
+            if (user.BlockExpiration && user.BlockExpiration > Date.now()) {
+                return true;
+            }
+            return false;
+        }
+
+        const sqlSearch = "Select * from Admin_Credentials where UserName = ?";
+        const search_query = mysql.format(sqlSearch,[user]);
+        await connection.query (search_query, async (err, result) => {
+            connection.release();
+            
             if (err) throw (err);
-
-            async function blockUser(user) {
-                var now = new Date();
-                now.setMinutes(now.getMinutes()+blockTime);
-                const expiration = now;
-                const sql = "UPDATE Admin_Credentials SET BlockExpiration = ? WHERE UserName = ?";
-                const query = mysql.format(sql, [expiration, user]);
-                await connection.query(query, (err, result) => {
-                    if (err) throw err;
-                });
+            if (result.length == 0) {
+                console.log("User does not exist")
+                res.render('admin_login', { title: 'Login' });
             }
-
-            async function checkBlockedUser(user) {
-                if (user.BlockExpiration && user.BlockExpiration > Date.now()) {
-                    return true;
-                }
-                return false;
-            }
-
-            const sqlSearch = "Select * from Admin_Credentials where UserName = ?";
-            const search_query = mysql.format(sqlSearch,[user]);
-            await connection.query (search_query, async (err, result) => {
-                connection.release()
-                
-                if (err) throw (err)
-                if (result.length == 0) {
-                    console.log("User does not exist")
+            else {
+                const blockedUser = await checkBlockedUser(result[0]);
+                if (blockedUser) {
+                    console.log("User account is currently blocked")
                     res.render('admin_login', { title: 'Login' });
+                    return;
+                }
+
+                // Generate a new random salt for every password
+                const salt = randomstring.generate(16);
+
+                const hashedPasswordInDB = result[0].Password;
+                const saltInDB = result[0].Salt;
+                let loginAttempts = result[0].LoginAttempts;
+
+                if (await argon2.verify(hashedPasswordInDB, password, { salt: saltInDB })) {
+                    console.log("Login Successful");
+                    const updateSalt = "UPDATE Admin_Credentials SET Salt = ?, LoginAttempts = 0, BlockExpiration = NULL WHERE UserName = ?";
+                    const update_query = mysql.format(updateSalt, [salt, user]);
+                    await connection.query(update_query, async (err, result) => {
+                        if (err) throw err;
+                        const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '15m' });
+                        res.cookie('token', token);
+                        renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
+                    });
                 }
                 else {
-                    const blockedUser = await checkBlockedUser(result[0]);
-                    if (blockedUser) {
-                        console.log("User account is currently blocked")
+                    console.log("Password Incorrect")
+                    if (loginAttempts + 1 >= maxLoginAttempts) {
+                        // block user account and IP address
+                        await blockUser(user);
+                        console.log('User access blocked for 15 minutes.');
+                    }
+                    loginAttempts ++;
+                    const updateAttempts = "UPDATE Admin_Credentials SET LoginAttempts = ? WHERE UserName = ?";
+                    const update_query = mysql.format(updateAttempts, [loginAttempts, user]);
+                    await connection.query(update_query, async (err, result) => {
+                        if (err) throw err;
                         res.render('admin_login', { title: 'Login' });
                         return;
-                    }
-
-                    // Generate a new random salt for every password
-                    const salt = randomstring.generate(16);
-
-                    const hashedPasswordInDB = result[0].Password;
-                    const saltInDB = result[0].Salt;
-                    let loginAttempts = result[0].LoginAttempts;
-
-                    if (await argon2.verify(hashedPasswordInDB, password, { salt: saltInDB })) {
-                        console.log("Login Successful");
-                        const updateSalt = "UPDATE Admin_Credentials SET Salt = ?, LoginAttempts = 0, BlockExpiration = NULL WHERE UserName = ?";
-                        const update_query = mysql.format(updateSalt, [salt, user]);
-                        await connection.query(update_query, async (err, result) => {
-                            if (err) throw err;
-                            adminLoggedIn = true;
-                            const token = jwt.sign({username: user}, process.env.secretKey);
-                            res.cookie('token', token);
-                            renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
-                        });
-                    }
-                    else {
-                        console.log("Password Incorrect")
-                        if (loginAttempts + 1 >= maxLoginAttempts) {
-                            // block user account and IP address
-                            await blockUser(user);
-                            console.log('User access blocked for 15 minutes.');
-                        }
-                        loginAttempts ++;
-                        const updateAttempts = "UPDATE Admin_Credentials SET LoginAttempts = ? WHERE UserName = ?";
-                        const update_query = mysql.format(updateAttempts, [loginAttempts, user]);
-                        await connection.query(update_query, async (err, result) => {
-                            if (err) throw err;
-                            res.render('admin_login', { title: 'Login' });
-                        });
-                    }
+                    });
                 }
-            })
+            }
         })
-    }
+    })
 });
 
 /* Open Register Election Form */
 router.post('/register-election', async function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        if (decoded) {
             renderDashboard(res, 'Register Election','add');
-        } catch (err) {
+        }
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Register Election */
 router.post('/election-add', async function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            renderDashboard(res, 'Register Election','add');
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        if (decoded) {
             const description = req.body.electiondescription;
             const date = req.body.electiondate;
             const opentime = date + ' ' + req.body.electionopeningtime + ':00';
@@ -195,205 +196,260 @@ router.post('/election-add', async function(req, res, next) {
                     }
                     res.redirect('/hj9h8765qzf5jizwwnua');
                 });
-            })
-        } catch (err) {
+            });
+        }
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* View Election Details */
-router.get('/view/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
-            CategoryName, CategoryDescription
-            from Election
-            left join Candidate on Election.Id = Candidate.ElectionId
-            left join Category on Election.Id = Category.ElectionId
-            where Election.Id = "${id}";`;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log("Viewing Election");
-                    res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
-                })
+router.get('/view/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
+        CategoryName, CategoryDescription
+        from Election
+        left join Candidate on Election.Id = Candidate.ElectionId
+        left join Category on Election.Id = Category.ElectionId
+        where Election.Id = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Viewing Election");
+                res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* View Edit Election Details */
-router.get('/edit/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
-            from Election left join Category
-            on Election.Id = Category.ElectionId
-            where Id = "${id}";`;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log("Editing Election");
-                    res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
-                })
+router.get('/edit/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+        from Election left join Category
+        on Election.Id = Category.ElectionId
+        where Id = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Editing Election");
+                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Edit Election Details */
-router.post('/edit/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var description = req.body.electiondescription;
-            var date = req.body.electiondate;
-            var opentime = date + ' ' + req.body.electionopeningtime + ':00';
-            var closetime = date + ' ' + req.body.electionclosingtime + ':00';
-            const categories = JSON.parse(req.body.updatedCategories);
+router.post('/edit/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var description = req.body.electiondescription;
+        var date = req.body.electiondate;
+        var opentime = date + ' ' + req.body.electionopeningtime + ':00';
+        var closetime = date + ' ' + req.body.electionclosingtime + ':00';
+        const categories = JSON.parse(req.body.updatedCategories);
 
-            var query = `
-            UPDATE Election
-            SET Description = "${description}", 
-            ElectionDate = "${date}", 
-            OpenTime = "${opentime}", 
-            CloseTime = "${closetime}" 
-            WHERE id = "${id}"
-            `;
-            const removeCategories = `DELETE FROM Category WHERE ElectionId = "${id}"`
-            const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
+        var query = `
+        UPDATE Election
+        SET Description = "${description}", 
+        ElectionDate = "${date}", 
+        OpenTime = "${opentime}", 
+        CloseTime = "${closetime}" 
+        WHERE id = "${id}"
+        `;
+        const removeCategories = `DELETE FROM Category WHERE ElectionId = "${id}"`
+        const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
 
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                if (err) throw (err);
+                await connection.query(removeCategories, async (err, result) => {
                     if (err) throw (err);
-                    await connection.query(removeCategories, async (err, result) => {
-                        if (err) throw (err);
-                        for (let i = 0; i < categories.length; i++) {
-                            const category = categories[i];
-                            const categoryName = category.name;
-                            const categoryDescription = category.description;
-                
-                            const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
-                            await connection.query(insert_category_query, async (err, result) => {
-                                if (err) throw (err);
-                            });
-                        }
-                    });
-                    connection.release();
-                    console.log ("Edited Election");
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                })
+                    for (let i = 0; i < categories.length; i++) {
+                        const category = categories[i];
+                        const categoryName = category.name;
+                        const categoryDescription = category.description;
+            
+                        const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                        await connection.query(insert_category_query, async (err, result) => {
+                            if (err) throw (err);
+                        });
+                    }
+                });
+                connection.release();
+                console.log ("Edited Election");
+                res.redirect('/hj9h8765qzf5jizwwnua');
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Delete Election */
-router.get('/delete/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var query = `delete from Election where Id = "${id}";`;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log("Deleted Election");
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                })
+router.get('/delete/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var query = `delete from Election where Id = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Deleted Election");
+                res.redirect('/hj9h8765qzf5jizwwnua');
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Open Register Candidate Form */
 router.post('/register-candidate', async function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            database.getConnection ( async (err, connection)=> {
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        database.getConnection ( async (err, connection)=> {
+            if (err) throw (err)
+            const sqlSearch =
+                `select * from Election
+                left outer join Candidate
+                on Election.Id = Candidate.ElectionId
+                left outer join Category
+                on Election.Id = Category.ElectionId
+                union
+                select * from Election
+                right outer join Candidate
+                on Election.Id = Candidate.ElectionId
+                right outer join Category
+                on Election.Id = Category.ElectionId;`
+            await connection.query (sqlSearch, async (err, result) => {
+                connection.release()
+
                 if (err) throw (err)
-                const sqlSearch =
-                    `select * from Election
-                    left outer join Candidate
-                    on Election.Id = Candidate.ElectionId
-                    left outer join Category
-                    on Election.Id = Category.ElectionId
-                    union
-                    select * from Election
-                    right outer join Candidate
-                    on Election.Id = Candidate.ElectionId
-                    right outer join Category
-                    on Election.Id = Category.ElectionId;`
-                await connection.query (sqlSearch, async (err, result) => {
-                    connection.release()
-    
-                    if (err) throw (err)
-                    res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
-                })
+                res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Register Candidate */
 router.post('/candidate-add', async function(req, res, next) {
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            const fname = req.body.candidatefname;
-            const lname = req.body.candidatelname;
-            const email = req.body.candidateemail;
-            const election = req.body.election;
-            const category = req.body.category;
-            console.log(category);
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        const fname = req.body.candidatefname;
+        const lname = req.body.candidatelname;
+        const email = req.body.candidateemail;
+        const election = req.body.election;
+        const category = req.body.category;
+        console.log(category);
 
-            database.getConnection( async (err, connection) => {
-                if (err) throw (err)
-                const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
-                const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
-                const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
-                const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
+        database.getConnection( async (err, connection) => {
+            if (err) throw (err)
+            const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
+            const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
+            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
+            const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
-                await connection.query (insert_query, async (err, result)=> {
+            await connection.query (insert_query, async (err, result)=> {
                 connection.release();
                 if (err) throw (err)
                 console.log ("Created Candidate");
@@ -408,55 +464,76 @@ router.post('/candidate-add', async function(req, res, next) {
                         res.redirect('/hj9h8765qzf5jizwwnua');
                     });
                 });
-                });
-            })
-        } catch (err) {
+            });
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 
 /* View Candidate Details */
-router.get('/viewcandidate/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var query = `select Candidate.CandidateId, fName, lName, Email,
-            CategoryName, NumVotes,
-            Description, Username, Password
-            from Candidate join Candidate_Category
-            on Candidate.CandidateId = Candidate_Category.CandidateId
-            left join Category
-            on Candidate_Category.CategoryId = Category.CategoryId
-            left join Election
-            on Candidate.ElectionId = Election.Id
-            left join Candidate_Credentials
-            on Candidate.CandidateId = Candidate_Credentials.CandidateId
-            where Candidate.CandidateId = "${id}";`;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log("Viewing Candidate");
-                    res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
-                })
+router.get('/viewcandidate/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var query = `select Candidate.CandidateId, fName, lName, Email,
+        CategoryName, NumVotes,
+        Description, Username, Password
+        from Candidate join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        left join Category
+        on Candidate_Category.CategoryId = Category.CategoryId
+        left join Election
+        on Candidate.ElectionId = Election.Id
+        left join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        where Candidate.CandidateId = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Viewing Candidate");
+                res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* View Edit Candidate Details */
-router.get('/editcandidate/:id', function(req, res, next){
-    if (adminLoggedIn) {
+router.get('/editcandidate/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         var candidateQuery = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
         Category.CategoryId, Id, Description, Username, Password
@@ -495,79 +572,110 @@ router.get('/editcandidate/:id', function(req, res, next){
             res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
                 categoryData: categoryResult, electionData: electionResult});
         })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
+            console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Edit Candidate Details */
-router.post('/editcandidate/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var fname = req.body.candidatefname;
-            var lname = req.body.candidatelname;
-            var email = req.body.candidateemail;
-            var election = req.body.election;
-            var category = req.body.category;
-            var username = req.body.candidateusername;
-            var password = req.body.candidatepassword;
+router.post('/editcandidate/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var fname = req.body.candidatefname;
+        var lname = req.body.candidatelname;
+        var email = req.body.candidateemail;
+        var election = req.body.election;
+        var category = req.body.category;
+        var username = req.body.candidateusername;
+        var password = req.body.candidatepassword;
 
-            var query = `UPDATE Candidate
-            inner join Candidate_Category
-            on Candidate.CandidateId = Candidate_Category.CandidateId
-            inner join Candidate_Credentials
-            on Candidate.CandidateId = Candidate_Credentials.CandidateId
-            SET fName = "${fname}", 
-            lName = "${lname}", 
-            Email = "${email}", 
-            ElectionId = "${election}",
-            CategoryId = "${category}",
-            Username = "${username}",
-            Password = "${password}"
-            WHERE Candidate.CandidateId = "${id}"
-            `;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log ("Edited Candidate");
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                })
+        var query = `UPDATE Candidate
+        inner join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        inner join Candidate_Credentials
+        on Candidate.CandidateId = Candidate_Credentials.CandidateId
+        SET fName = "${fname}", 
+        lName = "${lname}", 
+        Email = "${email}", 
+        ElectionId = "${election}",
+        CategoryId = "${category}",
+        Username = "${username}",
+        Password = "${password}"
+        WHERE Candidate.CandidateId = "${id}"
+        `;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log ("Edited Candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 /* Delete Candidate */
-router.get('/deletecandidate/:id', function(req, res, next){
-    if (adminLoggedIn) {
-        const token = req.cookies.token;
-        try {
-            jwt.verify(token, process.env.secretKey);
-            var id = req.params.id;
-            var query = `delete from Candidate where CandidateId = "${id}";`;
-            database.getConnection( async (err, connection) => {
-                if (err) console.log(err)
-                connection.query(query, async (err, result) => {
-                    connection.release();
-                    if (err)
-                        throw (err);
-                    console.log("Deleted Candidate");
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                })
+router.get('/deletecandidate/:id', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        var id = req.params.id;
+        var query = `delete from Candidate where CandidateId = "${id}";`;
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log("Deleted Candidate");
+                res.redirect('/hj9h8765qzf5jizwwnua');
             })
-        } catch (err) {
+        })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
             console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     }
-    else res.redirect('/hj9h8765qzf5jizwwnua');
 });
 
 module.exports = router;
