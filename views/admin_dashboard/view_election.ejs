@@ -1,0 +1,110 @@
+<div class="card">
+    <div class="card-header">
+        <%= data[0].Description %>
+        <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="GET">
+            <button type="submit">Edit</button>
+        </form>
+        <form action="/hj9h8765qzf5jizwwnua/delete/<%= data[0].Id %>" method="GET">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Date:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].ElectionDate %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Opens:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].OpenTime %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Closes:</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <%= data[0].CloseTime %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Categories</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <ul>
+                        <%
+                            var categoriesFound = false;
+                            data.forEach(function(data){
+                                if (data.CategoryName) {
+                                    categoriesFound = true;
+                        %>
+                                <%= data.CategoryName %> <br>
+                                <%= data.CategoryDescription %> <br>
+                        <%
+                                }
+                            });
+                            if (!categoriesFound)
+                            {
+                        %>
+                                No Categories Found for this Election
+                        <%
+                            }
+                        %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <strong>Candidates</strong>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <ul>
+                    <%
+                        var candidatesFound = false;
+                        data.forEach(function(data){
+                            if (data.CandidateName) {
+                                candidatesFound = true;
+                    %>
+                            <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
+                    <%
+                            }
+                        });
+                        if (!candidatesFound)
+                        {
+                    %>
+                            No Candidates Found for this Election
+                    <%
+                        }
+                    %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
