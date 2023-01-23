@@ -658,7 +658,8 @@ router.get('/deletecandidate/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var query = `delete from Candidate where CandidateId = "${id}";`;
+        const delete_query = `delete from Candidate where CandidateId = ?`;
+        const query = mysql.format(delete_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -669,6 +670,35 @@ router.get('/deletecandidate/:id', async function(req, res, next){
                 res.redirect('/hj9h8765qzf5jizwwnua');
             })
         })
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h8765qzf5jizwwnua');
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        } else {
+            console.log(err);
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        }
+    }
+});
+
+/* Log Out */
+router.get('/logout', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        jwt.verify(token, process.env.secretKey);
+        res.clearCookie('token');
+        const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
+        const update_query = mysql.format(updateLogIn, [decoded.username]);
+        await connection.query(update_query, async (err, result) => {
+            if (err) throw err;
+            res.redirect('/hj9h8765qzf5jizwwnua');
+        });
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
             const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
