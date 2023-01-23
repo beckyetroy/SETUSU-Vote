@@ -221,12 +221,13 @@ router.get('/view/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
-        CategoryName, CategoryDescription
-        from Election
-        left join Candidate on Election.Id = Candidate.ElectionId
-        left join Category on Election.Id = Category.ElectionId
-        where Election.Id = "${id}";`;
+        const view_query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
+                    CategoryName, CategoryDescription
+                    from Election
+                    left join Candidate on Election.Id = Candidate.ElectionId
+                    left join Category on Election.Id = Category.ElectionId
+                    where Election.Id = ?`;
+        const query = mysql.format(view_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -260,10 +261,11 @@ router.get('/edit/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
-        from Election left join Category
-        on Election.Id = Category.ElectionId
-        where Id = "${id}";`;
+        const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+                            from Election left join Category
+                            on Election.Id = Category.ElectionId
+                            where Id = ?`;
+        const query = mysql.format(edit_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -303,15 +305,17 @@ router.post('/edit/:id', async function(req, res, next){
         var closetime = date + ' ' + req.body.electionclosingtime + ':00';
         const categories = JSON.parse(req.body.updatedCategories);
 
-        var query = `
-        UPDATE Election
-        SET Description = "${description}", 
-        ElectionDate = "${date}", 
-        OpenTime = "${opentime}", 
-        CloseTime = "${closetime}" 
-        WHERE id = "${id}"
-        `;
-        const removeCategories = `DELETE FROM Category WHERE ElectionId = "${id}"`
+        var id = req.params.id;
+        const update_query = `UPDATE Election
+                            SET Description = ?, 
+                            ElectionDate = ?, 
+                            OpenTime = ?, 
+                            CloseTime = ? 
+                            WHERE id = ?`;
+        const query = mysql.format(update_query, [description, date, opentime, closetime, id]);
+
+        const remove_category_query = `DELETE FROM Category WHERE ElectionId = ?`;
+        const removeCategories = mysql.format(remove_category_query, [id]);
         const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
 
         database.getConnection( async (err, connection) => {
@@ -359,7 +363,8 @@ router.get('/delete/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var query = `delete from Election where Id = "${id}";`;
+        const remove_query = `delete from Election where Id = ?`;
+        const query = mysql.format(remove_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -490,18 +495,19 @@ router.get('/viewcandidate/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var query = `select Candidate.CandidateId, fName, lName, Email,
-        CategoryName, NumVotes,
-        Description, Username, Password
-        from Candidate join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        left join Category
-        on Candidate_Category.CategoryId = Category.CategoryId
-        left join Election
-        on Candidate.ElectionId = Election.Id
-        left join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        where Candidate.CandidateId = "${id}";`;
+        const view_query = `select Candidate.CandidateId, fName, lName, Email,
+                            CategoryName, NumVotes,
+                            Description, Username, Password
+                            from Candidate join Candidate_Category
+                            on Candidate.CandidateId = Candidate_Category.CandidateId
+                            left join Category
+                            on Candidate_Category.CategoryId = Category.CategoryId
+                            left join Election
+                            on Candidate.ElectionId = Election.Id
+                            left join Candidate_Credentials
+                            on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                            where Candidate.CandidateId = ?`;
+        const query = mysql.format(view_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
@@ -535,15 +541,16 @@ router.get('/editcandidate/:id', async function(req, res, next){
     try {
         jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
-        var candidateQuery = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
-        Category.CategoryId, Id, Description, Username, Password
-        FROM (SELECT * FROM Candidate WHERE CandidateId = "${id}") AS candidate
-        LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
-        LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
-        LEFT JOIN Election ON candidate.ElectionId = Election.Id
-        LEFT JOIN Candidate_Credentials ON candidate.CandidateId = Candidate_Credentials.CandidateId`;
-        var categoryQuery = `SELECT * FROM Category`;
-        var electionQuery = `SELECT * FROM Election`;
+        const cand_query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
+                            Category.CategoryId, Id, Description, Username, Password
+                            FROM (SELECT * FROM Candidate WHERE CandidateId = ?) AS candidate
+                            LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
+                            LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
+                            LEFT JOIN Election ON candidate.ElectionId = Election.Id
+                            LEFT JOIN Candidate_Credentials ON candidate.CandidateId = Candidate_Credentials.CandidateId`;
+        const candidateQuery = mysql.format(cand_query, [id]);
+        const categoryQuery = `SELECT * FROM Category`;
+        const electionQuery = `SELECT * FROM Election`;
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
@@ -603,20 +610,21 @@ router.post('/editcandidate/:id', async function(req, res, next){
         var username = req.body.candidateusername;
         var password = req.body.candidatepassword;
 
-        var query = `UPDATE Candidate
-        inner join Candidate_Category
-        on Candidate.CandidateId = Candidate_Category.CandidateId
-        inner join Candidate_Credentials
-        on Candidate.CandidateId = Candidate_Credentials.CandidateId
-        SET fName = "${fname}", 
-        lName = "${lname}", 
-        Email = "${email}", 
-        ElectionId = "${election}",
-        CategoryId = "${category}",
-        Username = "${username}",
-        Password = "${password}"
-        WHERE Candidate.CandidateId = "${id}"
-        `;
+        const update_query = `UPDATE Candidate
+                            inner join Candidate_Category
+                            on Candidate.CandidateId = Candidate_Category.CandidateId
+                            inner join Candidate_Credentials
+                            on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                            SET fName = ?, 
+                            lName = ?, 
+                            Email = ?, 
+                            ElectionId = ?,
+                            CategoryId = ?,
+                            Username = ?,
+                            Password = ?
+                            WHERE Candidate.CandidateId = ?`;
+        const query = mysql.format(update_query, [fname, lname, email, election, category, username, password, id]);
+
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
