@@ -1,5 +1,5 @@
 body {
-    background-color: #e6e6e2 !important;
+    background-color: #c4c4c4 !important;
 }
 
 h1 {
@@ -8,8 +8,12 @@ h1 {
     font-weight: bold !important;
     color: white;
     text-align: center;
-    padding-left: 1.5em;
-    padding-right: 1.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+h3 {
+    font-family: 'Aileron', sans-serif;
 }
 
 .navbar {
@@ -17,8 +21,73 @@ h1 {
 }
 
 .nav-link {
-    padding: 1.5em !important;
+    padding-right: 1.5em !important;
+    padding-left: 1.5em !important;
     color: white !important;
     font-family: 'Roboto Condensed';
     font-size: 1.5em;
+}
+
+form > input {
+    font-family: 'Inter';
+}
+
+.card-body {
+    background-color: #e6e6e2 !important;
+}
+
+.card-header {
+    background-color: #c4c4c4 !important;
+    font-family: 'Aileron', sans-serif;
+    font-size: 1.25em;
+}
+
+.primaryBtn {
+    background-color: #ffd633;
+    color: white;
+    font-family: 'Inter';
+    font-weight: bold;
+    padding: 0.5em;
+    border: none;
+}
+
+.container.login {
+    background-color: #e6e6e2;
+    width: 35%;
+    height: 60vh;
+    margin-top: 5%;
+}
+
+form.login {
+    margin: 0;
+    text-align: center;
+}
+
+.login > input {
+    width: 80%;
+}
+
+.login > label {
+    width: 80%;
+    text-align: left;
+    font-family: 'Inter';
+}
+
+.login > .primaryBtn {
+    margin: 2em;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+
+.login > h3 {
+    padding-top: 2em;
+}
+
+.logoBubble {
+    max-width: 10%;
+    background-color: #ffdb4d;
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+    border-radius: 50%;
 }

@@ -112,7 +112,7 @@ router.post('/', async function(req, res, next) {
                         if (err) throw err;
                         const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '15m' });
                         res.cookie('token', token);
-                        renderDashboard(res, 'Welcome to the Admin Dashboard!', 'list');
+                        renderDashboard(res, 'Admin Dashboard', 'list');
                     });
                 }
                 else {
