@@ -5,6 +5,7 @@ const argon2 = require('argon2');
 const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
+var crypto = require('crypto');
 const blockTime = 15; //15 minutes
 
 function renderDashboard(res, title, action) {
@@ -31,7 +32,26 @@ function renderDashboard(res, title, action) {
             }
         })
     })
-}
+};
+
+var Password = {
+    _pattern : /[a-zA-Z0-9_\-\+\.]/,
+    _getRandomByte : function() {
+        return crypto.randomBytes(1)[0];
+    },
+
+    generate : function(length) {
+        return Array.apply(null, {'length': length})
+        .map(function() {
+            var result;
+            while(true) {
+                result = String.fromCharCode(this._getRandomByte());
+                if(this._pattern.test(result)) return result;
+            }
+        }, this)
+        .join('');
+    }
+};
 
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
@@ -145,21 +165,7 @@ router.post('/register-election', async function(req, res, next) {
             renderDashboard(res, 'Register Election','add');
         }
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -201,21 +207,7 @@ router.post('/election-add', async function(req, res, next) {
             });
         }
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -243,21 +235,7 @@ router.get('/view/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -283,21 +261,7 @@ router.get('/edit/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -349,21 +313,7 @@ router.post('/edit/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -386,21 +336,7 @@ router.get('/delete/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -431,21 +367,7 @@ router.post('/register-candidate', async function(req, res, next) {
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -459,7 +381,8 @@ router.post('/candidate-add', async function(req, res, next) {
         const email = req.body.candidateemail;
         const election = req.body.election;
         const category = req.body.category;
-        console.log(category);
+        var password = Password.generate(16);
+        var username = fname.charAt(0) + lname;
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
@@ -468,42 +391,42 @@ router.post('/candidate-add', async function(req, res, next) {
             const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
-            await connection.query (insert_query, async (err, result)=> {
-                connection.release();
-                if (err) throw (err)
-                console.log ("Created Candidate");
-                const candidateId = result.insertId;
-                const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
-                await connection.query(insert_category_query, async (err, result) => {
-                    if (err) throw (err);
-                    const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, "User123", "Password123"]);
-                    await connection.query(insert_credentials_query, (err, result) => {
+            var i = 0;
+            const fetch_candidates = `SELECT * From Candidate
+                                    join Candidate_Credentials
+                                    on Candidate.CandidateId = Candidate_Credentials.CandidateId`;
+
+            await connection.query(fetch_candidates, async (err, result) => {
+                if (err) throw (err);
+
+                for (candidate of result) {
+                    if (candidate.Username === username) {
+                        i++;
+                        username = username + String(i);
+                    }
+                }
+
+                await connection.query (insert_query, async (err, result)=> {
+                    connection.release();
+                    if (err) throw (err)
+                    console.log ("Created Candidate");
+                    const candidateId = result.insertId;
+                    const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
+                    await connection.query(insert_category_query, async (err, result) => {
                         if (err) throw (err);
-                        console.log("Added category to candidate");
-                        res.redirect('/hj9h8765qzf5jizwwnua');
+                        const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, username, password]);
+                        await connection.query(insert_credentials_query, (err, result) => {
+                            if (err) throw (err);
+                            res.redirect('/hj9h8765qzf5jizwwnua');
+                        });
                     });
                 });
             });
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
-
 
 /* View Candidate Details */
 router.get('/viewcandidate/:id', async function(req, res, next){
@@ -535,21 +458,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -598,21 +507,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
                 categoryData: categoryResult, electionData: electionResult});
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -656,21 +551,7 @@ router.post('/editcandidate/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -693,21 +574,7 @@ router.get('/deletecandidate/:id', async function(req, res, next){
             })
         })
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 
@@ -726,21 +593,7 @@ router.get('/logout', async function(req, res, next){
             });
         });
     } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            database.getConnection( async (err, connection) => {
-                const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";
-                const update_query = mysql.format(updateLogIn, [decoded.username]);
-                await connection.query(update_query, async (err, result) => {
-                    if (err) throw err;
-                    res.redirect('/hj9h8765qzf5jizwwnua');
-                });
-            });
-        } else if (err.name === 'JsonWebTokenError') {
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        } else {
-            console.log(err);
-            res.redirect('/hj9h8765qzf5jizwwnua');
-        }
+        res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
 

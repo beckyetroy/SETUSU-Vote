@@ -18,6 +18,10 @@ h3 {
 
 .navbar {
     background-color: #eb2c5c !important;
+    position: sticky !important;
+    top: 0;
+    width: 100%;
+    z-index: 1 !important	;
 }
 
 .nav-link {
@@ -86,8 +90,8 @@ form.login {
 .logoBubble {
     max-width: 10%;
     background-color: #ffdb4d;
-    position: absolute;
-    right: 5%;
+    position: fixed;
+    right: 4%;
     bottom: 5%;
     border-radius: 50%;
 }
