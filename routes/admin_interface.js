@@ -25,10 +25,10 @@ function renderDashboard(res, title, action) {
             if (err) throw (err)
             if (result.length == 0) {
             console.log("Nothing Registered.")
-            res.render('admin_dashboard', { title: title, action:action, data:result});
+            res.render('admin/admin_dashboard', { title: title, action:action, data:result});
             }
             else {
-                res.render('admin_dashboard', { title: title, action:action, data:result});
+                res.render('admin/admin_dashboard', { title: title, action:action, data:result});
             }
         })
     })
@@ -63,10 +63,10 @@ router.get('/', function(req, res, next) {
         }
     } catch (err) {
         if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
-            res.render('admin_login', { title: 'Login' });
+            res.render('admin/admin_login', { title: 'Login' });
         } else {
             console.log(err);
-            res.render('admin_login', { title: 'Login' });
+            res.render('admin/admin_login', { title: 'Login' });
         }
     }
 });
@@ -107,13 +107,13 @@ router.post('/', async function(req, res, next) {
             if (err) throw (err);
             if (result.length == 0) {
                 console.log("User does not exist")
-                res.render('admin_login', { title: 'Login' });
+                res.render('admin/admin_login', { title: 'Login' });
             }
             else {
                 const blockedUser = await checkBlockedUser(result[0]);
                 if (blockedUser) {
                     console.log("User account is currently blocked")
-                    res.render('admin_login', { title: 'Login' });
+                    res.render('admin/admin_login', { title: 'Login' });
                     return;
                 }
 
@@ -147,7 +147,7 @@ router.post('/', async function(req, res, next) {
                     const update_query = mysql.format(updateAttempts, [loginAttempts, user]);
                     await connection.query(update_query, async (err, result) => {
                         if (err) throw err;
-                        res.render('admin_login', { title: 'Login' });
+                        res.render('admin/admin_login', { title: 'Login' });
                         return;
                     });
                 }
@@ -231,7 +231,7 @@ router.get('/view/:id', async function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Viewing Election");
-                res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
+                res.render('admin/admin_dashboard', { title: 'View Election', action: 'view', data: result});
             })
         })
     } catch (err) {
@@ -257,7 +257,7 @@ router.get('/edit/:id', async function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Editing Election");
-                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
             })
         })
     } catch (err) {
@@ -363,7 +363,7 @@ router.post('/register-candidate', async function(req, res, next) {
                 connection.release()
 
                 if (err) throw (err)
-                res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
+                res.render('admin/admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
             })
         })
     } catch (err) {
@@ -454,7 +454,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Viewing Candidate");
-                res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
+                res.render('admin/admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
         })
     } catch (err) {
@@ -503,7 +503,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
             ]);
             connection.release();
             console.log("Editing Candidate");
-            res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
+            res.render('admin/admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
                 categoryData: categoryResult, electionData: electionResult});
         })
     } catch (err) {
