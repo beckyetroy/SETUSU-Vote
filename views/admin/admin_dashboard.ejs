@@ -52,6 +52,9 @@
         
         <% } else if(action == 'editcandidate') { %>
             <%- include ('admin_dashboard/edit_candidate.ejs'); %>
+
+        <% } else if(action == 'generatecandidate') { %>
+            <%- include ('admin_dashboard/candidate_generation.ejs'); %>
         <% } %>
 
         <img class="logoBubble" src="assets/Logo.png" alt="SETUSU Logo">

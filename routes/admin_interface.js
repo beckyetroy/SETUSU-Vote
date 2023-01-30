@@ -117,7 +117,6 @@ router.post('/', async function(req, res, next) {
                     return;
                 }
 
-                // Generate a new random salt for every password
                 const salt = randomstring.generate(16);
 
                 const hashedPasswordInDB = result[0].Password;
@@ -382,13 +381,17 @@ router.post('/candidate-add', async function(req, res, next) {
         const election = req.body.election;
         const category = req.body.category;
         var password = Password.generate(16);
+        const salt = randomstring.generate(16);
+        const hashedPassword = await argon2.hash(String(password));
+        console.log(hashedPassword);
+        console.log(password);
         var username = fname.charAt(0) + lname;
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
             const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
-            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
+            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password, Salt) values (?,?,?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
             var i = 0;
@@ -414,16 +417,17 @@ router.post('/candidate-add', async function(req, res, next) {
                     const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
                     await connection.query(insert_category_query, async (err, result) => {
                         if (err) throw (err);
-                        const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, username, password]);
+                        const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, username, hashedPassword, salt]);
                         await connection.query(insert_credentials_query, (err, result) => {
                             if (err) throw (err);
-                            res.redirect('/hj9h8765qzf5jizwwnua');
+                            res.render('admin/admin_dashboard', { title: 'Credentials', action: 'generatecandidate', username: String(username), password: String(password)});
                         });
                     });
                 });
             });
         })
     } catch (err) {
+        console.log(err);
         res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
@@ -451,8 +455,13 @@ router.get('/viewcandidate/:id', async function(req, res, next){
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
                 connection.release();
-                if (err)
-                    throw (err);
+                if (err) throw (err);
+                const hashedPasswordInDB = result[0].Password;
+                const saltInDB = result[0].Salt;
+                const candidatePassword = await argon2.verify(hashedPasswordInDB, { salt: saltInDB });
+                result[0].Password = candidatePassword;
+                console.log(candidatePassword);
+                console.log(result[0].Password);
                 console.log("Viewing Candidate");
                 res.render('admin/admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
@@ -502,6 +511,10 @@ router.get('/editcandidate/:id', async function(req, res, next){
                 })
             ]);
             connection.release();
+            const candidatePassword = await argon2.verify(candidateResult[0].Password, process.env.secretKey);
+            candidateResult[0].Password = candidatePassword;
+            console.log(candidatePassword);
+            console.log(candidateResult[0].Password);
             console.log("Editing Candidate");
             res.render('admin/admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
                 categoryData: categoryResult, electionData: electionResult});
