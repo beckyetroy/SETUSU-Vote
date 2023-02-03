@@ -96,6 +96,11 @@
                     const showPasswordCheckbox = document.querySelector('input[type="checkbox"]#showPassword');
                     var passwordUpdated = document.getElementById('candidatepassword');
 
+                    function validatePassword(password) {
+                        var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                        return pattern.test(password);
+                    }
+
                     saveButton.addEventListener('click', function() {
                         //Passwords don't match
                         if (passwordInput.value !== repeatPasswordInput.value) {
@@ -105,6 +110,11 @@
                         //Not all fields entered
                         else if (passwordInput.value === "" || repeatPasswordInput.value ===""
                             || !passwordInput.value || !repeatPasswordInput.value) {
+                            passwordInput.value = "";
+                            repeatPasswordInput.value = "";
+                        }
+                        //Password is invalid format
+                        else if (!validatePassword(passwordInput.value) || !validatePassword(repeatPasswordInput.value)) {
                             passwordInput.value = "";
                             repeatPasswordInput.value = "";
                         }

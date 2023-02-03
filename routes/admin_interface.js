@@ -53,6 +53,11 @@ var Password = {
     }
 };
 
+function validatePassword(password) {
+    var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return pattern.test(password);
+}
+
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
     const token = req.cookies.token;
@@ -530,7 +535,7 @@ router.post('/editcandidate/:id', async function(req, res, next){
 
         //Verify Password - backend
         //Invalid or unchanged Password
-        if (password === "unchanged") {
+        if (password === "unchanged" || !validatePassword(password)) {
             update_query = `UPDATE Candidate
                             inner join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
