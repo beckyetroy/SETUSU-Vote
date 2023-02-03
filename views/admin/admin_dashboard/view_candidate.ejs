@@ -60,34 +60,14 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <strong>Credentials:</strong>
+                    <strong>Username:</strong>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    Username: <%= data[0].Username %>
-                </div>
-                <div class="mb-3">
-                    Password: <div id ="CandidatePW">●●●●●●●●●●</div>
-                </div>
-                <div class="mb-3">
-                    <button id="PWBtn" type="button">Show Password</button>
+                    <%= data[0].Username %>
                 </div>
             </div>
         </div>
-        <script>
-            //Toggle candidate password view
-            $(document).on("click", "#PWBtn", function(){
-                var pw = $("#CandidatePW");
-                var btn = $("#PWBtn");
-                if ($("#CandidatePW").html() =="●●●●●●●●●●") {
-                    $("#CandidatePW").html("<%= data[0].Password %>");
-                    $("#PWBtn").html("Hide Password");
-                } else {
-                    $("#CandidatePW").html("●●●●●●●●●●")
-                    $("#PWBtn").html("Show Password");
-                }
-            })
-        </script>
     </div>
 </div>

@@ -383,8 +383,6 @@ router.post('/candidate-add', async function(req, res, next) {
         var password = Password.generate(16);
         const salt = randomstring.generate(16);
         const hashedPassword = await argon2.hash(String(password));
-        console.log(hashedPassword);
-        console.log(password);
         var username = fname.charAt(0) + lname;
 
         database.getConnection( async (err, connection) => {
@@ -440,7 +438,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
                             CategoryName, NumVotes,
-                            Description, Username, Password
+                            Description, Username
                             from Candidate join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
                             left join Category
@@ -456,12 +454,6 @@ router.get('/viewcandidate/:id', async function(req, res, next){
             connection.query(query, async (err, result) => {
                 connection.release();
                 if (err) throw (err);
-                const hashedPasswordInDB = result[0].Password;
-                const saltInDB = result[0].Salt;
-                const candidatePassword = await argon2.verify(hashedPasswordInDB, { salt: saltInDB });
-                result[0].Password = candidatePassword;
-                console.log(candidatePassword);
-                console.log(result[0].Password);
                 console.log("Viewing Candidate");
                 res.render('admin/admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
@@ -478,7 +470,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const cand_query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
-                            Category.CategoryId, Id, Description, Username, Password
+                            Category.CategoryId, Id, Description, Username
                             FROM (SELECT * FROM Candidate WHERE CandidateId = ?) AS candidate
                             LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
                             LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
@@ -511,10 +503,6 @@ router.get('/editcandidate/:id', async function(req, res, next){
                 })
             ]);
             connection.release();
-            const candidatePassword = await argon2.verify(candidateResult[0].Password, process.env.secretKey);
-            candidateResult[0].Password = candidatePassword;
-            console.log(candidatePassword);
-            console.log(candidateResult[0].Password);
             console.log("Editing Candidate");
             res.render('admin/admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
                 categoryData: categoryResult, electionData: electionResult});
@@ -535,10 +523,15 @@ router.post('/editcandidate/:id', async function(req, res, next){
         var email = req.body.candidateemail;
         var election = req.body.election;
         var category = req.body.category;
-        var username = req.body.candidateusername;
         var password = req.body.candidatepassword;
 
-        const update_query = `UPDATE Candidate
+        var update_query;
+        var query;
+
+        //Verify Password - backend
+        //Invalid or unchanged Password
+        if (password === "unchanged") {
+            update_query = `UPDATE Candidate
                             inner join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
                             inner join Candidate_Credentials
@@ -547,11 +540,27 @@ router.post('/editcandidate/:id', async function(req, res, next){
                             lName = ?, 
                             Email = ?, 
                             ElectionId = ?,
-                            CategoryId = ?,
-                            Username = ?,
-                            Password = ?
+                            CategoryId = ?
                             WHERE Candidate.CandidateId = ?`;
-        const query = mysql.format(update_query, [fname, lname, email, election, category, username, password, id]);
+            query = mysql.format(update_query, [fname, lname, email, election, category, id]);
+        }
+        //Valid Password
+        else {
+            const hashedPassword = await argon2.hash(String(password));
+            update_query = `UPDATE Candidate
+                                inner join Candidate_Category
+                                on Candidate.CandidateId = Candidate_Category.CandidateId
+                                inner join Candidate_Credentials
+                                on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                                SET fName = ?, 
+                                lName = ?, 
+                                Email = ?, 
+                                ElectionId = ?,
+                                CategoryId = ?,
+                                Password = ?
+                                WHERE Candidate.CandidateId = ?`;
+            query = mysql.format(update_query, [fname, lname, email, election, category, hashedPassword, id]);
+        }
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
