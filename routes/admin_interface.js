@@ -25,10 +25,10 @@ function renderDashboard(res, title, action) {
             if (err) throw (err)
             if (result.length == 0) {
             console.log("Nothing Registered.")
-            res.render('admin_dashboard', { title: title, action:action, data:result});
+            res.render('admin/admin_dashboard', { title: title, action:action, data:result});
             }
             else {
-                res.render('admin_dashboard', { title: title, action:action, data:result});
+                res.render('admin/admin_dashboard', { title: title, action:action, data:result});
             }
         })
     })
@@ -53,6 +53,11 @@ var Password = {
     }
 };
 
+function validatePassword(password) {
+    var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return pattern.test(password);
+}
+
 /* GET admin login page. */
 router.get('/', function(req, res, next) {
     const token = req.cookies.token;
@@ -63,10 +68,10 @@ router.get('/', function(req, res, next) {
         }
     } catch (err) {
         if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
-            res.render('admin_login', { title: 'Login' });
+            res.render('admin/admin_login', { title: 'Login' });
         } else {
             console.log(err);
-            res.render('admin_login', { title: 'Login' });
+            res.render('admin/admin_login', { title: 'Login' });
         }
     }
 });
@@ -107,17 +112,16 @@ router.post('/', async function(req, res, next) {
             if (err) throw (err);
             if (result.length == 0) {
                 console.log("User does not exist")
-                res.render('admin_login', { title: 'Login' });
+                res.render('admin/admin_login', { title: 'Login' });
             }
             else {
                 const blockedUser = await checkBlockedUser(result[0]);
                 if (blockedUser) {
                     console.log("User account is currently blocked")
-                    res.render('admin_login', { title: 'Login' });
+                    res.render('admin/admin_login', { title: 'Login' });
                     return;
                 }
 
-                // Generate a new random salt for every password
                 const salt = randomstring.generate(16);
 
                 const hashedPasswordInDB = result[0].Password;
@@ -147,7 +151,7 @@ router.post('/', async function(req, res, next) {
                     const update_query = mysql.format(updateAttempts, [loginAttempts, user]);
                     await connection.query(update_query, async (err, result) => {
                         if (err) throw err;
-                        res.render('admin_login', { title: 'Login' });
+                        res.render('admin/admin_login', { title: 'Login' });
                         return;
                     });
                 }
@@ -231,7 +235,7 @@ router.get('/view/:id', async function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Viewing Election");
-                res.render('admin_dashboard', { title: 'View Election', action: 'view', data: result});
+                res.render('admin/admin_dashboard', { title: 'View Election', action: 'view', data: result});
             })
         })
     } catch (err) {
@@ -257,7 +261,7 @@ router.get('/edit/:id', async function(req, res, next){
                 if (err)
                     throw (err);
                 console.log("Editing Election");
-                res.render('admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
             })
         })
     } catch (err) {
@@ -363,7 +367,7 @@ router.post('/register-candidate', async function(req, res, next) {
                 connection.release()
 
                 if (err) throw (err)
-                res.render('admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
+                res.render('admin/admin_dashboard', { title: 'Register Candidate', action:'addCandidate', data:result});
             })
         })
     } catch (err) {
@@ -382,13 +386,15 @@ router.post('/candidate-add', async function(req, res, next) {
         const election = req.body.election;
         const category = req.body.category;
         var password = Password.generate(16);
+        const salt = randomstring.generate(16);
+        const hashedPassword = await argon2.hash(String(password));
         var username = fname.charAt(0) + lname;
 
         database.getConnection( async (err, connection) => {
             if (err) throw (err)
             const sqlInsert = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
             const sqlInsertCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
-            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password) values (?,?,?)";
+            const sqlInsertCredentials = "insert into Candidate_Credentials (CandidateId, Username, Password, Salt) values (?,?,?,?)";
             const insert_query = mysql.format(sqlInsert,[fname, lname, email, election]);
 
             var i = 0;
@@ -414,16 +420,17 @@ router.post('/candidate-add', async function(req, res, next) {
                     const insert_category_query = mysql.format(sqlInsertCategory,[category, candidateId]);
                     await connection.query(insert_category_query, async (err, result) => {
                         if (err) throw (err);
-                        const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, username, password]);
+                        const insert_credentials_query = mysql.format(sqlInsertCredentials,[candidateId, username, hashedPassword, salt]);
                         await connection.query(insert_credentials_query, (err, result) => {
                             if (err) throw (err);
-                            res.redirect('/hj9h8765qzf5jizwwnua');
+                            res.render('admin/admin_dashboard', { title: 'Credentials', action: 'generatecandidate', username: String(username), password: String(password)});
                         });
                     });
                 });
             });
         })
     } catch (err) {
+        console.log(err);
         res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
@@ -436,7 +443,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
                             CategoryName, NumVotes,
-                            Description, Username, Password
+                            Description, Username
                             from Candidate join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
                             left join Category
@@ -451,10 +458,9 @@ router.get('/viewcandidate/:id', async function(req, res, next){
             if (err) console.log(err)
             connection.query(query, async (err, result) => {
                 connection.release();
-                if (err)
-                    throw (err);
+                if (err) throw (err);
                 console.log("Viewing Candidate");
-                res.render('admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
+                res.render('admin/admin_dashboard', { title: 'View Candidate', action: 'viewcandidate', data:result});
             })
         })
     } catch (err) {
@@ -469,7 +475,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey);
         var id = req.params.id;
         const cand_query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
-                            Category.CategoryId, Id, Description, Username, Password
+                            Category.CategoryId, Id, Description, Username
                             FROM (SELECT * FROM Candidate WHERE CandidateId = ?) AS candidate
                             LEFT JOIN Candidate_Category ON candidate.CandidateId = Candidate_Category.CandidateId
                             LEFT JOIN Category ON Candidate_Category.CategoryId = Category.CategoryId
@@ -503,7 +509,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
             ]);
             connection.release();
             console.log("Editing Candidate");
-            res.render('admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
+            res.render('admin/admin_dashboard', { title: 'Edit Candidate', action: 'editcandidate', data: candidateResult,
                 categoryData: categoryResult, electionData: electionResult});
         })
     } catch (err) {
@@ -522,10 +528,15 @@ router.post('/editcandidate/:id', async function(req, res, next){
         var email = req.body.candidateemail;
         var election = req.body.election;
         var category = req.body.category;
-        var username = req.body.candidateusername;
         var password = req.body.candidatepassword;
 
-        const update_query = `UPDATE Candidate
+        var update_query;
+        var query;
+
+        //Verify Password - backend
+        //Invalid or unchanged Password
+        if (password === "unchanged" || !validatePassword(password)) {
+            update_query = `UPDATE Candidate
                             inner join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
                             inner join Candidate_Credentials
@@ -534,11 +545,27 @@ router.post('/editcandidate/:id', async function(req, res, next){
                             lName = ?, 
                             Email = ?, 
                             ElectionId = ?,
-                            CategoryId = ?,
-                            Username = ?,
-                            Password = ?
+                            CategoryId = ?
                             WHERE Candidate.CandidateId = ?`;
-        const query = mysql.format(update_query, [fname, lname, email, election, category, username, password, id]);
+            query = mysql.format(update_query, [fname, lname, email, election, category, id]);
+        }
+        //Valid Password
+        else {
+            const hashedPassword = await argon2.hash(String(password));
+            update_query = `UPDATE Candidate
+                                inner join Candidate_Category
+                                on Candidate.CandidateId = Candidate_Category.CandidateId
+                                inner join Candidate_Credentials
+                                on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                                SET fName = ?, 
+                                lName = ?, 
+                                Email = ?, 
+                                ElectionId = ?,
+                                CategoryId = ?,
+                                Password = ?
+                                WHERE Candidate.CandidateId = ?`;
+            query = mysql.format(update_query, [fname, lname, email, election, category, hashedPassword, id]);
+        }
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)

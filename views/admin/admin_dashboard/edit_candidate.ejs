@@ -1,0 +1,152 @@
+<div class="card">
+    <div class="card-header">Edit</div>
+        <div class="card-body">
+            <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="POST" id="editForm">
+                <div class="container">
+                    <label>First Name(s): </label>
+                    <input type="text" name="candidatefname" value="<%= data[0].fName %>"required>
+                    <label>Surname: </label>
+                    <input type="text" name="candidatelname" value="<%= data[0].lName %>" required>
+                    <label>Email Address: </label>
+                    <input type="text" name="candidateemail" value="<%= data[0].Email %>" required>
+                    <label>Registered for Election: </label>
+                        <%
+                        if(data.length > 0)
+                        {
+                            %>
+                            <select name="election" id="electionSelect">
+                                <% electionData.forEach(function(election) { %>
+                                <% if (election.Id === data[0].ElectionId) { %>
+                                    <option value="<%= election.Id %>" selected><%= election.Description %></option>
+                                <% } else { %>
+                                    <option value="<%= election.Id %>"><%= election.Description %></option>
+                                <% } %>
+                                <% }); %>
+                            </select>
+                            <select name="category" id="categorySelect">
+                                <% categoryData.forEach(function(category) { %>
+                                <option value="<%= category.CategoryId %>"
+                                    data-election-id="<%= category.ElectionId %>"
+                                <% if (category.CategoryId === data[0].CategoryId) { %>
+                                    selected
+                                <% } %>><%= category.CategoryName %></option>
+                                <% }); %>
+                            </select>
+                            <%
+                        }
+                        else
+                        {
+                            %>
+                            <tr>
+                                <td colspan="5">No Data Found</td>
+                            </tr>
+                        <%
+                        }
+                        %>
+                        <label>Username: </label>
+                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" required>
+                        <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
+                        <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form">Reset Password</button>
+                        <div class="modal fade" id="reset-password-form" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">Reset Password</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <label>New Password : </label>
+                                    <input type="password" placeholder="Enter New Password" name="password" id="password">
+                                    <label>Confirm Password : </label>
+                                    <input type="password" placeholder="Enter Password Again" name="repeatpassword" id="repeatpassword">
+                                    <div>
+                                        <input type="checkbox" id="showPassword">
+                                        <label for="showPassword">Show Password</label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" id="cancel-password" data-bs-dismiss="modal">Cancel</button>
+                                  <button type="button" class="btn btn-primary" id="save-password">Confirm</button>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                    <button type="submit" value="edit" id="submitBtn">Save Changes</button>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function(){
+                    const electionSelect = document.querySelector("#electionSelect");
+                    const categorySelect = document.querySelector("#categorySelect");
+                    const originalOptions = Array.from(categorySelect.options);
+
+                    function filterCategoryOptions() {
+                        const selectedElectionId = electionSelect.value;
+                        const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
+                        categorySelect.innerHTML = "";
+                        filteredOptions.forEach(option => categorySelect.add(option));
+                    }
+
+                    electionSelect.addEventListener("change", filterCategoryOptions);
+                    filterCategoryOptions();
+
+                    const passwordInput = document.querySelector('input[name="password"]');
+                    const repeatPasswordInput = document.querySelector('input[name="repeatpassword"]');
+                    const saveButton = document.getElementById('save-password');
+                    const cancelButton = document.getElementById('cancel-password');
+                    const showPasswordCheckbox = document.querySelector('input[type="checkbox"]#showPassword');
+                    var passwordUpdated = document.getElementById('candidatepassword');
+
+                    function validatePassword(password) {
+                        var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                        return pattern.test(password);
+                    }
+
+                    saveButton.addEventListener('click', function() {
+                        //Passwords don't match
+                        if (passwordInput.value !== repeatPasswordInput.value) {
+                            passwordInput.value = "";
+                            repeatPasswordInput.value = "";
+                        }
+                        //Not all fields entered
+                        else if (passwordInput.value === "" || repeatPasswordInput.value ===""
+                            || !passwordInput.value || !repeatPasswordInput.value) {
+                            passwordInput.value = "";
+                            repeatPasswordInput.value = "";
+                        }
+                        //Password is invalid format
+                        else if (!validatePassword(passwordInput.value) || !validatePassword(repeatPasswordInput.value)) {
+                            passwordInput.value = "";
+                            repeatPasswordInput.value = "";
+                        }
+                        else {
+                            passwordUpdated.value = passwordInput.value;
+                            $('#reset-password-form').modal('hide');
+                        }
+                    });
+
+                    cancelButton.addEventListener('click', function() {
+                        //Reset form values
+                        if (passwordUpdated.value != "unchanged") {
+                            passwordInput.value = passwordUpdated.value;
+                            repeatPasswordInput.value = passwordUpdated.value;
+                        }
+                        else {
+                            passwordInput.value = "";
+                            repeatPasswordInput.value = "";
+                        }
+                    });
+
+                    showPasswordCheckbox.addEventListener('change', function() {
+                        if (showPasswordCheckbox.checked) {
+                            passwordInput.type = 'text';
+                            repeatPasswordInput.type = 'text';
+                        } else {
+                            passwordInput.type = 'password';
+                            repeatPasswordInput.type = 'password';
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
