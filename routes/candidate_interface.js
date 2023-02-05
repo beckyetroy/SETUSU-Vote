@@ -8,8 +8,36 @@ const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 const blockTime = 15; //15 minutes
 
-function renderDashboard(res, title, action) {
-    console.log("Logged in");
+function renderDashboard(res, title, action, username) {
+    database.getConnection ( async (err, connection)=> {
+        if (err) throw (err)
+        const candidate_query =
+            `select Candidate.CandidateId, fName, lName, Email,
+                    CategoryName, NumVotes,
+                    Description, Username
+                    from Candidate join Candidate_Category
+                    on Candidate.CandidateId = Candidate_Category.CandidateId
+                    left join Category
+                    on Candidate_Category.CategoryId = Category.CategoryId
+                    left join Election
+                    on Candidate.ElectionId = Election.Id
+                    left join Candidate_Credentials
+                    on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                    where Candidate_Credentials.Username = ?`;
+        const query = mysql.format(candidate_query, username);
+        await connection.query (query, async (err, result) => {
+            connection.release()
+            
+            if (err) throw (err)
+            if (result.length == 0) {
+            console.log("An error occurred. Please verify user details.")
+            res.render('candidate/candidate_dashboard', { title: title, action:action, data:result});
+            }
+            else {
+                res.render('candidate/candidate_dashboard', { title: title, action:action, data:result});
+            }
+        })
+    })
 };
 
 /* GET candidate login page. */
@@ -18,7 +46,7 @@ router.get('/', function(req, res, next) {
     try {
         const decoded = jwt.verify(token, process.env.secretKey);
         if (decoded) {
-            renderDashboard(res, 'Candidate Dashboard', 'list');
+            renderDashboard(res, 'Candidate Dashboard', 'main', decoded.username);
         }
     } catch (err) {
         if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError') {
@@ -89,9 +117,9 @@ router.post('/', async function(req, res, next) {
                     const update_query = mysql.format(updateSalt, [salt, user]);
                     await connection.query(update_query, async (err, result) => {
                         if (err) throw err;
-                        const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '15m' });
+                        const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '30m' });
                         res.cookie('token', token);
-                        renderDashboard(res, 'Candidate Dashboard', 'list');
+                        renderDashboard(res, 'Candidate Dashboard', 'main', user);
                     });
                 }
                 else {
@@ -113,6 +141,25 @@ router.post('/', async function(req, res, next) {
             }
         })
     })
+});
+
+/* Log Out */
+router.get('/logout', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        res.clearCookie('token');
+        database.getConnection( async (err, connection) => {
+            const updateLogIn = "UPDATE Candidate_Credentials SET LoginAttempts = 0 WHERE Username = ?";
+            const update_query = mysql.format(updateLogIn, [decoded.username]);
+            await connection.query(update_query, async (err, result) => {
+                if (err) throw err;
+                res.redirect('/hj9h');
+            });
+        });
+    } catch (err) {
+        res.redirect('/hj9h');
+    }
 });
 
 module.exports = router;

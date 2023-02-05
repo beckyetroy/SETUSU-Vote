@@ -44,7 +44,8 @@
                         }
                         %>
                         <label>Username: </label>
-                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" required>
+                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" disabled>
+                        <small>Usernames are uniquely generated and cannot be changed</small>
                         <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
                         <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form">Reset Password</button>
                         <div class="modal fade" id="reset-password-form" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
