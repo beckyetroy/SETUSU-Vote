@@ -143,6 +143,76 @@ router.post('/', async function(req, res, next) {
     })
 });
 
+/* View User Details */
+router.get('/settings', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        renderDashboard(res, 'Account Settings', 'settings', decoded.username)
+    } catch (err) {
+        res.redirect('/hj9h');
+    }
+});
+
+/* Update User Details */
+router.post('/settings', async function(req, res, next){
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        var username = decoded.username;
+        var fname = req.body.candidatefname;
+        var lname = req.body.candidatelname;
+        var email = req.body.candidateemail;
+        var password = req.body.candidatepassword;
+
+        var update_query;
+        var query;
+
+        //Verify Password - backend
+        //Invalid or unchanged Password
+        if (password === "unchanged" || !validatePassword(password)) {
+            update_query = `UPDATE Candidate
+                            inner join Candidate_Category
+                            on Candidate.CandidateId = Candidate_Category.CandidateId
+                            inner join Candidate_Credentials
+                            on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                            SET fName = ?, 
+                            lName = ?, 
+                            Email = ?
+                            WHERE Candidate_Credentials.Username = ?`;
+            query = mysql.format(update_query, [fname, lname, email, username]);
+        }
+        //Valid Password
+        else {
+            const hashedPassword = await argon2.hash(String(password));
+            update_query = `UPDATE Candidate
+                                inner join Candidate_Category
+                                on Candidate.CandidateId = Candidate_Category.CandidateId
+                                inner join Candidate_Credentials
+                                on Candidate.CandidateId = Candidate_Credentials.CandidateId
+                                SET fName = ?,
+                                lName = ?,
+                                Email = ?,
+                                Password = ?
+                                WHERE Candidate_Credentials.Username = ?`;;
+            query = mysql.format(update_query, [fname, lname, email, hashedPassword, username]);
+        }
+
+        database.getConnection( async (err, connection) => {
+            if (err) console.log(err)
+            connection.query(query, async (err, result) => {
+                connection.release();
+                if (err)
+                    throw (err);
+                console.log ("Edited Candidate Details");
+                res.redirect('/hj9h');
+            })
+        })
+    } catch (err) {
+        res.redirect('/hj9h');
+    }
+});
+
 /* Log Out */
 router.get('/logout', async function(req, res, next){
     const token = req.cookies.token;

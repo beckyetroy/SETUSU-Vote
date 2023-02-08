@@ -1,0 +1,193 @@
+<div class="card">
+    <div class="card-header">
+        <%= data[0].fName %> <%= data[0].lName %>
+    </div>
+    <form action="/hj9h/settings" method="POST">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>First Name:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <input type="text" name="candidatefname" value="<%= data[0].fName %>">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Surname:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <input type="text" name="candidatelname" value="<%= data[0].lName %>">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Email:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <input type="text" name="candidateemail" value="<%= data[0].Email %>">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Election:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <%= data[0].Description %>
+                        <i class="fa fa-question-circle" data-bs-toggle="tooltip"
+                            title="Contact your Administrator to update this" data-bs-placement="right"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Category Running For:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <%= data[0].CategoryName %>
+                        <i class="fa fa-question-circle" data-bs-toggle="tooltip"
+                            title="Contact your Administrator to update this" data-bs-placement="right"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Number of Votes:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <%= data[0].NumVotes %>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <strong>Username:</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" disabled><br>
+                        <small>Usernames are uniquely generated and cannot be changed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form">Reset Password</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="reset-password-form" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reset Password</h5>
+                    </div>
+                    <div class="modal-body">
+                        <input type="password" placeholder="Enter New Password" name="password" id="password"><br>
+                        <label>Confirm Password : </label>
+                        <input type="password" placeholder="Enter Password Again" name="repeatpassword" id="repeatpassword">
+                        <div>
+                            <input type="checkbox" id="showPassword">
+                            <label for="showPassword">Show Password</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancel-password" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="save-password">Confirm</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" value="edit">Save Changes</button>
+        </form>
+        <script>
+            $(document).ready(function(){
+                const passwordInput = document.querySelector('input[name="password"]');
+                const repeatPasswordInput = document.querySelector('input[name="repeatpassword"]');
+                const saveButton = document.getElementById('save-password');
+                const cancelButton = document.getElementById('cancel-password');
+                const showPasswordCheckbox = document.querySelector('input[type="checkbox"]#showPassword');
+                var passwordUpdated = document.getElementById('candidatepassword');
+
+                function validatePassword(password) {
+                    var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                    return pattern.test(password);
+                }
+
+                saveButton.addEventListener('click', function() {
+                    //Not all fields entered
+                    if (passwordInput.value === "" || repeatPasswordInput.value ===""
+                        || !passwordInput.value || !repeatPasswordInput.value) {
+                        passwordInput.value = "";
+                        repeatPasswordInput.value = "";
+                    }
+                    //Passwords don't match
+                    else if (passwordInput.value !== repeatPasswordInput.value) {
+                        passwordInput.value = "";
+                        repeatPasswordInput.value = "";
+                    }
+                    //Password is invalid format
+                    else if (!validatePassword(passwordInput.value) || !validatePassword(repeatPasswordInput.value)) {
+                        passwordInput.value = "";
+                        repeatPasswordInput.value = "";
+                    }
+                    else {
+                        passwordUpdated.value = passwordInput.value;
+                        $('#reset-password-form').modal('hide');
+                    }
+                });
+
+                cancelButton.addEventListener('click', function() {
+                    //Reset form values
+                    if (passwordUpdated.value != "unchanged") {
+                        passwordInput.value = passwordUpdated.value;
+                        repeatPasswordInput.value = passwordUpdated.value;
+                    }
+                    else {
+                        passwordInput.value = "";
+                        repeatPasswordInput.value = "";
+                    }
+                });
+
+                showPasswordCheckbox.addEventListener('change', function() {
+                    if (showPasswordCheckbox.checked) {
+                        passwordInput.type = 'text';
+                        repeatPasswordInput.type = 'text';
+                    } else {
+                        passwordInput.type = 'password';
+                        repeatPasswordInput.type = 'password';
+                    }
+                });
+            });
+        </script>
+    </div>
+</div>
