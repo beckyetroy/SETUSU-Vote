@@ -112,6 +112,9 @@
                         <h5 class="modal-title">Reset Password</h5>
                     </div>
                     <div class="modal-body">
+                        <label>Current Password : </label>
+                        <input type="password" placeholder="Enter Current Password" name="currentpassword" id="currentpassword"><br>
+                        <label>New Password : </label>
                         <input type="password" placeholder="Enter New Password" name="password" id="password"><br>
                         <label>Confirm Password : </label>
                         <input type="password" placeholder="Enter Password Again" name="repeatpassword" id="repeatpassword">
@@ -131,6 +134,7 @@
         </form>
         <script>
             $(document).ready(function(){
+                const currentPasswordInput = document.querySelector('input[name="currentpassword"]');
                 const passwordInput = document.querySelector('input[name="password"]');
                 const repeatPasswordInput = document.querySelector('input[name="repeatpassword"]');
                 const saveButton = document.getElementById('save-password');
@@ -145,10 +149,11 @@
 
                 saveButton.addEventListener('click', function() {
                     //Not all fields entered
-                    if (passwordInput.value === "" || repeatPasswordInput.value ===""
-                        || !passwordInput.value || !repeatPasswordInput.value) {
+                    if (passwordInput.value === "" || repeatPasswordInput.value ==="" || currentPasswordInput.value ===""
+                        || !passwordInput.value || !repeatPasswordInput.value || !currentPasswordInput.value) {
                         passwordInput.value = "";
                         repeatPasswordInput.value = "";
+                        currentPasswordInput.value ="";
                     }
                     //Passwords don't match
                     else if (passwordInput.value !== repeatPasswordInput.value) {
@@ -161,18 +166,34 @@
                         repeatPasswordInput.value = "";
                     }
                     else {
-                        passwordUpdated.value = passwordInput.value;
-                        $('#reset-password-form').modal('hide');
+                        $.ajax({
+                            url: '/hj9h/verify-password',
+                            type: 'POST',
+                            data: {
+                                password: currentPasswordInput.value,
+                            },
+                            success: function(data) {
+                                passwordUpdated.value = passwordInput.value;
+                                $('#reset-password-form').modal('hide');
+                            },
+                            error: function(error) {
+                                passwordInput.value = "";
+                                repeatPasswordInput.value = "";
+                                currentPasswordInput.value = "";
+                            },
+                        });
                     }
                 });
 
                 cancelButton.addEventListener('click', function() {
                     //Reset form values
                     if (passwordUpdated.value != "unchanged") {
+                        currentPasswordInput.value = "";
                         passwordInput.value = passwordUpdated.value;
                         repeatPasswordInput.value = passwordUpdated.value;
                     }
                     else {
+                        currentPasswordInput.value = "";
                         passwordInput.value = "";
                         repeatPasswordInput.value = "";
                     }
@@ -182,9 +203,11 @@
                     if (showPasswordCheckbox.checked) {
                         passwordInput.type = 'text';
                         repeatPasswordInput.type = 'text';
+                        currentPasswordInput.type = 'text';
                     } else {
                         passwordInput.type = 'password';
                         repeatPasswordInput.type = 'password';
+                        currentPasswordInput.type = 'password';
                     }
                 });
             });

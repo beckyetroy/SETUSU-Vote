@@ -8,6 +8,11 @@ const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 const blockTime = 15; //15 minutes
 
+function validatePassword(password) {
+    var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return pattern.test(password);
+}
+
 function renderDashboard(res, title, action, username) {
     database.getConnection ( async (err, connection)=> {
         if (err) throw (err)
@@ -154,6 +159,59 @@ router.get('/settings', async function(req, res, next){
     }
 });
 
+/* Verify Password */
+router.post('/verify-password', async function(req, res, next) {
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey);
+        const user = decoded.username;
+        const password = req.body.password;
+        database.getConnection ( async (err, connection)=> {
+            if (err) throw (err);
+    
+            async function checkBlockedUser(user) {
+                if (user.BlockExpiration && user.BlockExpiration > Date.now()) {
+                    return true;
+                }
+                return false;
+            }
+    
+            const sqlSearch = "Select * from Candidate_Credentials where Username = ?";
+            const search_query = mysql.format(sqlSearch,[user]);
+            await connection.query (search_query, async (err, result) => {
+                connection.release();
+                
+                if (err) throw (err);
+                if (result.length == 0 || result.length == 1 && !(result[0].Username)) {
+                    console.log("User does not exist")
+                    return res.status(500).send('Server error');
+                }
+                else {
+                    const blockedUser = await checkBlockedUser(result[0]);
+                    if (blockedUser) {
+                        console.log("User account is currently blocked")
+                        res.render('candidate/candidate_login', { title: 'Login' });
+                        return;
+                    }
+    
+                    const hashedPasswordInDB = result[0].Password;
+                    const saltInDB = result[0].Salt;
+    
+                    if (await argon2.verify(hashedPasswordInDB, password, { salt: saltInDB })) {
+                        if (err) throw err;
+                        return res.status(200).json({ msg: 'Password verified' });
+                    }
+                    else {
+                        return res.status(500).send('Server not verified');
+                    }
+                }
+            })
+        })
+    } catch (err) {
+        res.redirect('/hj9h');
+    }
+});
+
 /* Update User Details */
 router.post('/settings', async function(req, res, next){
     const token = req.cookies.token;
@@ -184,6 +242,7 @@ router.post('/settings', async function(req, res, next){
         }
         //Valid Password
         else {
+            const salt = randomstring.generate(16);
             const hashedPassword = await argon2.hash(String(password));
             update_query = `UPDATE Candidate
                                 inner join Candidate_Category
@@ -193,9 +252,10 @@ router.post('/settings', async function(req, res, next){
                                 SET fName = ?,
                                 lName = ?,
                                 Email = ?,
-                                Password = ?
+                                Password = ?,
+                                Salt = ?
                                 WHERE Candidate_Credentials.Username = ?`;;
-            query = mysql.format(update_query, [fname, lname, email, hashedPassword, username]);
+            query = mysql.format(update_query, [fname, lname, email, hashedPassword, salt, username]);
         }
 
         database.getConnection( async (err, connection) => {

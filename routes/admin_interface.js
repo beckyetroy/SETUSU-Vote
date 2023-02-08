@@ -551,6 +551,7 @@ router.post('/editcandidate/:id', async function(req, res, next){
         }
         //Valid Password
         else {
+            const salt = randomstring.generate(16);
             const hashedPassword = await argon2.hash(String(password));
             update_query = `UPDATE Candidate
                                 inner join Candidate_Category
@@ -562,9 +563,10 @@ router.post('/editcandidate/:id', async function(req, res, next){
                                 Email = ?, 
                                 ElectionId = ?,
                                 CategoryId = ?,
-                                Password = ?
+                                Password = ?,
+                                Salt = ?
                                 WHERE Candidate.CandidateId = ?`;
-            query = mysql.format(update_query, [fname, lname, email, election, category, hashedPassword, id]);
+            query = mysql.format(update_query, [fname, lname, email, election, category, hashedPassword, salt, id]);
         }
 
         database.getConnection( async (err, connection) => {
