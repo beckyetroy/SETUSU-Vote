@@ -49,7 +49,7 @@ function renderDashboard(res, title, action, username) {
 router.get('/', function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey2);
         if (decoded) {
             renderDashboard(res, 'Candidate Dashboard', 'main', decoded.username);
         }
@@ -122,7 +122,7 @@ router.post('/', async function(req, res, next) {
                     const update_query = mysql.format(updateSalt, [salt, user]);
                     await connection.query(update_query, async (err, result) => {
                         if (err) throw err;
-                        const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '30m' });
+                        const token = jwt.sign({username: user}, process.env.secretKey2, { expiresIn: '30m' });
                         res.cookie('token', token);
                         renderDashboard(res, 'Candidate Dashboard', 'main', user);
                     });
@@ -152,7 +152,7 @@ router.post('/', async function(req, res, next) {
 router.get('/settings', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey2);
         renderDashboard(res, 'Account Settings', 'settings', decoded.username)
     } catch (err) {
         res.redirect('/hj9h');
@@ -163,7 +163,7 @@ router.get('/settings', async function(req, res, next){
 router.post('/verify-password', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey2);
         const user = decoded.username;
         const password = req.body.password;
         database.getConnection ( async (err, connection)=> {
@@ -216,7 +216,7 @@ router.post('/verify-password', async function(req, res, next) {
 router.post('/settings', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey2);
         var username = decoded.username;
         var fname = req.body.candidatefname;
         var lname = req.body.candidatelname;
@@ -277,7 +277,7 @@ router.post('/settings', async function(req, res, next){
 router.get('/logout', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey2);
         res.clearCookie('token');
         database.getConnection( async (err, connection) => {
             const updateLogIn = "UPDATE Candidate_Credentials SET LoginAttempts = 0 WHERE Username = ?";
