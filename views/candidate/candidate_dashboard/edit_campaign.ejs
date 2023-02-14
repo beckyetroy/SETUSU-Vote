@@ -1,8 +1,15 @@
-<form action="/hj9h/campaign" method="POST" id="editCampaignForm">
+<form action="/hj9h/campaign" method="POST" enctype="multipart/form-data" id="editCampaignForm">
     <div class= "header-image">
         <h2 class="campaign-header"><%= data[0].fName %> <%= data[0].lName %>:</h2>
         <input type="text" name="candidateslogan" id ="candidateslogan" value="<%= data[0].Slogan %>">
     </div>
+
+    <%
+        if (data[0].Picture_Path) {
+    %>
+        <img src="<%= data[0].Picture_Path %>" alt="Main Campaign Image" class = "campaign-thumbnail">    <% } %>
+
+    <input type="file" name="picture">
 
     <h4>Overview</h4>
     <br>
@@ -52,7 +59,6 @@
             }
         %>
     </ul>
-</div>
                 <label>Agenda: </label>
                 <input type="text" placeholder="Short Description" name="newagenda" id="newagenda">
                 <input type="button" value="Add" class="addNewAgenda"></button>
@@ -65,70 +71,69 @@
 
     <script>
         const updatedAgendaList = document.querySelector('.updatedAgendaList');
-                    const addNewBtn = document.querySelector(".addNewAgenda");
-                    const newAgenda = document.querySelector('#newagenda');
-                    const buttons = document.getElementsByTagName("button");
-                    for (let i = 0; i < buttons.length; i++) {
-                        if (buttons[i].textContent === "Remove") {
-                            buttons[i].addEventListener("click", e => deleteAgenda(e));
-                        }
-                    }
-                    let updatedAgendas = [];
+        const addNewBtn = document.querySelector(".addNewAgenda");
+        const newAgenda = document.querySelector('#newagenda');
+        const buttons = document.getElementsByTagName("button");
+        for (let i = 0; i < buttons.length; i++) {
+            if (buttons[i].textContent === "Remove") {
+                buttons[i].addEventListener("click", e => deleteAgenda(e));
+            }
+        }
+        let updatedAgendas = [];
 
-                    function deleteAgenda(e) {
-                    const parent = e.target.parentNode;
-                    parent.remove();
-                    }
+        function deleteAgenda(e) {
+        const parent = e.target.parentNode;
+        parent.remove();
+        }
 
-                    function addAgenda() {
-                        const name = newAgenda.value;
+        function addAgenda() {
+            const name = newAgenda.value;
 
-                        if(name.length === 0) return;
+            if(name.length === 0) return;
 
-                        const li = document.createElement('li');
+            const li = document.createElement('li');
 
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = 'Remove';
-                        btn.addEventListener("click", (e) => deleteAgenda(e));
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'Remove';
+            btn.addEventListener("click", (e) => deleteAgenda(e));
 
-                        const nameLabel = document.createElement('label');
-                        nameLabel.textContent = "Agenda";
-                        const nameField = document.createElement('input');
-                        nameField.setAttribute("type","text");
-                        nameField.setAttribute("value", name);
-                        nameField.setAttribute("name","addedagenda");
-                        nameField.setAttribute("id","addedagenda");
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = "Agenda";
+            const nameField = document.createElement('input');
+            nameField.setAttribute("type","text");
+            nameField.setAttribute("value", name);
+            nameField.setAttribute("name","addedagenda");
+            nameField.setAttribute("id","addedagenda");
 
-                        updatedAgendaList.append(li);
-                        li.appendChild(nameLabel);
-                        li.appendChild(nameField);
-                        li.appendChild(btn);
+            updatedAgendaList.append(li);
+            li.appendChild(nameLabel);
+            li.appendChild(nameField);
+            li.appendChild(btn);
 
-                        newagenda.value = "";
-                    }
+            newagenda.value = "";
+        }
 
-                    addNewBtn.addEventListener("click", addAgenda);
+        addNewBtn.addEventListener("click", addAgenda);
 
-                    const updateForm = document.getElementById("editCampaignForm");
+        const updateForm = document.getElementById("editCampaignForm");
 
-                    updateForm.addEventListener("submit", function(e) {
-                        e.preventDefault();
-                        const agendaInputs = document.querySelectorAll('input[name="addedagenda"]');
+        updateForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const agendaInputs = document.querySelectorAll('input[name="addedagenda"]');
 
-                        agendaInputs.forEach((input, index) => {
-                            const name = input.value;
-                            updatedAgendas.push(name);
-                        });
+            agendaInputs.forEach((input, index) => {
+                const name = input.value;
+                updatedAgendas.push(name);
+            });
 
-                        const hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "updatedAgendas";
-                        hiddenInput.value = JSON.stringify(updatedAgendas);
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "updatedAgendas";
+            hiddenInput.value = JSON.stringify(updatedAgendas);
 
-                        updateForm.appendChild(hiddenInput);
-                        updateForm.submit();
-                    });
-                </script>
-
+            updateForm.appendChild(hiddenInput);
+            updateForm.submit();
+        });
+    </script>
 </form>

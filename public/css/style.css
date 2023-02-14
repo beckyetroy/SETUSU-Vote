@@ -116,3 +116,8 @@ form.login {
     display: inline-block;
     width: 45%;
 }
+
+.campaign-thumbnail {
+    max-width: 10%;
+    max-height: 10%;
+}

@@ -6,7 +6,28 @@ const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
+const multer = require('multer');
 const blockTime = 15; //15 minutes
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|mp4)$/)) {
+      return cb(new Error('Only image and video files are allowed'));
+    }
+    cb(null, true);
+  }
+});
 
 function validatePassword(password) {
     var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -20,7 +41,7 @@ function renderDashboard(res, title, action, username) {
             `select Candidate.CandidateId, fName, lName, Email,
                     Instagram, Twitter, Facebook, ContactNo,
                     Category.CategoryId, CategoryName, NumVotes, Slogan, Overview,
-                    Description, Username, Summary
+                    Description, Username, Summary, Picture_Path
                     from Candidate join Candidate_Category
                     on Candidate.CandidateId = Candidate_Category.CandidateId
                     left join Category
@@ -288,7 +309,7 @@ router.get('/campaign', async function(req, res, next){
 });
 
 /* Edit User Campaign */
-router.post('/campaign', async function(req, res, next){
+router.post('/campaign', upload.single('picture'), async function(req, res, next){
     const token = req.cookies.token;
     try {
         const decoded = jwt.verify(token, process.env.secretKey2);
@@ -342,8 +363,25 @@ router.post('/campaign', async function(req, res, next){
                                 connection.release();
                                 if (err)
                                     throw (err);
-                                console.log ("Edited Campaign");
-                                res.redirect('/hj9h');
+                                if (req.file) {
+                                    const picture = req.file;
+                                    const picture_path = picture.path.replace('public', '');
+                                    const candidateid = req.body.candidateid;
+                                    upload_query = `UPDATE Candidate_Category SET picture_path = ?, picture_type = ? WHERE CandidateId = ?`;
+                                    query = mysql.format(upload_query, [picture_path, picture.mimetype, candidateid]);
+                                    connection.query(query, async (err, results) => {
+                                        if (err) {
+                                            console.error(err);
+                                            res.status(500).send('Failed to upload image to DB');
+                                        } else {
+                                            console.log ("Edited Campaign (image uploaded)");
+                                            res.redirect('/hj9h');
+                                        }
+                                    });
+                                } else {
+                                    console.log ("Edited Campaign (no image uploaded)");
+                                    res.redirect('/hj9h');
+                                }
                             })
                         });
                     }
