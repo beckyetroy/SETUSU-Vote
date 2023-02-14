@@ -99,3 +99,30 @@ form.login {
     bottom: 5%;
     border-radius: 50%;
 }
+
+.header-image {
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    background: url(/assets/SETU1.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    padding: 5em;
+}
+
+.campaign-header, #candidateslogan {
+    display: inline-block;
+    width: 45%;
+}
+
+.campaign-thumbnail {
+    max-width: 10%;
+    max-height: 10%;
+}
+
+.campaign-media > img, .campaign-media > video {
+    max-width: 15%;
+    max-height: 15%;
+}

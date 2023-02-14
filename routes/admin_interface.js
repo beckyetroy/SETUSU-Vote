@@ -62,7 +62,7 @@ function validatePassword(password) {
 router.get('/', function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         if (decoded) {
             renderDashboard(res, 'Admin Dashboard', 'list');
         }
@@ -134,7 +134,7 @@ router.post('/', async function(req, res, next) {
                     const update_query = mysql.format(updateSalt, [salt, user]);
                     await connection.query(update_query, async (err, result) => {
                         if (err) throw err;
-                        const token = jwt.sign({username: user}, process.env.secretKey, { expiresIn: '15m' });
+                        const token = jwt.sign({username: user}, process.env.secretKey1, { expiresIn: '15m' });
                         res.cookie('token', token);
                         renderDashboard(res, 'Admin Dashboard', 'list');
                     });
@@ -164,7 +164,7 @@ router.post('/', async function(req, res, next) {
 router.post('/register-election', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         if (decoded) {
             renderDashboard(res, 'Register Election','add');
         }
@@ -177,7 +177,7 @@ router.post('/register-election', async function(req, res, next) {
 router.post('/election-add', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         if (decoded) {
             const description = req.body.electiondescription;
             const date = req.body.electiondate;
@@ -219,7 +219,7 @@ router.post('/election-add', async function(req, res, next) {
 router.get('/view/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
                     CategoryName, CategoryDescription
@@ -247,7 +247,7 @@ router.get('/view/:id', async function(req, res, next){
 router.get('/edit/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
                             from Election left join Category
@@ -273,7 +273,7 @@ router.get('/edit/:id', async function(req, res, next){
 router.post('/edit/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        jwt.verify(token, process.env.secretKey);
+        jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         var description = req.body.electiondescription;
         var date = req.body.electiondate;
@@ -325,7 +325,7 @@ router.post('/edit/:id', async function(req, res, next){
 router.get('/delete/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const remove_query = `delete from Election where Id = ?`;
         const query = mysql.format(remove_query, [id]);
@@ -348,7 +348,7 @@ router.get('/delete/:id', async function(req, res, next){
 router.post('/register-candidate', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         database.getConnection ( async (err, connection)=> {
             if (err) throw (err)
             const sqlSearch =
@@ -379,7 +379,7 @@ router.post('/register-candidate', async function(req, res, next) {
 router.post('/candidate-add', async function(req, res, next) {
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         const fname = req.body.candidatefname;
         const lname = req.body.candidatelname;
         const email = req.body.candidateemail;
@@ -439,7 +439,7 @@ router.post('/candidate-add', async function(req, res, next) {
 router.get('/viewcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
                             CategoryName, NumVotes,
@@ -472,7 +472,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
 router.get('/editcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const cand_query = `SELECT fName, lName, Email, CategoryName, Candidate.CandidateId,
                             Category.CategoryId, Id, Description, Username
@@ -521,7 +521,7 @@ router.get('/editcandidate/:id', async function(req, res, next){
 router.post('/editcandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         var fname = req.body.candidatefname;
         var lname = req.body.candidatelname;
@@ -588,7 +588,7 @@ router.post('/editcandidate/:id', async function(req, res, next){
 router.get('/deletecandidate/:id', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const delete_query = `delete from Candidate where CandidateId = ?`;
         const query = mysql.format(delete_query, [id]);
@@ -611,7 +611,7 @@ router.get('/deletecandidate/:id', async function(req, res, next){
 router.get('/logout', async function(req, res, next){
     const token = req.cookies.token;
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.secretKey1);
         res.clearCookie('token');
         database.getConnection( async (err, connection) => {
             const updateLogIn = "UPDATE Admin_Credentials SET LoginAttempts = 0 WHERE UserName = ?";

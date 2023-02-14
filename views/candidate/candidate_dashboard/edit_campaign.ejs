@@ -1,0 +1,153 @@
+<form action="/hj9h/campaign" method="POST" enctype="multipart/form-data" id="editCampaignForm">
+    <div class= "header-image">
+        <h2 class="campaign-header"><%= data[0].fName %> <%= data[0].lName %>:</h2>
+        <input type="text" name="candidateslogan" id ="candidateslogan" value="<%= data[0].Slogan %>">
+    </div>
+
+    <%
+        if (data[0].Picture_Path) {
+    %>
+        <img src="<%= data[0].Picture_Path %>" alt="Main Campaign Image" class = "campaign-thumbnail">    <% } %>
+
+    <input type="file" id="picture" name="picture">
+
+    <h4>Overview</h4>
+    <br>
+    <input type="textarea" name="candidateoverview" id="candidateoverview" value="<%= data[0].Overview %>">
+    <br>
+
+    <ul>
+        <li>
+            <strong>Contact Number:</strong> <input type="text" name="candidatecontactno" id="candidatecontactno" value="<%= data[0].ContactNo %>">
+        </li>
+        <li>
+            <strong>Email:</strong> <%= data[0].Email %>
+        </li>
+        <li>
+            <i class="fab fa-facebook-square fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidatefacebook" id="candidatefacebook" value="<%= data[0].Facebook %>">
+        </li>
+        <li>
+            <i class="fab fa-twitter-square fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidatetwitter" id="candidatetwitter" value="<%= data[0].Twitter %>">
+        </li>
+        <li>
+            <i class="fab fa-instagram fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidateinstagram" id="candidateinstagram" value="<%= data[0].Instagram %>">
+        </li>
+    </ul>
+
+    <h5>Agendas</h5>
+    <ul class ="updatedAgendaList">
+        <%
+            var agendasFound = false;
+            data.forEach(function(data){
+                if (data.Summary) {
+                    agendasFound = true;
+        %>
+                <li>
+                <label>Agenda: </label>
+                <input type="text" value="<%= data.Summary %>" name="addedagenda" id="addedagenda">
+                <br>
+                <button type="button">Remove</button>
+                </li>
+        <%
+                }
+            });
+            if (!agendasFound)
+            {
+        %>
+                Add Agendas below
+        <%
+            }
+        %>
+    </ul>
+                <label>Agenda: </label>
+                <input type="text" placeholder="Short Description" name="newagenda" id="newagenda">
+                <input type="button" value="Add" class="addNewAgenda"></button>
+                <ul class="agendaList"></ul>
+
+                <input type="hidden" name="candidateid" id="candidateid" value="<%= data[0].CandidateId %>">
+                <input type="hidden" name="categoryid" id="categoryid" value="<%= data[0].CategoryId %>">
+
+    <input type="file" id="media-upload" name="media-upload" multiple>
+
+    <div class="campaign-media">
+        <% if ((data[0].File_Path) && data[0].Type){ %>
+            <% data.forEach(function(media) { %>
+                <% if (media.Type === 'image') { %>
+                    <img src="<%= media.File_Path %>" alt="Campaign Image" class="campaign-image">
+                <% } else if (media.Type === 'video') { %>
+                    <video src="<%= media.File_Path %>" controls class="campaign-video"></video>
+                <% } %>
+            <% }); %>
+        <% } %>
+    </div>
+
+    <button type="submit" value="edit">Save Changes</button>
+
+    <script>
+        const updatedAgendaList = document.querySelector('.updatedAgendaList');
+        const addNewBtn = document.querySelector(".addNewAgenda");
+        const newAgenda = document.querySelector('#newagenda');
+        const buttons = document.getElementsByTagName("button");
+        for (let i = 0; i < buttons.length; i++) {
+            if (buttons[i].textContent === "Remove") {
+                buttons[i].addEventListener("click", e => deleteAgenda(e));
+            }
+        }
+        let updatedAgendas = [];
+
+        function deleteAgenda(e) {
+        const parent = e.target.parentNode;
+        parent.remove();
+        }
+
+        function addAgenda() {
+            const name = newAgenda.value;
+
+            if(name.length === 0) return;
+
+            const li = document.createElement('li');
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'Remove';
+            btn.addEventListener("click", (e) => deleteAgenda(e));
+
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = "Agenda";
+            const nameField = document.createElement('input');
+            nameField.setAttribute("type","text");
+            nameField.setAttribute("value", name);
+            nameField.setAttribute("name","addedagenda");
+            nameField.setAttribute("id","addedagenda");
+
+            updatedAgendaList.append(li);
+            li.appendChild(nameLabel);
+            li.appendChild(nameField);
+            li.appendChild(btn);
+
+            newagenda.value = "";
+        }
+
+        addNewBtn.addEventListener("click", addAgenda);
+
+        const updateForm = document.getElementById("editCampaignForm");
+
+        updateForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const agendaInputs = document.querySelectorAll('input[name="addedagenda"]');
+
+            agendaInputs.forEach((input, index) => {
+                const name = input.value;
+                updatedAgendas.push(name);
+            });
+
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "updatedAgendas";
+            hiddenInput.value = JSON.stringify(updatedAgendas);
+
+            updateForm.appendChild(hiddenInput);
+            updateForm.submit();
+        });
+    </script>
+</form>
