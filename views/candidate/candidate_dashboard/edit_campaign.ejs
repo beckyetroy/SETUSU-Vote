@@ -9,7 +9,7 @@
     %>
         <img src="<%= data[0].Picture_Path %>" alt="Main Campaign Image" class = "campaign-thumbnail">    <% } %>
 
-    <input type="file" name="picture">
+    <input type="file" id="picture" name="picture">
 
     <h4>Overview</h4>
     <br>
@@ -66,6 +66,20 @@
 
                 <input type="hidden" name="candidateid" id="candidateid" value="<%= data[0].CandidateId %>">
                 <input type="hidden" name="categoryid" id="categoryid" value="<%= data[0].CategoryId %>">
+
+    <input type="file" id="media-upload" name="media-upload" multiple>
+
+    <div class="campaign-media">
+        <% if ((data[0].File_Path) && data[0].Type){ %>
+            <% data.forEach(function(media) { %>
+                <% if (media.Type === 'image') { %>
+                    <img src="<%= media.File_Path %>" alt="Campaign Image" class="campaign-image">
+                <% } else if (media.Type === 'video') { %>
+                    <video src="<%= media.File_Path %>" controls class="campaign-video"></video>
+                <% } %>
+            <% }); %>
+        <% } %>
+    </div>
 
     <button type="submit" value="edit">Save Changes</button>
 
