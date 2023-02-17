@@ -2,6 +2,37 @@ var express = require('express');
 var router = express.Router();
 var database = require('../database');
 var mysql = require('mysql');
+const AWS = require('aws-sdk');
+const multer = require('multer');
+const dotenv = require("dotenv");
+const jwt = require('jsonwebtoken');
+
+dotenv.config({ path: '.env' });
+
+// set up multer storage engine
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// set up AWS SDK
+const rekognition = new AWS.Rekognition({
+    accessKeyId: process.env.accessKeyId,
+    secretAccessKey: process.env.secretAccessKey,
+    region: process.env.region});
+
+const detectText = async (imageData) => {
+  const params = {
+    Image: {
+      Bytes: imageData
+    }
+  };
+  const response = await rekognition.detectText(params).promise();
+  const textDetections = response.TextDetections;
+  if (textDetections.length === 0) {
+    return null;
+  }
+  const detectedText = textDetections[0].DetectedText;
+  return detectedText;
+};
 
 function renderPage(res, message) {
     database.getConnection ( async (err, connection)=> {
@@ -17,47 +48,113 @@ function renderPage(res, message) {
 
 /* GET register page. */
 router.get('/', function(req, res, next) {
+    const token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey1, { expiresIn: '30m' });
+    res.cookie('token', token);
     renderPage(res, '');
 });
 
 /* Register voter */
 router.post('/', function(req, res, next) {
-    const studentno = req.body.studentno;
-    const fname = req.body.fname;
-    const lname = req.body.lname;
-    const email = req.body.email;
-    const election = req.body.election;
+    const token = req.cookies.token;
+    if (!token) {
+        // handle error when token is not found
+    }
+    const decoded = jwt.verify(token, process.env.secretKey1);
+    const voterId = decoded.voterId;
+    const voter = req.body;
+    const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey1, { expiresIn: '30m' });
+    res.cookie('token', newToken);
+    renderPage(res, '');
+});
 
-    database.getConnection( async (err, connection) => {
-        if (err) throw (err)
-        const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId) values (?,?,?,?,?)";
-        const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election]);
+/* Upload Card Image */
+router.post('/upload-card', upload.single('image'), async function(req, res, next) {
+    const token = req.cookies.token;
+    const decoded = jwt.verify(token, process.env.secretKey1);
+    const voter = decoded.voter;
+    try {
+        const imageData = req.file.buffer.toString('base64');
+    
+        // set up parameters for the DetectText operation
+        const detectParams = {
+        Image: {
+            Bytes: Buffer.from(imageData, 'base64')
+        }
+        };
+    
+        // detect text in the image
+        const detectTextResponse = await rekognition.detectText(detectParams).promise();
+    
+        //console.log('Text detected:', detectTextResponse);
 
-        var i = 0;
-        const fetch_voters = `SELECT * From Voter
-                                join Election
-                                on Voter.ElectionId = Election.Id
-                                where StudentNo = ? and
-                                Voter.ElectionId = ?`;
-        const check_query = mysql.format(fetch_voters,[studentno, election])
+        const studentno = voter.studentno;
+        const fname = voter.fname;
+        const lname = voter.lname;
+        const email = voter.email;
+        const election = voter.election;
 
-        await connection.query(check_query, async (err, result) => {
-            if (err) throw (err);
+        let fnameFound = false;
+        let lnameFound = false;
+        let studentNoFound = false;
 
-            if (result.length > 0) {
-                renderPage(res, 'You are already registered for this election.');
+        for (const textDetection of detectTextResponse.TextDetections) {
+            const detectedText = textDetection.DetectedText.toLowerCase();
+        
+            if (detectedText.includes(studentno.toLowerCase())) {
+                console.log('Student number detected:', detectedText);
+                studentNoFound = true;
+                next();
             }
+        
+            if (detectedText.includes(fname.toLowerCase())) {
+                console.log('First name detected:', detectedText);
+                fnameFound = true;
+                next();
+            }
+        
+            if (detectedText.includes(lname.toLowerCase())) {
+                console.log('Last name detected:', detectedText);
+                lnameFound = true;
+                next();
+            }
+        }
 
-            else {
-                await connection.query (insert_query, async (err, result)=> {
-                    connection.release();
-                    if (err) throw (err)
-                    console.log ("Registered Voter");
-                    res.redirect("/");
+        if (fnameFound && lnameFound && studentNoFound) {
+            database.getConnection( async (err, connection) => {
+                if (err) throw (err)
+                const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId) values (?,?,?,?,?)";
+                const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election]);
+    
+                var i = 0;
+                const fetch_voters = `SELECT * From Voter
+                                        join Election
+                                        on Voter.ElectionId = Election.Id
+                                        where StudentNo = ? and
+                                        Voter.ElectionId = ?`;
+                const check_query = mysql.format(fetch_voters,[studentno, election])
+    
+                await connection.query(check_query, async (err, result) => {
+                    if (err) throw (err);
+    
+                    if (result.length > 0) {
+                        renderPage(res, 'You are already registered for this election.');
+                    }
+    
+                    else {
+                        await connection.query (insert_query, async (err, result)=> {
+                            connection.release();
+                            if (err) throw (err)
+                            console.log ("Registered Voter");
+                            res.redirect("/");
+                        });
+                    }
                 });
-            }
-        });
-    })
+            })
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        res.status(500).send({ error: 'Server error' });
+    }
 });
 
 module.exports = router;

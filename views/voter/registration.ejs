@@ -28,6 +28,10 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+        <!-- Dropzone -->
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
         <title><%= title %></title>
     </head>
     <body>
@@ -83,6 +87,141 @@
                 %>
             </form>
         </div>
+
+        <div id="my-dropzone" class="dropzone"></div>
+
+        <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+            <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
+            <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
+            <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
+          </div>
+          
+        <button id="open-camera-btn">Open camera</button>
+
+<script>
+  const openCameraBtn = document.getElementById('open-camera-btn');
+  const cameraContainer = document.getElementById('camera-container');
+  const video = document.getElementById('video');
+  const startbutton = document.getElementById('startbutton');
+  const cancelbutton = document.getElementById('cancelbutton');
+  const canvas = document.createElement('canvas');
+  let stream = null;
+
+  openCameraBtn.addEventListener('click', function() {
+    // Show camera container
+    cameraContainer.style.display = 'block';
+
+    // Get user media
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(mediaStream) {
+            stream = mediaStream;
+            video.srcObject = mediaStream;
+            video.play();
+        })
+        .catch(function(err) {
+          console.log("An error occurred: " + err);
+        });
+    }
+  });
+
+  // Take photo
+startbutton.addEventListener('click', function() {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  let data = canvas.toDataURL('image/png');
+  video.pause();
+  stream.getTracks()[0].stop();
+
+  const confirmDialog = document.createElement('div');
+  confirmDialog.innerHTML = `
+    <img src="${data}" alt="Taken photo">
+    <button id="retake">Retake</button>
+    <button id="confirm">Confirm</button>
+  `;
+  document.body.appendChild(confirmDialog);
+  cameraContainer.style.display = 'none';
+
+  const retakeButton = document.getElementById('retake');
+  const confirmButton = document.getElementById('confirm');
+
+  retakeButton.addEventListener('click', function () {
+    document.body.removeChild(confirmDialog);
+    cameraContainer.style.display = 'block';
+    video.play();
+  });
+
+  confirmButton.addEventListener('click', function () {
+    // convert data to Blob object
+  const byteString = atob(data.split(',')[1]);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: 'image/png' });
+
+  // create FormData object and append file
+  const formData = new FormData();
+  formData.append('image', blob, 'image.png');
+
+  fetch('/register/upload-card', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Image uploaded:', data, 'image.png');
+    })
+    .catch(error => {
+      console.error('Error uploading image:', error);
+    });
+    cameraContainer.style.display = 'none';
+    document.body.removeChild(confirmDialog);
+  });
+});
+
+  // Cancel photo
+  cancelbutton.addEventListener('click', function() {
+    video.pause();
+    video.srcObject.getTracks()[0].stop();
+    cameraContainer.style.display = 'none'; // Hide camera container
+    console.log('Video stream stopped');
+  });
+</script>
+
+        <script>
+        // Instantiate Dropzone
+        Dropzone.options.myDropzone = {
+            url: "/register/upload-card",
+            acceptedFiles: "image/*",
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop files here or click to upload",
+            dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+            dictInvalidFileType: "You can't upload files of this type.",
+            dictCancelUpload: "Cancel upload",
+            dictUploadCanceled: "Upload canceled.",
+            dictRemoveFile: "Remove file",
+            dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} files.",
+            maxFiles: 1,
+            init: function() {
+                // Add camera button to file picker dialog
+                var button = document.createElement("button");
+                button.innerHTML = "Take a Photo";
+                button.type = "file"; // Change the type to "file"
+                button.className = "dz-button";
+                this.element.querySelector(".dz-default.dz-message").appendChild(button);
+
+                // When the button is clicked, trigger the file picker dialog with the appropriate attributes
+                button.addEventListener("click", function() {
+                    this.hiddenFileInput.setAttribute("accept", "image/*");
+                    this.hiddenFileInput.setAttribute("capture", "camera");
+                }.bind(this));
+            }
+        };
+
+        </script>
 
         <img class="logoBubble" src="assets/Logo.png" alt="SETUSU Logo">
     </body>
