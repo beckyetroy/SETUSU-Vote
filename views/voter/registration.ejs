@@ -154,31 +154,37 @@ startbutton.addEventListener('click', function() {
 
   confirmButton.addEventListener('click', function () {
     // convert data to Blob object
-  const byteString = atob(data.split(',')[1]);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  const blob = new Blob([ab], { type: 'image/png' });
+    const byteString = atob(data.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: 'image/png' });
 
-  // create FormData object and append file
-  const formData = new FormData();
-  formData.append('image', blob, 'image.png');
+    // create FormData object and append file
+    const formData = new FormData();
+    formData.append('image', blob, 'image.png');
 
-  fetch('/register/upload-card', {
-    method: 'POST',
-    body: formData
-  })
+    fetch('/register/upload-card', {
+      method: 'POST',
+      body: formData
+    })
     .then(response => response.json())
     .then(data => {
-      console.log('Image uploaded:', data, 'image.png');
+      if (data.message === 'Voter registered successfully') {
+        window.location.href = '/';
+      } else {
+        cameraContainer.style.display = 'none';
+        document.body.removeChild(confirmDialog);
+        const errorMessageDiv = document.createElement('div');
+        errorMessageDiv.textContent = 'Error uploading image. Please try again.';
+        document.body.appendChild(errorMessageDiv);
+      }
     })
     .catch(error => {
       console.error('Error uploading image:', error);
     });
-    cameraContainer.style.display = 'none';
-    document.body.removeChild(confirmDialog);
   });
 });
 

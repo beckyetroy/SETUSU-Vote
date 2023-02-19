@@ -57,10 +57,11 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
     const token = req.cookies.token;
     if (!token) {
-        // handle error when token is not found
+        const token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey1, { expiresIn: '30m' });
     }
     const decoded = jwt.verify(token, process.env.secretKey1);
     const voterId = decoded.voterId;
+    //TODO - VERIFICATION
     const voter = req.body;
     const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey1, { expiresIn: '30m' });
     res.cookie('token', newToken);
@@ -84,8 +85,6 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
     
         // detect text in the image
         const detectTextResponse = await rekognition.detectText(detectParams).promise();
-    
-        //console.log('Text detected:', detectTextResponse);
 
         const studentno = voter.studentno;
         const fname = voter.fname;
@@ -99,23 +98,25 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
 
         for (const textDetection of detectTextResponse.TextDetections) {
             const detectedText = textDetection.DetectedText.toLowerCase();
+            const confidence = textDetection.Confidence;
         
-            if (detectedText.includes(studentno.toLowerCase())) {
+            if ((detectedText.includes(studentno.toLowerCase())) && (confidence >= 97)) {
                 console.log('Student number detected:', detectedText);
                 studentNoFound = true;
-                next();
             }
         
-            if (detectedText.includes(fname.toLowerCase())) {
+            if ((detectedText.includes(fname.toLowerCase())) && (confidence >= 97)) {
                 console.log('First name detected:', detectedText);
                 fnameFound = true;
-                next();
             }
         
-            if (detectedText.includes(lname.toLowerCase())) {
+            if ((detectedText.includes(lname.toLowerCase()) && (confidence >= 97))) {
                 console.log('Last name detected:', detectedText);
                 lnameFound = true;
-                next();
+            }
+
+            if (fnameFound && lnameFound && studentNoFound) {
+                break;
             }
         }
 
@@ -137,6 +138,7 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
                     if (err) throw (err);
     
                     if (result.length > 0) {
+                        console.log('here');
                         renderPage(res, 'You are already registered for this election.');
                     }
     
@@ -144,12 +146,15 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
                         await connection.query (insert_query, async (err, result)=> {
                             connection.release();
                             if (err) throw (err)
-                            console.log ("Registered Voter");
-                            res.redirect("/");
+                            console.log("Registered Voter");
+                            res.status(200).json({ message: 'Voter registered successfully' });
                         });
                     }
                 });
-            })
+            });
+        }
+        else {
+            res.status(500).send({ message: 'Photo invalid.' });
         }
     } catch (error) {
         console.error('Error uploading image:', error);
