@@ -91,12 +91,18 @@
         <div id="my-dropzone" class="dropzone"></div>
 
         <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-            <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
-            <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
-            <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
-          </div>
+          <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
+          <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
+          <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
+        </div>
           
         <button id="open-camera-btn">Open camera</button>
+
+        <div id="confirm-dialog" class="hidden">
+          <img id="photo-preview" src="" alt="Taken photo">
+          <button id="retake">Retake</button>
+          <button id="confirm">Confirm</button>
+        </div>
 
 <script>
   const openCameraBtn = document.getElementById('open-camera-btn');
@@ -104,8 +110,13 @@
   const video = document.getElementById('video');
   const startbutton = document.getElementById('startbutton');
   const cancelbutton = document.getElementById('cancelbutton');
+  const confirmDialog = document.getElementById('confirm-dialog');
+  const photoPreview = document.getElementById('photo-preview');
   const canvas = document.createElement('canvas');
   let stream = null;
+  let data = null;
+
+  confirmDialog.classList.add('hidden');
 
   openCameraBtn.addEventListener('click', function() {
     // Show camera container
@@ -126,30 +137,40 @@
   });
 
   // Take photo
-startbutton.addEventListener('click', function() {
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-  let data = canvas.toDataURL('image/png');
-  video.pause();
-  stream.getTracks()[0].stop();
+  startbutton.addEventListener('click', function() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    data = canvas.toDataURL('image/png');
+    video.pause();
+    stream.getTracks()[0].stop();
 
-  const confirmDialog = document.createElement('div');
-  confirmDialog.innerHTML = `
-    <img src="${data}" alt="Taken photo">
-    <button id="retake">Retake</button>
-    <button id="confirm">Confirm</button>
-  `;
-  document.body.appendChild(confirmDialog);
-  cameraContainer.style.display = 'none';
+    photoPreview.src = data;
+    confirmDialog.classList.remove('hidden');
+    cameraContainer.style.display = 'none';
+  });
 
   const retakeButton = document.getElementById('retake');
   const confirmButton = document.getElementById('confirm');
 
   retakeButton.addEventListener('click', function () {
-    document.body.removeChild(confirmDialog);
+    confirmDialog.classList.add('hidden');
+    // Show camera container
     cameraContainer.style.display = 'block';
-    video.play();
+
+    // Get user media
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(mediaStream) {
+            stream = mediaStream;
+            video.srcObject = mediaStream;
+            video.play();
+        })
+        .catch(function(err) {
+          console.log("An error occurred: " + err);
+        });
+    }
+    photoPreview.src = '';
   });
 
   confirmButton.addEventListener('click', function () {
@@ -186,13 +207,12 @@ startbutton.addEventListener('click', function() {
       console.error('Error uploading image:', error);
     });
   });
-});
 
   // Cancel photo
   cancelbutton.addEventListener('click', function() {
     video.pause();
     video.srcObject.getTracks()[0].stop();
-    cameraContainer.style.display = 'none'; // Hide camera container
+    cameraContainer.style.display = 'none';
     console.log('Video stream stopped');
   });
 </script>

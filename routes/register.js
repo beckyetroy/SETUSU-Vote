@@ -57,15 +57,38 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
     const token = req.cookies.token;
     if (!token) {
-        const token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey1, { expiresIn: '30m' });
+        token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey1, { expiresIn: '30m' });
     }
     const decoded = jwt.verify(token, process.env.secretKey1);
     const voterId = decoded.voterId;
+    const studentno = req.body.studentno;
+    const election = req.body.election;
     //TODO - VERIFICATION
-    const voter = req.body;
-    const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey1, { expiresIn: '30m' });
-    res.cookie('token', newToken);
-    renderPage(res, '');
+
+    //Check is user is already registered
+    database.getConnection( async (err, connection) => {
+        if (err) throw (err)
+        const fetch_voters = `SELECT * From Voter
+                                join Election
+                                on Voter.ElectionId = Election.Id
+                                where StudentNo = ? and
+                                Voter.ElectionId = ?`;
+        const check_query = mysql.format(fetch_voters,[studentno, election])
+
+        await connection.query(check_query, async (err, result) => {
+            if (err) throw (err);
+
+            if (result.length > 0) {
+                renderPage(res, 'You are already registered for this election.');
+                return;
+            }
+
+            const voter = req.body;
+            const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey1, { expiresIn: '30m' });
+            res.cookie('token', newToken);
+            renderPage(res, '');
+        });
+    });
 });
 
 /* Upload Card Image */
