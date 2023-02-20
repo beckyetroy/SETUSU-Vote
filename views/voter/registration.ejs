@@ -105,6 +105,10 @@
           <button id="confirm">Confirm</button>
         </div>
 
+        <div id="errorMessageDiv" class="hidden">
+          This image is not valid. Please try again.
+        </div>
+
 <script>
   const openCameraBtn = document.getElementById('open-camera-btn');
   const cameraContainer = document.getElementById('camera-container');
@@ -112,16 +116,19 @@
   const startbutton = document.getElementById('startbutton');
   const cancelbutton = document.getElementById('cancelbutton');
   const confirmDialog = document.getElementById('confirm-dialog');
+  const errorMessageDiv = document.getElementById('errorMessageDiv');
   const photoPreview = document.getElementById('photo-preview');
   const canvas = document.createElement('canvas');
   let stream = null;
   let data = null;
 
   confirmDialog.classList.add('hidden');
+  errorMessageDiv.classList.add('hidden');
 
   openCameraBtn.addEventListener('click', function() {
     // Show camera container
     cameraContainer.style.display = 'block';
+    errorMessageDiv.classList.add('hidden');
 
     // Get user media
     if (navigator.mediaDevices.getUserMedia) {
@@ -198,10 +205,8 @@
         window.location.href = '/';
       } else {
         cameraContainer.style.display = 'none';
-        document.body.removeChild(confirmDialog);
-        const errorMessageDiv = document.createElement('div');
-        errorMessageDiv.textContent = 'Error uploading image. Please try again.';
-        document.body.appendChild(errorMessageDiv);
+        confirmDialog.classList.add('hidden');
+        errorMessageDiv.classList.remove('hidden');
       }
     })
     .catch(error => {
@@ -247,9 +252,7 @@
 
       // Handle upload errors
       this.on("error", function(file, response) {
-        const errorMessageDiv = document.createElement('div');
-        errorMessageDiv.textContent = response.message;
-        document.body.appendChild(errorMessageDiv);
+        errorMessageDiv.classList.remove('hidden');
         this.removeFile(file);
       });
 
@@ -272,9 +275,7 @@
 
       // Handle upload errors
       this.on("error", function(file, response) {
-          const errorMessageDiv = document.createElement('div');
-          errorMessageDiv.textContent = response.message;
-          document.body.appendChild(errorMessageDiv);
+          errorMessageDiv.classList.remove('hidden');
           this.removeFile(file);
       });
     }

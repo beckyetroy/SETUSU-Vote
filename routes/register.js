@@ -98,6 +98,7 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
     const voter = decoded.voter;
     try {
         const imageData = req.file.buffer.toString('base64');
+        const mimeType = req.file.mimetype;
     
         // set up parameters for the DetectText operation
         const detectParams = {
@@ -108,6 +109,8 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
     
         // detect text in the image
         const detectTextResponse = await rekognition.detectText(detectParams).promise();
+        // Detect faces in the image
+        const detectFacesResponse = await rekognition.detectFaces(detectParams).promise();
 
         const studentno = voter.studentno;
         const fname = voter.fname;
@@ -118,6 +121,7 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
         let fnameFound = false;
         let lnameFound = false;
         let studentNoFound = false;
+        let faceDetected = false;
 
         for (const textDetection of detectTextResponse.TextDetections) {
             const detectedText = textDetection.DetectedText.toLowerCase();
@@ -143,11 +147,22 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
             }
         }
 
-        if (fnameFound && lnameFound && studentNoFound) {
+        if (detectFacesResponse.FaceDetails.length > 0) {
+            const faceDetail = detectFacesResponse.FaceDetails[0];
+            const confidence = faceDetail.Confidence;
+          
+            if (confidence >= 97) {
+              faceDetected = true;
+            } else {
+              faceDetected = false;
+            }
+        }
+
+        if (fnameFound && lnameFound && studentNoFound && faceDetected) {
             database.getConnection( async (err, connection) => {
                 if (err) throw (err)
-                const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId) values (?,?,?,?,?)";
-                const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election]);
+                const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId, CardImg, CardImgMimeType) values (?,?,?,?,?,?,?)";
+                const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election, imageData, mimeType]);
     
                 var i = 0;
                 const fetch_voters = `SELECT * From Voter
