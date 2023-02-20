@@ -89,6 +89,7 @@
         </div>
 
         <div id="my-dropzone" class="dropzone"></div>
+        <button id="confirmBtn" disabled>Confirm</button>
 
         <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
           <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
@@ -215,39 +216,70 @@
     cameraContainer.style.display = 'none';
     console.log('Video stream stopped');
   });
-</script>
 
-        <script>
-        // Instantiate Dropzone
-        Dropzone.options.myDropzone = {
-            url: "/register/upload-card",
-            acceptedFiles: "image/*",
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop files here or click to upload",
-            dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
-            dictInvalidFileType: "You can't upload files of this type.",
-            dictCancelUpload: "Cancel upload",
-            dictUploadCanceled: "Upload canceled.",
-            dictRemoveFile: "Remove file",
-            dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} files.",
-            maxFiles: 1,
-            init: function() {
-                // Add camera button to file picker dialog
-                var button = document.createElement("button");
-                button.innerHTML = "Take a Photo";
-                button.type = "file"; // Change the type to "file"
-                button.className = "dz-button";
-                this.element.querySelector(".dz-default.dz-message").appendChild(button);
+  // Instantiate Dropzone
+  Dropzone.options.myDropzone = {
+    url: "/register/upload-card",
+    paramName: "image",
+    acceptedFiles: "image/*",
+    addRemoveLinks: true,
+    dictDefaultMessage: "Drop files here or click to upload",
+    dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+    dictInvalidFileType: "You can't upload files of this type.",
+    dictCancelUpload: "Cancel upload",
+    dictUploadCanceled: "Upload canceled.",
+    dictRemoveFile: "Remove file",
+    dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} file.",
+    maxFiles: 1,
+    autoProcessQueue: false, // Prevent automatic uploading of the image
+    init: function() {
+      var confirmBtn = document.getElementById("confirmBtn");
+      var dz = this;
 
-                // When the button is clicked, trigger the file picker dialog with the appropriate attributes
-                button.addEventListener("click", function() {
-                    this.hiddenFileInput.setAttribute("accept", "image/*");
-                    this.hiddenFileInput.setAttribute("capture", "camera");
-                }.bind(this));
+      // Display thumbnail of the selected image
+      this.on("thumbnail", function(file, dataUrl) {
+        confirmBtn.disabled = false;
+        var previewElement = file.previewElement;
+        previewElement.classList.remove("dz-file-preview");
+        var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+        previewImage.src = dataUrl;
+      });
+
+      // Handle upload errors
+      this.on("error", function(file, response) {
+        const errorMessageDiv = document.createElement('div');
+        errorMessageDiv.textContent = response.message;
+        document.body.appendChild(errorMessageDiv);
+        this.removeFile(file);
+      });
+
+      // Handle confirm button click
+      confirmBtn.addEventListener("click", function() {
+        // Process the queue of files
+        dz.processQueue();
+
+        // Handle the success event when the queue has been processed
+        dz.on("success", function(file, response) {
+            if (response.message === 'Voter registered successfully') {
+                window.location.href = '/';
             }
-        };
+        });
 
-        </script>
+        // Disable the button after sending the image
+        confirmBtn.disabled = true;
+      });
+
+
+      // Handle upload errors
+      this.on("error", function(file, response) {
+          const errorMessageDiv = document.createElement('div');
+          errorMessageDiv.textContent = response.message;
+          document.body.appendChild(errorMessageDiv);
+          this.removeFile(file);
+      });
+    }
+  };
+</script>
 
         <img class="logoBubble" src="assets/Logo.png" alt="SETUSU Logo">
     </body>
