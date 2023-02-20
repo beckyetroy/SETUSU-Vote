@@ -53,7 +53,7 @@ router.get('/', function(req, res, next) {
     renderPage(res, '');
 });
 
-/* Register voter */
+/* Save basic form details */
 router.post('/', function(req, res, next) {
     const token = req.cookies.token;
     if (!token) {
@@ -86,12 +86,12 @@ router.post('/', function(req, res, next) {
             const voter = req.body;
             const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey1, { expiresIn: '30m' });
             res.cookie('token', newToken);
-            renderPage(res, '');
+            res.status(200).json({ message: 'Basic form saved' });
         });
     });
 });
 
-/* Upload Card Image */
+/* Register Voter and Upload Card Image */
 router.post('/upload-card', upload.single('image'), async function(req, res, next) {
     const token = req.cookies.token;
     const decoded = jwt.verify(token, process.env.secretKey1);

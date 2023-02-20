@@ -43,7 +43,7 @@
                 </div>
             </div>
         </nav>
-        <div class="container register">
+        <div class="container-basic-registration">
             <form action="/register" method="POST" class="register">
                 <h3 class="formTitle">Register to Vote</h3>
                 <%= message %>
@@ -75,7 +75,7 @@
                     <label>Student Email : </label>
                     <input type="text" placeholder="Enter Email" name="email" required>
                     <br>
-                    <button type="submit" value="register" class="primaryBtn">REGISTER</button>
+                    <button type="submit" value="register" class="primaryBtn" id="next-button">NEXT</button>
                     <%
                 }
                 else
@@ -88,28 +88,63 @@
             </form>
         </div>
 
-        <div id="my-dropzone" class="dropzone"></div>
-        <button id="confirmBtn" disabled>Confirm</button>
+        <div class="container-image-registration">
+          <div class="image-upload">
+            <div id="my-dropzone" class="dropzone"></div>
+            <button id="confirmBtn" disabled>Confirm</button>
+          </div>
 
-        <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-          <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
-          <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
-          <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
-        </div>
-          
-        <button id="open-camera-btn">Open camera</button>
+          <div class="camera">
+            <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+              <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
+              <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
+              <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
+            </div>
+              
+            <button id="open-camera-btn">Open camera</button>
 
-        <div id="confirm-dialog" class="hidden">
-          <img id="photo-preview" src="" alt="Taken photo">
-          <button id="retake">Retake</button>
-          <button id="confirm">Confirm</button>
-        </div>
+            <div id="confirm-dialog" class="hidden">
+              <img id="photo-preview" src="" alt="Taken photo">
+              <button id="retake">Retake</button>
+              <button id="confirm">Confirm</button>
+            </div>
+          </div>
 
-        <div id="errorMessageDiv" class="hidden">
-          This image is not valid. Please try again.
-        </div>
+          <div id="errorMessageDiv" class="hidden">
+            This image is not valid. Please try again.
+          </div>
+      </div>
 
 <script>
+  const nextButton = document.getElementById('next-button');
+  const basicRegistration = document.querySelector('.container-basic-registration');
+  const imageRegistration = document.querySelector('.container-image-registration');
+  const basicForm = document.querySelector('.register');
+
+  basicForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+  });
+
+  nextButton.addEventListener('click', () => {
+    fetch('/register', {
+      method: 'POST',
+      body: new FormData(basicForm)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message === 'Basic form saved') {
+        basicRegistration.classList.add('slide-out');
+        setTimeout(() => {
+          basicRegistration.remove();
+          imageRegistration.classList.add('fade-in');
+        }, 1000);
+      }
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  });
+
   const openCameraBtn = document.getElementById('open-camera-btn');
   const cameraContainer = document.getElementById('camera-container');
   const video = document.getElementById('video');
