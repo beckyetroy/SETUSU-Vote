@@ -46,7 +46,7 @@
         <div class="container-basic-registration">
             <form action="/register" method="POST" class="register">
                 <h3 class="formTitle">Register to Vote</h3>
-                <%= message %>
+                <div class="basic-form-error" id="basic-form-error"></div>
                 <%
                 if(data.length > 0)
                 {
@@ -135,15 +135,22 @@
   const instructions = document.querySelector('.container-instructions');
   const imageRegistration = document.querySelector('.container-image-registration');
   const basicForm = document.querySelector('.register');
+  const basicFormError = document.getElementById('basic-form-error');
 
   basicForm.addEventListener('submit', function(event) {
     event.preventDefault();
   });
 
   nextButton.addEventListener('click', () => {
+    const formData = new FormData(basicForm);
+    const body = new URLSearchParams(formData).toString();
+
     fetch('/register', {
       method: 'POST',
-      body: new FormData(basicForm)
+      body: body,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
     .then(response => response.json())
     .then(data => {
@@ -151,8 +158,12 @@
         basicRegistration.classList.add('slide-out');
         setTimeout(() => {
           basicRegistration.remove();
+          basicFormError.textContent = '';
           instructions.classList.add('fade-in');
         }, 1000);
+      }
+      else if (data.message === 'You are already registered for this election.') {
+        basicFormError.textContent = 'You are already registered for this election.';
       }
     })
     .catch(error => {

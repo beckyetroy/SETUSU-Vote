@@ -79,7 +79,7 @@ router.post('/', function(req, res, next) {
             if (err) throw (err);
 
             if (result.length > 0) {
-                renderPage(res, 'You are already registered for this election.');
+                res.status(400).json({ message: 'You are already registered for this election.' });
                 return;
             }
 
