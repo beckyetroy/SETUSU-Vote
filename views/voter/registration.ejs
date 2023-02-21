@@ -88,6 +88,14 @@
             </form>
         </div>
 
+        <div class="container-instructions">
+          <h3> Upload An Image of your Student Card to Complete Registration</h3>
+          <p> The image must clearly show your name, student number, and photo ID as below:</p>
+          <img src="assets/Sample_Card.jpg" alt="Sample Student Card Image" id="cardSample">
+          <br><small><strong>NOTE:</strong> You will only get to upload your card once, so make sure it is clear!</small>
+          <button class="primaryBtn" id="next-button-2">NEXT</button>
+        </div>
+
         <div class="container-image-registration">
           <div class="image-upload">
             <div id="my-dropzone" class="dropzone"></div>
@@ -96,18 +104,23 @@
 
           <div class="camera">
             <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-              <video id="video" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" autoplay></video>
-              <button id="startbutton" style="position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);">Take photo</button>
-              <button id="cancelbutton" style="position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);">Cancel</button>
+              <video id="video" autoplay></video>
+              <button id="startbutton">Take photo</button>
+              <button id="cancelbutton">Cancel</button>
             </div>
-              
-            <button id="open-camera-btn">Open camera</button>
 
             <div id="confirm-dialog" class="hidden">
               <img id="photo-preview" src="" alt="Taken photo">
               <button id="retake">Retake</button>
               <button id="confirm">Confirm</button>
             </div>
+              
+            <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
+          </div>
+
+          <div class="slider-controls" id="slider-controls">
+            <button class="switch-to-image-upload">Image Upload</button>
+            <button class="switch-to-camera">Camera</button>
           </div>
 
           <div id="errorMessageDiv" class="hidden">
@@ -117,7 +130,9 @@
 
 <script>
   const nextButton = document.getElementById('next-button');
+  const nextButton2 = document.getElementById('next-button-2');
   const basicRegistration = document.querySelector('.container-basic-registration');
+  const instructions = document.querySelector('.container-instructions');
   const imageRegistration = document.querySelector('.container-image-registration');
   const basicForm = document.querySelector('.register');
 
@@ -136,7 +151,7 @@
         basicRegistration.classList.add('slide-out');
         setTimeout(() => {
           basicRegistration.remove();
-          imageRegistration.classList.add('fade-in');
+          instructions.classList.add('fade-in');
         }, 1000);
       }
     })
@@ -144,6 +159,43 @@
       console.error(error);
     });
   });
+
+  nextButton2.addEventListener('click', () => {
+    instructions.classList.add('slide-out');
+      setTimeout(() => {
+        instructions.remove();
+        imageRegistration.classList.add('fade-in');
+        camera.style.display = 'none';
+      }, 1000);
+  });
+
+  const switchToImageUploadBtn = document.querySelector('.switch-to-image-upload');
+  const switchToCameraBtn = document.querySelector('.switch-to-camera');
+  const imageUpload = document.querySelector('.image-upload');
+  const camera = document.querySelector('.camera');
+
+  switchToImageUploadBtn.addEventListener('click', () => {
+    camera.style.transform = 'translateX(100%)';
+
+  // Wait for the transition to complete before hiding the camera div
+  camera.addEventListener('transitionend', () => {
+    imageUpload.style.display = 'block';
+    imageUpload.style.transform = 'translateX(0)';
+    camera.style.display = 'none';
+  });
+});
+
+switchToCameraBtn.addEventListener('click', () => {
+  imageUpload.style.transform = 'translateX(-100%)';
+
+  // Wait for the transition to complete before hiding the imageUpload div
+  imageUpload.addEventListener('transitionend', () => {
+    camera.style.display = 'block';
+    camera.style.transform = 'translateX(0)';
+    imageUpload.style.display = 'none';
+  });
+});
+
 
   const openCameraBtn = document.getElementById('open-camera-btn');
   const cameraContainer = document.getElementById('camera-container');
@@ -153,6 +205,7 @@
   const confirmDialog = document.getElementById('confirm-dialog');
   const errorMessageDiv = document.getElementById('errorMessageDiv');
   const photoPreview = document.getElementById('photo-preview');
+  const sliderControls = document.getElementById('slider-controls');
   const canvas = document.createElement('canvas');
   let stream = null;
   let data = null;
@@ -161,9 +214,12 @@
   errorMessageDiv.classList.add('hidden');
 
   openCameraBtn.addEventListener('click', function() {
-    // Show camera container
+    // Show camera container and hide other fields
     cameraContainer.style.display = 'block';
     errorMessageDiv.classList.add('hidden');
+    sliderControls.classList.add('hidden');
+    imageRegistration.classList.add('camera-show');
+    openCameraBtn.classList.add('hidden');
 
     // Get user media
     if (navigator.mediaDevices.getUserMedia) {
@@ -239,9 +295,12 @@
       if (data.message === 'Voter registered successfully') {
         window.location.href = '/';
       } else {
+        imageRegistration.classList.remove('camera-show');
         cameraContainer.style.display = 'none';
         confirmDialog.classList.add('hidden');
         errorMessageDiv.classList.remove('hidden');
+        sliderControls.classList.remove('hidden');
+        openCameraBtn.classList.remove('hidden');
       }
     })
     .catch(error => {
@@ -251,6 +310,9 @@
 
   // Cancel photo
   cancelbutton.addEventListener('click', function() {
+    sliderControls.classList.remove('hidden');
+    openCameraBtn.classList.remove('hidden');
+    imageRegistration.classList.remove('camera-show');
     video.pause();
     video.srcObject.getTracks()[0].stop();
     cameraContainer.style.display = 'none';

@@ -127,14 +127,14 @@ form.login {
     max-height: 15%;
 }
 
-.camera-container {
+.camera-container, .camera {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
-    z-index: 1;
+    top: 0;
   }
   
   .video-container {
@@ -166,25 +166,45 @@ form.login {
   
   #startbutton,
   #cancelbutton {
-    margin: 0 10px;
-    padding: 10px;
+    position: absolute;
+    margin: 0 5%;
+    padding: 0.8em;
     background-color: white;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 1em;
     cursor: pointer;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #startbutton {
+    bottom: 12%
+  }
+
+  #cancelbutton {
+    bottom: 2%;
   }
 
 .hidden {
     display: none;
 }
 
-.container-image-registration {
+.container-image-registration, .container-instructions {
     opacity: 0;
     transition: opacity 2s ease-in-out;
+    padding: 1em;
+    text-align: center;
+    display:none;
 }
 
-.container-basic-registration.slide-out {
+.camera-show {
+    width: 100%;
+    height: 90vh;
+    align-items: center;
+}
+
+.container-basic-registration.slide-out, .container-instructions.slide-out {
     animation: slide-out 1s forwards;
 }
 
@@ -197,7 +217,66 @@ form.login {
     }
 }
 
-.container-image-registration.fade-in {
+.container-image-registration.fade-in, .container-instructions.fade-in {
     opacity: 1;
     transition-delay: -1s;
+    display:block !important;
+}
+
+#cardSample {
+    max-width: 50%;
+}
+
+.image-upload {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .camera {
+    transform: translateX(100%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  
+  .slider-controls {
+    justify-content: center;
+    margin-top: 5%;
+    position: relative;
+  }
+  
+  .slider-controls button {
+    margin: 0 1%;
+    padding: 1%;
+  }
+  
+  .switch-to-image-upload {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .switch-to-camera {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .cameraBtn {
+    background-color: #4363B1;
+    color: white;
+    font-family: 'Inter';
+    padding: 1em;
+    font-size: 1.2em;
+    border: none;
+    margin-top: 4.5%;
+    margin-bottom: 4.5%;
+}
+
+.image-upload,
+.camera {
+  transition: transform 0.3s ease-in-out;
 }
