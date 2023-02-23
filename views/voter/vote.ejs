@@ -64,6 +64,26 @@
                     <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
             </form>
         </div>
+
+        <div class="container-advanced-authentication" id="container-advanced-authentication">
+            <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+            <video id="video" autoplay></video>
+            <button id="startbutton">Take photo</button>
+            <button id="cancelbutton">Cancel</button>
+            </div>
+
+            <div id="confirm-dialog" class="hidden">
+            <img id="photo-preview" src="" alt="Taken photo">
+            <button id="retake">Retake</button>
+            <button id="confirm">Confirm</button>
+            </div>
+
+            <div id="errorMessageDiv" class="hidden">
+                This image is not valid. Please try again.
+            </div>
+
+            <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
+        </div>
         <%
             }
             else
@@ -84,7 +104,10 @@
         const authenticateBasicContainer = document.getElementById('container-basic-authentication');
         const basicForm = document.querySelector('.authenticate');
         const basicFormError = document.getElementById('basic-form-error');
+        const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
         const id = '<%= data[0].Id %>';
+
+        authenticateAdvancedContainer.classList.add('hidden');
 
         basicForm.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -107,6 +130,8 @@
                     setTimeout(() => {
                         basicFormError.textContent = '';
                         authenticateBasicContainer.remove();
+                        authenticateAdvancedContainer.classList.remove('hidden');
+                        authenticateAdvancedContainer.classList.add('fade-in');
                     }, 1000);
                 }
                 else if (data.message === 'Invalid details.') {
@@ -116,6 +141,124 @@
             .catch(error => {
                 console.error(error);
             });
+        });
+
+        const openCameraBtn = document.getElementById('open-camera-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const video = document.getElementById('video');
+        const startbutton = document.getElementById('startbutton');
+        const cancelbutton = document.getElementById('cancelbutton');
+        const confirmDialog = document.getElementById('confirm-dialog');
+        const errorMessageDiv = document.getElementById('errorMessageDiv');
+        const photoPreview = document.getElementById('photo-preview');
+        const canvas = document.createElement('canvas');
+        let stream = null;
+        let data = null;
+
+        confirmDialog.classList.add('hidden');
+        errorMessageDiv.classList.add('hidden');
+
+        openCameraBtn.addEventListener('click', function() {
+            // Show camera container and hide other fields
+            cameraContainer.style.display = 'block';
+            errorMessageDiv.classList.add('hidden');
+            authenticateAdvancedContainer.classList.add('camera-show');
+            openCameraBtn.classList.add('hidden');
+
+            // Get user media
+            if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = mediaStream;
+                    video.play();
+                })
+                .catch(function(err) {
+                console.log("An error occurred: " + err);
+                });
+            }
+        });
+
+        // Take photo
+        startbutton.addEventListener('click', function() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            data = canvas.toDataURL('image/png');
+            video.pause();
+            stream.getTracks()[0].stop();
+
+            photoPreview.src = data;
+            confirmDialog.classList.remove('hidden');
+            cameraContainer.style.display = 'none';
+        });
+
+        const retakeButton = document.getElementById('retake');
+        const confirmButton = document.getElementById('confirm');
+
+        retakeButton.addEventListener('click', function () {
+            confirmDialog.classList.add('hidden');
+            // Show camera container
+            cameraContainer.style.display = 'block';
+
+            // Get user media
+            if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = mediaStream;
+                    video.play();
+                })
+                .catch(function(err) {
+                console.log("An error occurred: " + err);
+                });
+            }
+            photoPreview.src = '';
+        });
+
+        confirmButton.addEventListener('click', function () {
+            // convert data to Blob object
+            const byteString = atob(data.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: 'image/png' });
+
+            // create FormData object and append file
+            const imageFormData = new FormData();
+            imageFormData.append('image', blob, 'image.png');
+
+            fetch(`/vote/${id}/authenticate`, {
+                method: 'POST',
+                body: imageFormData
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.message === 'Authentication successful') {
+                console.log('success');
+            } else {
+                authenticateAdvancedContainer.classList.remove('camera-show');
+                cameraContainer.style.display = 'none';
+                confirmDialog.classList.add('hidden');
+                errorMessageDiv.classList.remove('hidden');
+                openCameraBtn.classList.remove('hidden');
+            }
+            })
+            .catch(error => {
+            console.error('Error uploading image:', error);
+            });
+        });
+
+        // Cancel photo
+        cancelbutton.addEventListener('click', function() {
+            openCameraBtn.classList.remove('hidden');
+            imageRegistration.classList.remove('camera-show');
+            video.pause();
+            video.srcObject.getTracks()[0].stop();
+            cameraContainer.style.display = 'none';
+            console.log('Video stream stopped');
         });
     </script>
 </html>

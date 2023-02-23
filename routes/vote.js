@@ -84,4 +84,72 @@ router.post('/:id', function(req, res, next) {
     });
 });
 
+/* Advanced authentication */
+router.post('/:id/authenticate', upload.single('image'), async function(req, res, next) {
+    const token = req.cookies.token;
+    const election = req.params.id;
+    var voter;
+    if (!token) {
+        res.redirect(`/vote/${election}/authenticate`);
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey3);
+        voter = decoded.voter;
+    }
+    catch {
+        res.redirect(`/vote/${election}/authenticate`);
+    }
+    try {
+        const imageData = req.file.buffer.toString('base64');
+        const mimeType = req.file.mimetype;
+
+        // Verify Image with Card
+        database.getConnection( async (err, connection) => {
+            if (err) throw (err)
+            const fetch_voter = `SELECT CardImg From Voter
+                                    where StudentNo = ?`;
+            const check_query = mysql.format(fetch_voter,[voter.studentno])
+
+            await connection.query(check_query, async (err, result) => {
+                if (err) throw (err);
+
+                if (result.length === 0) {
+                    console.log('Image not found.');
+                    res.status(400).json({ message: 'Error retrieving card image.' });
+                    return;
+                }
+
+                const cardImg = result[0].CardImg;
+                const faceMatchThreshold = 90;
+
+                const params = {
+                    SourceImage: {
+                      Bytes: Buffer.from(imageData, 'base64')
+                    },
+                    TargetImage: {
+                      Bytes: cardImg
+                    },
+                    SimilarityThreshold: faceMatchThreshold
+                };
+
+                rekognition.compareFaces(params, function (err, data) {
+                    if (err) {
+                        console.error('Error comparing faces:', err);
+                        res.status(500).send({ error: 'Server error' });
+                    } else if (data.FaceMatches.length == 0) {
+                        console.log('No matching face found');
+                        res.status(401).send({ error: 'Authentication failed' });
+                    } else {
+                        console.log('Face match found');
+                        res.status(200).send({ message: 'Authentication successful' });
+                    }
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Error handling image:', error);
+        res.status(500).send({ error: 'Server error' });
+    }
+});
+
 module.exports = router;
