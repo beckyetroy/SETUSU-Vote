@@ -79,7 +79,7 @@ router.post('/', function(req, res, next) {
             if (err) throw (err);
 
             if (result.length > 0) {
-                renderPage(res, 'You are already registered for this election.');
+                res.status(400).json({ message: 'You are already registered for this election.' });
                 return;
             }
 
@@ -99,6 +99,7 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
     try {
         const imageData = req.file.buffer.toString('base64');
         const mimeType = req.file.mimetype;
+        const cardImg = req.file.buffer;
     
         // set up parameters for the DetectText operation
         const detectParams = {
@@ -162,7 +163,7 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
             database.getConnection( async (err, connection) => {
                 if (err) throw (err)
                 const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId, CardImg, CardImgMimeType) values (?,?,?,?,?,?,?)";
-                const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election, imageData, mimeType]);
+                const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election, cardImg, mimeType]);
     
                 var i = 0;
                 const fetch_voters = `SELECT * From Voter
