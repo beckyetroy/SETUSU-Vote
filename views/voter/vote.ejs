@@ -84,6 +84,59 @@
 
             <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
         </div>
+
+        <div class="container-vote" id="container-vote">
+            <%
+                var candidatesFound = false;
+                data.forEach(function(data){
+                    if (data.fName) {
+                        candidatesFound = true;
+            %>
+                <div class="card h-100" id="vote-option">
+                    <div class="row no-gutters align-items-center h-100">
+                        <div class="col-3 h-100">
+                            <%
+                                if (data.Picture_Path) {
+                            %>
+                                <img src="<%= data.Picture_Path %>" alt="Candidate Image" class="card-img-top h-100">
+                            <%
+                                } else {
+                            %>
+                                <img src="/assets/Person-Placeholder.png" alt="Candidate Image" class="card-img-top h-100">
+                            <%
+                                }
+                            %>
+                        </div>
+                        <div class="col-6 d-flex align-items-center h-100">
+                            <div class="card-body" id="vote-name">
+                                <h4 class="card-name"><%= data.fName %> <%= data.lName %></h2>
+                            </div>
+                        </div>
+                        <div class="col-3 d-flex align-items-center justify-content-center h-100">
+                            <label class="radio-container">
+                                <input type="radio" name="vote-option-candidate" value="<%= data.CandidateId %>">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            <%
+                    }
+                });
+                if (!candidatesFound)
+                {
+            %>
+                    No Candidates Found for this Election
+            <%
+                }
+            %>
+
+            <div id="errorMessageVote" class="hidden">
+                Sorry, there was a problem with your vote. Please try again later.
+            </div>
+
+            <button class="primaryBtn" id="confirm-btn1">CONFIRM</button>
+        </div>
         <%
             }
             else
@@ -152,11 +205,13 @@
         const errorMessageDiv = document.getElementById('errorMessageDiv');
         const photoPreview = document.getElementById('photo-preview');
         const canvas = document.createElement('canvas');
+        const voteContainer = document.getElementById('container-vote');
         let stream = null;
         let data = null;
 
         confirmDialog.classList.add('hidden');
         errorMessageDiv.classList.add('hidden');
+        voteContainer.classList.add('hidden');
 
         openCameraBtn.addEventListener('click', function() {
             // Show camera container and hide other fields
@@ -237,7 +292,11 @@
             .then(response => response.json())
             .then(data => {
             if (data.message === 'Authentication successful') {
-                console.log('success');
+                authenticateAdvancedContainer.classList.remove('camera-show');
+                cameraContainer.style.display = 'none';
+                confirmDialog.classList.add('hidden');
+                voteContainer.classList.remove('hidden');
+
             } else {
                 authenticateAdvancedContainer.classList.remove('camera-show');
                 cameraContainer.style.display = 'none';

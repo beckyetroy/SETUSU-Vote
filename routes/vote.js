@@ -23,7 +23,13 @@ const rekognition = new AWS.Rekognition({
 function renderPage(res, electionId, message) {
     database.getConnection ( async (err, connection)=> {
         if (err) throw (err);
-        const election_query = `select * from Election where Id = ?`;
+        const election_query = `select Id, Description, Candidate.CandidateId,
+                                fName, lName, Picture_path
+                                from Election join Candidate
+                                on Candidate.ElectionId = Election.Id
+                                join Candidate_Category
+                                on Candidate.CandidateId = Candidate_Category.CandidateId
+                                where Id = ?`;
         const query = mysql.format(election_query, [electionId]);
         await connection.query (query, async (err, result) => {
             connection.release();
@@ -69,6 +75,7 @@ router.post('/:id', function(req, res, next) {
         const check_query = mysql.format(fetch_voters,[studentno, election, fname, lname, email])
 
         await connection.query(check_query, async (err, result) => {
+            connection.release();
             if (err) throw (err);
 
             if (result.length === 0) {
@@ -90,14 +97,14 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
     const election = req.params.id;
     var voter;
     if (!token) {
-        res.redirect(`/vote/${election}/authenticate`);
+        res.redirect(`/vote/${election}`);
     }
     try {
         const decoded = jwt.verify(token, process.env.secretKey3);
         voter = decoded.voter;
     }
     catch {
-        res.redirect(`/vote/${election}/authenticate`);
+        res.redirect(`/vote/${election}`);
     }
     try {
         const imageData = req.file.buffer.toString('base64');
@@ -105,6 +112,7 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
 
         // Verify Image with Card
         database.getConnection( async (err, connection) => {
+            connection.release();
             if (err) throw (err)
             const fetch_voter = `SELECT CardImg From Voter
                                     where StudentNo = ?`;
