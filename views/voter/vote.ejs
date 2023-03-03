@@ -47,277 +47,32 @@
             if(data.length > 0)
             {
         %>
-        <h2> <%= data[0].Description %></h2>
-        <div class="container-basic-authentication" id="container-basic-authentication">
-            <form action="/authenticate" method="POST" class="authenticate">
-                <h3 class="formTitle">Please enter your details</h3>
-                <div class="basic-form-error" id="basic-form-error"></div>
-                    <label>Student Number : </label>
-                    <input type="text" placeholder="Enter Student Number" name="studentno" required>
-                    <label>First Name(s) : </label>
-                    <input type="text" placeholder="Enter First Name(s)" name="fname" required>
-                    <label>Last Name : </label>
-                    <input type="text" placeholder="Enter Last Name" name="lname" required>
-                    <label>Student Email : </label>
-                    <input type="text" placeholder="Enter Email" name="email" required>
-                    <br>
-                    <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
-            </form>
-        </div>
+            <h2> <%= data[0].Description %></h2>
+            <% if(action == 'basicAuthentication') { %>
+                <%- include ('vote/basic_authentication.ejs'); %>
 
-        <div class="container-advanced-authentication" id="container-advanced-authentication">
-            <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-            <video id="video" autoplay></video>
-            <button id="startbutton">Take photo</button>
-            <button id="cancelbutton">Cancel</button>
-            </div>
+            <% } else if(action == 'advancedAuthentication') { %>
+                <%- include ('vote/advanced_authentication.ejs'); %>
 
-            <div id="confirm-dialog" class="hidden">
-            <img id="photo-preview" src="" alt="Taken photo">
-            <button id="retake">Retake</button>
-            <button id="confirm">Confirm</button>
-            </div>
+            <% } else if(action == 'vote') { %>
+                <%- include ('vote/vote_category.ejs'); %>
 
-            <div id="errorMessageDiv" class="hidden">
-                This image is not valid. Please try again.
-            </div>
-
-            <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
-        </div>
-
-        <div class="container-vote" id="container-vote">
-            <%
-                var candidatesFound = false;
-                data.forEach(function(data){
-                    if (data.fName) {
-                        candidatesFound = true;
-            %>
-                <div class="card h-100" id="vote-option">
-                    <div class="row no-gutters align-items-center h-100">
-                        <div class="col-3 h-100">
-                            <%
-                                if (data.Picture_Path) {
-                            %>
-                                <img src="<%= data.Picture_Path %>" alt="Candidate Image" class="card-img-top h-100">
-                            <%
-                                } else {
-                            %>
-                                <img src="/assets/Person-Placeholder.png" alt="Candidate Image" class="card-img-top h-100">
-                            <%
-                                }
-                            %>
-                        </div>
-                        <div class="col-6 d-flex align-items-center h-100">
-                            <div class="card-body" id="vote-name">
-                                <h4 class="card-name"><%= data.fName %> <%= data.lName %></h2>
-                            </div>
-                        </div>
-                        <div class="col-3 d-flex align-items-center justify-content-center h-100">
-                            <label class="radio-container">
-                                <input type="radio" name="vote-option-candidate" value="<%= data.CandidateId %>">
-                                <span class="checkmark"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            <%
-                    }
-                });
-                if (!candidatesFound)
-                {
-            %>
-                    No Candidates Found for this Election
-            <%
-                }
-            %>
-
-            <div id="errorMessageVote" class="hidden">
-                Sorry, there was a problem with your vote. Please try again later.
-            </div>
-
-            <button class="primaryBtn" id="confirm-btn1">CONFIRM</button>
-        </div>
+            <% } else if(action == 'confirm') { %>
+                <%- include ('vote/confirm.ejs'); %>
+            <% } %>
         <%
-            }
-            else
-            {
-                %>
-                <h1 class="blank-page">Invalid URL. Redirecting ...</h1>
-                <script>
-                    setTimeout(function() {
-                        window.location.href = "/";
-                    }, 2500);
-                </script>
-            <%
-            }
-        %>
+        }
+        else
+        {
+            %>
+            <h1 class="blank-page">Invalid URL. Redirecting ...</h1>
+            <script>
+                setTimeout(function() {
+                    window.location.href = "/";
+                }, 2500);
+            </script>
+        <%
+        }
+    %>
     </body>
-    <script>
-        const authenticateBasicBtn = document.getElementById('authenticate-basic');
-        const authenticateBasicContainer = document.getElementById('container-basic-authentication');
-        const basicForm = document.querySelector('.authenticate');
-        const basicFormError = document.getElementById('basic-form-error');
-        const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
-        const id = '<%= data[0].Id %>';
-
-        authenticateAdvancedContainer.classList.add('hidden');
-
-        basicForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-        });
-
-        authenticateBasicBtn.addEventListener('click', () => {
-            const formData = new FormData(basicForm);
-            const body = new URLSearchParams(formData).toString();
-                fetch(`/vote/${id}`, {
-                method: 'POST',
-                body: body,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'Basic details verified.') {
-                    authenticateBasicContainer.classList.add('slide-out');
-                    setTimeout(() => {
-                        basicFormError.textContent = '';
-                        authenticateBasicContainer.remove();
-                        authenticateAdvancedContainer.classList.remove('hidden');
-                        authenticateAdvancedContainer.classList.add('fade-in');
-                    }, 1000);
-                }
-                else if (data.message === 'Invalid details.') {
-                    basicFormError.textContent = 'Invalid details. Please try again.';
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        });
-
-        const openCameraBtn = document.getElementById('open-camera-btn');
-        const cameraContainer = document.getElementById('camera-container');
-        const video = document.getElementById('video');
-        const startbutton = document.getElementById('startbutton');
-        const cancelbutton = document.getElementById('cancelbutton');
-        const confirmDialog = document.getElementById('confirm-dialog');
-        const errorMessageDiv = document.getElementById('errorMessageDiv');
-        const photoPreview = document.getElementById('photo-preview');
-        const canvas = document.createElement('canvas');
-        const voteContainer = document.getElementById('container-vote');
-        let stream = null;
-        let data = null;
-
-        confirmDialog.classList.add('hidden');
-        errorMessageDiv.classList.add('hidden');
-        voteContainer.classList.add('hidden');
-
-        openCameraBtn.addEventListener('click', function() {
-            // Show camera container and hide other fields
-            cameraContainer.style.display = 'block';
-            errorMessageDiv.classList.add('hidden');
-            authenticateAdvancedContainer.classList.add('camera-show');
-            openCameraBtn.classList.add('hidden');
-
-            // Get user media
-            if (navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(mediaStream) {
-                    stream = mediaStream;
-                    video.srcObject = mediaStream;
-                    video.play();
-                })
-                .catch(function(err) {
-                console.log("An error occurred: " + err);
-                });
-            }
-        });
-
-        // Take photo
-        startbutton.addEventListener('click', function() {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            data = canvas.toDataURL('image/png');
-            video.pause();
-            stream.getTracks()[0].stop();
-
-            photoPreview.src = data;
-            confirmDialog.classList.remove('hidden');
-            cameraContainer.style.display = 'none';
-        });
-
-        const retakeButton = document.getElementById('retake');
-        const confirmButton = document.getElementById('confirm');
-
-        retakeButton.addEventListener('click', function () {
-            confirmDialog.classList.add('hidden');
-            // Show camera container
-            cameraContainer.style.display = 'block';
-
-            // Get user media
-            if (navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(mediaStream) {
-                    stream = mediaStream;
-                    video.srcObject = mediaStream;
-                    video.play();
-                })
-                .catch(function(err) {
-                console.log("An error occurred: " + err);
-                });
-            }
-            photoPreview.src = '';
-        });
-
-        confirmButton.addEventListener('click', function () {
-            // convert data to Blob object
-            const byteString = atob(data.split(',')[1]);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-            }
-            const blob = new Blob([ab], { type: 'image/png' });
-
-            // create FormData object and append file
-            const imageFormData = new FormData();
-            imageFormData.append('image', blob, 'image.png');
-
-            fetch(`/vote/${id}/authenticate`, {
-                method: 'POST',
-                body: imageFormData
-            })
-            .then(response => response.json())
-            .then(data => {
-            if (data.message === 'Authentication successful') {
-                authenticateAdvancedContainer.classList.remove('camera-show');
-                cameraContainer.style.display = 'none';
-                confirmDialog.classList.add('hidden');
-                voteContainer.classList.remove('hidden');
-
-            } else {
-                authenticateAdvancedContainer.classList.remove('camera-show');
-                cameraContainer.style.display = 'none';
-                confirmDialog.classList.add('hidden');
-                errorMessageDiv.classList.remove('hidden');
-                openCameraBtn.classList.remove('hidden');
-            }
-            })
-            .catch(error => {
-            console.error('Error uploading image:', error);
-            });
-        });
-
-        // Cancel photo
-        cancelbutton.addEventListener('click', function() {
-            openCameraBtn.classList.remove('hidden');
-            imageRegistration.classList.remove('camera-show');
-            video.pause();
-            video.srcObject.getTracks()[0].stop();
-            cameraContainer.style.display = 'none';
-            console.log('Video stream stopped');
-        });
-    </script>
 </html>

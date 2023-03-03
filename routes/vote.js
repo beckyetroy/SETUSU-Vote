@@ -20,7 +20,7 @@ const rekognition = new AWS.Rekognition({
     region: process.env.region
 });
 
-function renderPage(res, electionId, message) {
+function renderPage(res, electionId, action, message) {
     database.getConnection ( async (err, connection)=> {
         if (err) throw (err);
         const election_query = `select Id, Description, Candidate.CandidateId,
@@ -34,7 +34,7 @@ function renderPage(res, electionId, message) {
         await connection.query (query, async (err, result) => {
             connection.release();
             if (err) throw (err);
-            res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: result});
+            res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: result, action: action});
         })
     })
 }
@@ -44,7 +44,7 @@ router.get('/:id', function(req, res, next) {
     const token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey3, { expiresIn: '30m' });
     const election = req.params.id;
     res.cookie('token', token);
-    renderPage(res, election, '');
+    renderPage(res, election, 'basicAuthentication', '');
 });
 
 /* Verify basic details */
@@ -79,14 +79,14 @@ router.post('/:id', function(req, res, next) {
             if (err) throw (err);
 
             if (result.length === 0) {
-                res.status(400).json({ message: 'Invalid details.' });
+                renderPage(res, election, 'basicAuthentication', 'Invalid Details. Please try again.')
                 return;
             }
 
             const voter = req.body;
             const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey3, { expiresIn: '30m' });
             res.cookie('token', newToken);
-            res.status(200).json({ message: 'Basic details verified.' });
+            renderPage(res, election, 'advancedAuthentication', '');
         });
     });
 });
@@ -123,7 +123,7 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
 
                 if (result.length === 0) {
                     console.log('Image not found.');
-                    res.status(400).json({ message: 'Error retrieving card image.' });
+                    renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem retrieving your details. Please try again later.');
                     return;
                 }
 
@@ -143,20 +143,20 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
                 rekognition.compareFaces(params, function (err, data) {
                     if (err) {
                         console.error('Error comparing faces:', err);
-                        res.status(500).send({ error: 'Server error' });
+                        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.');
                     } else if (data.FaceMatches.length == 0) {
                         console.log('No matching face found');
-                        res.status(401).send({ error: 'Authentication failed' });
+                        renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.');
                     } else {
                         console.log('Face match found');
-                        res.status(200).send({ message: 'Authentication successful' });
+                        renderPage(res, election, 'vote', '');
                     }
                 });
             });
         });
     } catch (error) {
         console.error('Error handling image:', error);
-        res.status(500).send({ error: 'Server error' });
+        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.');
     }
 });
 
