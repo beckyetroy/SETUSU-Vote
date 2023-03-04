@@ -20,23 +20,30 @@ const rekognition = new AWS.Rekognition({
     region: process.env.region
 });
 
-function renderPage(res, electionId, action, message) {
-    database.getConnection ( async (err, connection)=> {
+function renderPage(res, electionId, action, message, category) {
+    database.getConnection(async (err, connection) => {
+      if (err) throw (err);
+      const election_query = `SELECT Id, Description, Candidate.CandidateId,
+                            fName, lName, Picture_path, CategoryId
+                            FROM Election JOIN Candidate
+                            ON Candidate.ElectionId = Election.Id
+                            JOIN Candidate_Category
+                            ON Candidate.CandidateId = Candidate_Category.CandidateId
+                            WHERE Id = ?`;
+      const category_query = `SELECT * FROM Category WHERE ElectionId = ?`;
+      const query = mysql.format(election_query, [electionId]);
+      const query2 = mysql.format(category_query, [electionId]);
+      await connection.query(query, async (err, result) => {
+        const electionData = result;
         if (err) throw (err);
-        const election_query = `select Id, Description, Candidate.CandidateId,
-                                fName, lName, Picture_path
-                                from Election join Candidate
-                                on Candidate.ElectionId = Election.Id
-                                join Candidate_Category
-                                on Candidate.CandidateId = Candidate_Category.CandidateId
-                                where Id = ?`;
-        const query = mysql.format(election_query, [electionId]);
-        await connection.query (query, async (err, result) => {
-            connection.release();
-            if (err) throw (err);
-            res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: result, action: action});
-        })
-    })
+        await connection.query(query2, async (err, result) => {
+          if (err) throw (err);
+          const categoryData = result;
+          connection.release();
+          res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: electionData, categorydata: categoryData, action: action, currentcategory: category });
+        });
+      });
+    });
 }
 
 /* GET vote page. */
@@ -44,7 +51,7 @@ router.get('/:id', function(req, res, next) {
     const token = jwt.sign({ voterId: Math.random().toString(36).substring(2) }, process.env.secretKey3, { expiresIn: '30m' });
     const election = req.params.id;
     res.cookie('token', token);
-    renderPage(res, election, 'basicAuthentication', '');
+    renderPage(res, election, 'basicAuthentication', '', 0);
 });
 
 /* Verify basic details */
@@ -79,14 +86,14 @@ router.post('/:id', function(req, res, next) {
             if (err) throw (err);
 
             if (result.length === 0) {
-                renderPage(res, election, 'basicAuthentication', 'Invalid Details. Please try again.')
+                renderPage(res, election, 'basicAuthentication', 'Invalid Details. Please try again.', 0)
                 return;
             }
 
             const voter = req.body;
             const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey3, { expiresIn: '30m' });
             res.cookie('token', newToken);
-            renderPage(res, election, 'advancedAuthentication', '');
+            renderPage(res, election, 'advancedAuthentication', '', 0);
         });
     });
 });
@@ -123,7 +130,7 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
 
                 if (result.length === 0) {
                     console.log('Image not found.');
-                    renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem retrieving your details. Please try again later.');
+                    renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem retrieving your details. Please try again later.', 0);
                     return;
                 }
 
@@ -143,21 +150,30 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
                 rekognition.compareFaces(params, function (err, data) {
                     if (err) {
                         console.error('Error comparing faces:', err);
-                        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.');
+                        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.', 0);
                     } else if (data.FaceMatches.length == 0) {
                         console.log('No matching face found');
-                        renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.');
+                        renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.', 0);
                     } else {
                         console.log('Face match found');
-                        renderPage(res, election, 'vote', '');
+                        renderPage(res, election, 'vote', '', 0);
                     }
                 });
             });
         });
     } catch (error) {
         console.error('Error handling image:', error);
-        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.');
+        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.', 0);
     }
 });
+
+/* Render the next category */
+router.get('/:id/:category', function(req, res) {
+    var id = req.params.id;
+    var currentcategory = parseInt(req.params.category);
+    currentcategory++;
+    renderPage(res, id, 'vote', '', currentcategory);
+  });
+  
 
 module.exports = router;
