@@ -1,0 +1,82 @@
+<div class="container-vote" id="container-vote">
+    <% if (categorydata.length === 0) { %>
+        No Categories Found for this Election
+    <% } else if (currentcategory >= categorydata.length) { %>
+        Test
+    <% } else { %>
+        <h3><%= categorydata[currentcategory].CategoryName %></h3>
+
+        <% var candidatesFound = false; %>
+
+        <% data.forEach(function(candidate) {
+          if (candidate.CategoryId === categorydata[currentcategory].CategoryId) {
+            candidatesFound = true;
+        %>
+        <div class="card h-100" id="vote-option">
+            <div class="row g-0 align-items-center h-100">
+                <div class="col-3 h-100">
+                    <%
+                        if (candidate.Picture_path) {
+                    %>
+                        <img src="<%= candidate.Picture_path %>" alt="Candidate Image" class="card-img-top h-100">
+                    <%
+                        } else {
+                    %>
+                        <img src="/assets/Person-Placeholder.png" alt="Candidate Image" class="card-img-top h-100">
+                    <%
+                        }
+                    %>
+                </div>
+                <div class="col-7 d-flex align-items-center h-100">
+                    <div class="card-body" id="vote-name">
+                        <h4 class="card-name"><%= candidate.fName %> <%= candidate.lName %></h2>
+                    </div>
+                </div>
+                <div class="col-2 d-flex align-items-left h-100">
+                    <label class="radio-container">
+                        <input type="radio" name="vote-option-candidate" value="<%= candidate.CandidateId %>">
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <% } });
+        if (!candidatesFound) { %>
+          No Candidates Found for this Category
+        <% } %>
+
+        <div id="errorMessageVote">
+            <% message %>
+        </div>
+
+        <% if ((categorydata.length > 1) && (candidatesFound)) { %>
+            <% if (currentcategory > 0) { %>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
+            <% } %>
+            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">CONFIRM</button>
+        <% } else if ((categorydata.length > 1) && (!candidatesFound)) { %>
+            <% if (currentcategory > 0) { %>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
+            <% } %>
+            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT</button>
+        <% } %>
+    <% } %>
+</div>
+
+<script>
+    function nextCategory(electionId, currentcategory) {
+        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromButton=true`, function(data) {
+            var tempContainer = $('<div>').html(data);
+            var container = tempContainer.find('#container-vote');
+            $('#container-vote').html(container.html());
+        });
+    }
+
+    function previousCategory(electionId, currentcategory) {
+        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromPrevButton=true`, function(data) {
+            var tempContainer = $('<div>').html(data);
+            var container = tempContainer.find('#container-vote');
+            $('#container-vote').html(container.html());
+        });
+    }
+</script>
