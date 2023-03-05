@@ -91,7 +91,7 @@ router.post('/:id', function(req, res, next) {
             }
 
             const voter = req.body;
-            const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey3, { expiresIn: '30m' });
+            const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey3, { expiresIn: '10m' });
             res.cookie('token', newToken);
             renderPage(res, election, 'advancedAuthentication', '', 0);
         });
@@ -103,12 +103,14 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
     const token = req.cookies.token;
     const election = req.params.id;
     var voter;
+    var voterId;
     if (!token) {
         res.redirect(`/vote/${election}`);
     }
     try {
         const decoded = jwt.verify(token, process.env.secretKey3);
         voter = decoded.voter;
+        voterId = decoded.voterId;
     }
     catch {
         res.redirect(`/vote/${election}`);
@@ -156,6 +158,9 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
                         renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.', 0);
                     } else {
                         console.log('Face match found');
+                        const faceData = data.FaceMatches[0].Face;
+                        const newToken = jwt.sign({ voterId: voterId, voter: voter, image: faceData }, process.env.secretKey3, { expiresIn: '10m' });
+                        res.cookie('token', newToken);
                         renderPage(res, election, 'vote', '', 0);
                     }
                 });
@@ -167,13 +172,41 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
     }
 });
 
-/* Render the next category */
+/* Render the next or previous category */
 router.get('/:id/:category', function(req, res) {
+    const token = req.cookies.token;
     var id = req.params.id;
     var currentcategory = parseInt(req.params.category);
-    currentcategory++;
-    renderPage(res, id, 'vote', '', currentcategory);
-  });
-  
+    const fromButton = req.query.fromButton;
+    const fromPrevButton = req.query.fromPrevButton;
+    var voter;
+    var voterId;
+    var image;
+
+    if (!token) {
+        res.redirect(`/vote/${id}`);
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey3);
+        voter = decoded.voter;
+        voterId = decoded.voterId;
+        image = decoded.image;
+    }
+    catch {
+        res.redirect(`/vote/${id}`);
+    }
+    if (!fromButton && !fromPrevButton) {
+        res.redirect(`/vote/${id}`);
+        return;
+    }
+    else if (fromButton) {
+        currentcategory++;
+        renderPage(res, id, 'vote', '', currentcategory);
+    }
+    else {
+        currentcategory--;
+        renderPage(res, id, 'vote', '', currentcategory);
+    }
+});
 
 module.exports = router;

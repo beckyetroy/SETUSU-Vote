@@ -50,8 +50,14 @@
         </div>
 
         <% if ((categorydata.length > 1) && (candidatesFound)) { %>
+            <% if (currentcategory > 0) { %>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
+            <% } %>
             <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">CONFIRM</button>
         <% } else if ((categorydata.length > 1) && (!candidatesFound)) { %>
+            <% if (currentcategory > 0) { %>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
+            <% } %>
             <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT</button>
         <% } %>
     <% } %>
@@ -59,8 +65,15 @@
 
 <script>
     function nextCategory(electionId, currentcategory) {
-        const nextCategory = parseInt(currentcategory) + 1;
-        $.get(`/vote/<%= data[0].Id %>/${currentcategory}`, function(data) {
+        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromButton=true`, function(data) {
+            var tempContainer = $('<div>').html(data);
+            var container = tempContainer.find('#container-vote');
+            $('#container-vote').html(container.html());
+        });
+    }
+
+    function previousCategory(electionId, currentcategory) {
+        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromPrevButton=true`, function(data) {
             var tempContainer = $('<div>').html(data);
             var container = tempContainer.find('#container-vote');
             $('#container-vote').html(container.html());
