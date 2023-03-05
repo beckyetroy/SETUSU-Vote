@@ -2,9 +2,24 @@
     <% if (categorydata.length === 0) { %>
         No Categories Found for this Election
     <% } else if (currentcategory >= categorydata.length) { %>
-        Test
+        <h3>Confirm your choices</h3>
+        <% Object.keys(selectedOptions).forEach(function(category) { %>
+            <h4><%= categorydata[category].CategoryName %></h4>
+            <% if (selectedOptions[category] !== '-1') { %>
+                <% for (let i = 0; i < data.length; i++) { %>
+                    <% if (data[i].CandidateId === parseInt(selectedOptions[category])) { %>
+                        <h5>You voted for: </h5>
+                        <p><%= data[i].fName %> <%= data[i].lName %> </p>
+                    <% } %>
+                <% } %>
+            <% } else { %>
+              <p>No candidate selected</p>
+            <% } %>
+        <% }); %>
+        <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">BACK</button>
+        <button class="primaryBtn" id="submit-vote" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">SUBMIT VOTE</button>
     <% } else { %>
-        <h3><%= categorydata[currentcategory].CategoryName %></h3>
+        <h3>You are voting for the role of: <%= categorydata[currentcategory].CategoryName %></h3>
 
         <% var candidatesFound = false; %>
 
@@ -65,7 +80,12 @@
 
 <script>
     function nextCategory(electionId, currentcategory) {
-        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromButton=true`, function(data) {
+        let selectedOption = $('input[name=vote-option-candidate]:checked').val();
+        if (!selectedOption) {
+            selectedOption = "-1";
+        }
+        const url = `/vote/${electionId}/${currentcategory}?fromButton=true&selectedOption=${selectedOption}`;
+        $.get(url, function(data) {
             var tempContainer = $('<div>').html(data);
             var container = tempContainer.find('#container-vote');
             $('#container-vote').html(container.html());
@@ -73,7 +93,12 @@
     }
 
     function previousCategory(electionId, currentcategory) {
-        $.get(`/vote/<%= data[0].Id %>/${currentcategory}?fromPrevButton=true`, function(data) {
+        let selectedOption = $('input[name=vote-option-candidate]:checked').val();
+        if (!selectedOption) {
+            selectedOption = "-1";
+        }
+        const url = `/vote/${electionId}/${currentcategory}?fromPrevButton=true&selectedOption=${selectedOption}`;
+        $.get(url, function(data) {
             var tempContainer = $('<div>').html(data);
             var container = tempContainer.find('#container-vote');
             $('#container-vote').html(container.html());
