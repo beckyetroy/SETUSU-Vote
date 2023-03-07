@@ -1,15 +1,19 @@
 <div class="container-vote" id="container-vote">
     <% if (categorydata.length === 0) { %>
         No Categories Found for this Election
+    <% } else if (message === 'Success') { %>
+        Vote submitted successfully!
     <% } else if (currentcategory >= categorydata.length) { %>
         <h3>Confirm your choices</h3>
-        <% Object.keys(selectedOptions).forEach(function(category) { %>
-            <h4><%= categorydata[category].CategoryName %></h4>
-            <% if (selectedOptions[category] !== '-1') { %>
+        <form method="POST" action="/vote/<%= data[0].Id %>/submit">
+        <% Object.keys(selectedOptions).forEach(function(categoryIndex) { %>
+            <h4><%= categorydata[categoryIndex].CategoryName %></h4>
+            <% if (selectedOptions[categoryIndex] !== '-1') { %>
                 <% for (let i = 0; i < data.length; i++) { %>
-                    <% if (data[i].CandidateId === parseInt(selectedOptions[category])) { %>
+                    <% if (data[i].CandidateId === parseInt(selectedOptions[categoryIndex])) { %>
                         <h5>You voted for: </h5>
                         <p><%= data[i].fName %> <%= data[i].lName %> </p>
+                        <input type="hidden" name="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>" value="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>">
                     <% } %>
                 <% } %>
             <% } else { %>
@@ -17,7 +21,8 @@
             <% } %>
         <% }); %>
         <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">BACK</button>
-        <button class="primaryBtn" id="submit-vote" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">SUBMIT VOTE</button>
+        <button class="primaryBtn" id="submit-vote" type="submit">SUBMIT VOTE</button>
+        </form>
     <% } else { %>
         <h3>You are voting for the role of: <%= categorydata[currentcategory].CategoryName %></h3>
 
@@ -93,6 +98,19 @@
     }
 
     function previousCategory(electionId, currentcategory) {
+        let selectedOption = $('input[name=vote-option-candidate]:checked').val();
+        if (!selectedOption) {
+            selectedOption = "-1";
+        }
+        const url = `/vote/${electionId}/${currentcategory}?fromPrevButton=true&selectedOption=${selectedOption}`;
+        $.get(url, function(data) {
+            var tempContainer = $('<div>').html(data);
+            var container = tempContainer.find('#container-vote');
+            $('#container-vote').html(container.html());
+        });
+    }
+
+    function submitVote(electionId, currentcategory) {
         let selectedOption = $('input[name=vote-option-candidate]:checked').val();
         if (!selectedOption) {
             selectedOption = "-1";

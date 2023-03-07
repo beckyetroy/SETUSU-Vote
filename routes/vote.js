@@ -253,4 +253,74 @@ router.get('/:id/:category', function(req, res) {
     }
 });
 
+/* Submit Vote */
+router.post('/:id/submit', async function(req, res, next) {
+    const electionId = req.params.id;
+    const votes = req.body;
+    const token = req.cookies.token;
+    const promises = [];
+    var voter;
+    var image;
+
+    if (!token) {
+        console.log('token error');
+        res.redirect(`/vote/${id}`);
+        return;
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey3);
+        voter = decoded.voter;
+        image = decoded.image;
+    }
+    catch {
+        console.log('decoded error');
+        res.redirect(`/vote/${id}`);
+        return;
+    }
+
+    if (!voter || !image) {
+        console.log('missing voter or image error');
+        res.redirect(`/vote/${election}`);
+        return;
+    }
+
+    Object.keys(votes).forEach(function(vote) {
+        const [categoryId, candidateId] = vote.split('-');
+
+        promises.push(new Promise((resolve, reject) => {
+            database.getConnection(async (err, connection) => {
+              if (err) reject(err);
+        
+              const vote_query = `UPDATE Candidate_Category SET NumVotes = NumVotes + 1
+                                  WHERE CategoryId  = ?
+                                  AND CandidateId = ?`;
+              const voter_query = `UPDATE Voter SET Voted = 1
+                                  WHERE StudentNo = ?`;
+              const submit_query = mysql.format(vote_query, [categoryId, candidateId]);
+              const update_query = mysql.format(voter_query, [voter.studentno]);
+        
+              try {
+                await connection.query(submit_query);
+                await connection.query(update_query);
+                connection.release();
+                resolve();
+              } catch (err) {
+                connection.release();
+                reject(err);
+              }
+            });
+        }));
+    });
+        
+    Promise.all(promises)
+        .then(() => {
+        renderPage(res, electionId, 'vote', 'Success', 0, {});
+        })
+        .catch((err) => {
+        console.log(err);
+        renderPage(res, electionId, 'vote', 'There was a problem submitting your vote. Please try again later.', 0, {});
+    });
+});
+
 module.exports = router;
