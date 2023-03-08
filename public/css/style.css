@@ -20,6 +20,10 @@ h3 {
     font-family: 'Aileron', sans-serif;
 }
 
+h5 {
+  font-size: 1.1em;
+}
+
 .navbar {
     background-color: #eb2c5c !important;
     position: sticky !important;
