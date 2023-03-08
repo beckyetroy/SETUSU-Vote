@@ -101,6 +101,11 @@ router.post('/:id', function(req, res, next) {
                 return;
             }
 
+            if (result[0].Voted === 1) {
+                renderPage(res, election, 'basicAuthentication', 'Already Voted', 0, {})
+                return;
+            }
+
             const voter = req.body;
             const newToken = jwt.sign({ voterId: voterId, voter: voter }, process.env.secretKey3, { expiresIn: '10m' });
             res.cookie('token', newToken);

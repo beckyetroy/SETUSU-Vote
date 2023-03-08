@@ -1,16 +1,21 @@
 <div class="container-basic-authentication" id="container-basic-authentication">
-    <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate">
-        <h3 class="formTitle">Please enter your details</h3>
-        <div class="vote-error"><%= message %></div>
-            <label>Student Number : </label>
-            <input type="text" placeholder="Enter Student Number" name="studentno" required>
-            <label>First Name(s) : </label>
-            <input type="text" placeholder="Enter First Name(s)" name="fname" required>
-            <label>Last Name : </label>
-            <input type="text" placeholder="Enter Last Name" name="lname" required>
-            <label>Student Email : </label>
-            <input type="text" placeholder="Enter Email" name="email" required>
-            <br>
-            <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
-    </form>
+    <% if (message === 'Already Voted') { %>
+        You have already voted in this election.
+        <button class="primaryBtn" onclick="location.href='/'" type="button"> HOME </button>
+    <% } else { %>
+        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate">
+            <h3 class="formTitle">Please enter your details</h3>
+            <div class="vote-error"><%= message %></div>
+                <label>Student Number : </label>
+                <input type="text" placeholder="Enter Student Number" name="studentno" required>
+                <label>First Name(s) : </label>
+                <input type="text" placeholder="Enter First Name(s)" name="fname" required>
+                <label>Last Name : </label>
+                <input type="text" placeholder="Enter Last Name" name="lname" required>
+                <label>Student Email : </label>
+                <input type="text" placeholder="Enter Email" name="email" required>
+                <br>
+                <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
+        </form>
+    <% } %>
 </div>
