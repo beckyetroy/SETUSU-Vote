@@ -7,8 +7,9 @@
   },
   "dependencies": {
     "argon2": "^0.30.3",
-    "aws-sdk": "^2.1317.0",
+    "aws-sdk": "^2.1338.0",
     "bcrypt": "^5.1.0",
+    "blink-detection": "^1.2.1",
     "cookie-parser": "~1.4.4",
     "crypto-random-string": "^5.0.0",
     "debug": "~2.6.9",
@@ -19,6 +20,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-partials": "^0.3.0",
     "express-session": "^1.17.3",
+    "face-api.js": "^0.22.2",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.0",
     "morgan": "~1.9.1",
