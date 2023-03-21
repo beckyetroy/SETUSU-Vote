@@ -1,7 +1,6 @@
 <div class="container-advanced-authentication fade-in" id="container-advanced-authentication">
     <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
     <video id="video" autoplay></video>
-    <button id="startbutton">Take photo</button>
     <button id="cancelbutton">Cancel</button>
     </div>
 
@@ -16,124 +15,225 @@
     <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-recognition"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-api"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+
 <script>
-    const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
-    const id = '<%= data[0].Id %>';
+    Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+        faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+    ]).then(start);
 
-    const openCameraBtn = document.getElementById('open-camera-btn');
-    const cameraContainer = document.getElementById('camera-container');
-    const video = document.getElementById('video');
-    const startbutton = document.getElementById('startbutton');
-    const cancelbutton = document.getElementById('cancelbutton');
-    const confirmDialog = document.getElementById('confirm-dialog');
-    const photoPreview = document.getElementById('photo-preview');
-    const canvas = document.createElement('canvas');
-    const errorMessage = document.getElementById('vote-error');
-    let stream = null;
-    let data = null;
+    function start() {
+        console.log('Service started.');
+        const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
+        const id = '<%= data[0].Id %>';
 
-    confirmDialog.classList.add('hidden');
+        const openCameraBtn = document.getElementById('open-camera-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const video = document.getElementById('video');
+        const cancelbutton = document.getElementById('cancelbutton');
+        const confirmDialog = document.getElementById('confirm-dialog');
+        const photoPreview = document.getElementById('photo-preview');
+        const canvas = document.createElement('canvas');
+        const errorMessage = document.getElementById('vote-error');
+        let stream = null;
+        let data = null;
 
-    openCameraBtn.addEventListener('click', function() {
-        // Show camera container and hide other fields
-        cameraContainer.style.display = 'block';
-        authenticateAdvancedContainer.classList.add('camera-show');
-        openCameraBtn.classList.add('hidden');
+        var prevLandmarks = null;
+        var prevFrameTime = null;
+        var faceStable = false;
+        var maxLandmarkMovement = 10;
 
-        // Get user media
-        if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(mediaStream) {
-                stream = mediaStream;
-                video.srcObject = mediaStream;
-                video.play();
-            })
-            .catch(function(err) {
-            console.log("An error occurred: " + err);
-            });
-        }
-    });
-
-    // Take photo
-    startbutton.addEventListener('click', function() {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        data = canvas.toDataURL('image/png');
-        video.pause();
-        stream.getTracks()[0].stop();
-
-        photoPreview.src = data;
-        confirmDialog.classList.remove('hidden');
-        cameraContainer.style.display = 'none';
-    });
-
-    const retakeButton = document.getElementById('retake');
-    const confirmButton = document.getElementById('confirm');
-
-    retakeButton.addEventListener('click', function () {
         confirmDialog.classList.add('hidden');
-        // Show camera container
-        cameraContainer.style.display = 'block';
 
-        // Get user media
-        if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(mediaStream) {
-                stream = mediaStream;
-                video.srcObject = mediaStream;
-                video.play();
-            })
-            .catch(function(err) {
-            console.log("An error occurred: " + err);
-            });
+        openCameraBtn.addEventListener('click', function() {
+            // Show camera container and hide other fields
+            cameraContainer.style.display = 'block';
+            authenticateAdvancedContainer.classList.add('camera-show');
+            openCameraBtn.classList.add('hidden');
+
+            const faceFrame = document.createElement('img');
+            faceFrame.src = '/assets/Frame.png';
+            faceFrame.id = 'face-frame';
+            faceFrame.classList.add('white-frame');
+            cameraContainer.appendChild(faceFrame);
+            const frameBox = faceFrame.getBoundingClientRect();
+
+            // Get user media
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = mediaStream;
+                    video.play();
+                    // When the video is playing, start the face detection and head movement check
+                    video.addEventListener('playing', function () {
+                        // Resize the canvas to match the video size
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+
+                        // Detect faces and face landmarks in each video frame
+                        let headMovementInterval;
+                        setInterval(function () {
+                            faceapi.detectSingleFace(video).withFaceLandmarks().then(function (result) {
+                                if (result) {
+                                    if (faceFrame.classList.contains('green-frame')) {
+                                            faceFrame.classList.add('white-frame');
+                                            faceFrame.classList.remove('green-frame');
+                                    }
+                                    const faceBox = result.detection.box;
+                                    var isInsideFrame = faceBox.x >= frameBox.x && faceBox.y <= frameBox.y
+                                        && faceBox.top <= frameBox.top && faceBox.bottom <= frameBox.bottom
+                                        && (window.innerHeight - faceBox.bottom) >= (window.innerHeight - frameBox.bottom);
+                                    if (window.innerWidth > 450) {
+                                        isInsideFrame = faceBox.x <= frameBox.x && faceBox.y <= frameBox.y;
+                                    }
+
+                                    if (isInsideFrame) {
+                                        const landmarks = result.landmarks;
+                                        // check if face is stable (i.e., landmarks have not moved too much since previous frame)
+                                        var currentFrameTime = new Date().getTime();
+                                        if (prevLandmarks != null && prevFrameTime != null) {
+                                            var maxMovement = 0;
+                                            for (var i = 0; i < landmarks._positions.length; i++) {
+                                                var dx = landmarks._positions[i]._x - prevLandmarks._positions[i]._x;
+                                                var dy = landmarks._positions[i]._y - prevLandmarks._positions[i]._y;
+                                                var movement = Math.sqrt(dx*dx + dy*dy);
+                                                if (movement > maxMovement) {
+                                                    maxMovement = movement;
+                                                }
+                                            }
+                                            if (maxMovement > maxLandmarkMovement) {
+                                                faceStable = false;
+                                            } else {
+                                                faceStable = true;
+                                            }
+                                        }
+                                        prevLandmarks = landmarks;
+                                        prevFrameTime = currentFrameTime;
+
+                                        if (faceStable && landmarks.getLeftEye() && landmarks.getRightEye() && landmarks.getMouth() &&
+                                            landmarks.getNose() && landmarks.getJawOutline()) {
+                                                if (faceFrame.classList.contains('white-frame')) {
+                                                    faceFrame.classList.remove('white-frame');
+                                                    faceFrame.classList.add('green-frame');
+                                                }
+                                                // Check if the user is blinking
+                                                var leftEye = result.landmarks.getLeftEye();
+                                                var rightEye = result.landmarks.getRightEye();
+                                                var blinkTimeout = null;
+                                                var blinkDelay = 1000;
+                                                var blinkThreshold = 0.45;
+                                                var blinkRatio = (leftEye[3].y - leftEye[1].y) / (leftEye[4].y - leftEye[0].y + rightEye[4].y - rightEye[0].y);
+                                                if (blinkRatio < blinkThreshold && blinkRatio > 0.2) {
+                                                    // User blinked
+                                                    if (blinkTimeout == null) {
+                                                        blinkTimeout = setTimeout(function() {
+                                                            canvas.width = video.videoWidth;
+                                                            canvas.height = video.videoHeight;
+                                                            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                                                            data = canvas.toDataURL('image/png');
+                                                            video.pause();
+                                                            stream.getTracks()[0].stop();
+
+                                                            photoPreview.src = data;
+                                                            confirmDialog.classList.remove('hidden');
+                                                            cameraContainer.style.display = 'none';
+                                                                    blinkThreshold = null;
+                                                        }, blinkDelay);
+                                                    }
+                                                }
+                                        }
+                                    } else {
+                                        if (faceFrame.classList.contains('green-frame')) {
+                                            faceFrame.classList.add('white-frame');
+                                            faceFrame.classList.remove('green-frame');
+                                        }
+                                    }
+                                }
+                            });
+                        }, 10);
+                    });
+                })
+                .catch(function(err) {
+                    console.log("An error occurred: " + err);
+                });
+            }
+        });
+        
+        const retakeButton = document.getElementById('retake');
+        const confirmButton = document.getElementById('confirm');
+
+        retakeButton.addEventListener('click', function () {
+            confirmDialog.classList.add('hidden');
+            // Show camera container
+            cameraContainer.style.display = 'block';
+
+            // Get user media
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = mediaStream;
+                    video.play();
+                })
+                .catch(function(err) {
+                    console.log("An error occurred: " + err);
+                });
+            }
+            photoPreview.src = '';
+        });
+
+        confirmButton.addEventListener('click', function () {
+            // convert data to Blob object
+            const byteString = atob(data.split(',')[1]);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: 'image/png' });
+
+            // create FormData object and append file
+            const imageFormData = new FormData();
+            imageFormData.append('image', blob, 'image.png');
+
+            try {
+                fetch(`/vote/${id}/authenticate`, {
+                    method: 'POST',
+                    body: imageFormData
+                })
+                .then(res => res.text()).then(htmlStr => {
+                    document.open();
+                    document.write(htmlStr);
+                    document.close();
+                })
+            } catch (error) {
+                console.error('Error uploading image:', error);
+            }
+        });
+
+        if (!errorMessage.textContent.length === 0) {
+            authenticateAdvancedContainer.classList.remove('camera-show');
+            cameraContainer.style.display = 'none';
+            confirmDialog.classList.add('hidden');
+            openCameraBtn.classList.remove('hidden');
         }
-        photoPreview.src = '';
-    });
 
-    confirmButton.addEventListener('click', function () {
-        // convert data to Blob object
-        const byteString = atob(data.split(',')[1]);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: 'image/png' });
-
-        // create FormData object and append file
-        const imageFormData = new FormData();
-        imageFormData.append('image', blob, 'image.png');
-
-        try {
-            fetch(`/vote/${id}/authenticate`, {
-                method: 'POST',
-                body: imageFormData
-            })
-            .then(res => res.text()).then(htmlStr => {
-                document.open();
-                document.write(htmlStr);
-                document.close();
-            })
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
-    });
-
-    if (!errorMessage.textContent.length === 0) {
-        authenticateAdvancedContainer.classList.remove('camera-show');
-        cameraContainer.style.display = 'none';
-        confirmDialog.classList.add('hidden');
-        openCameraBtn.classList.remove('hidden');
+        // Cancel photo
+        cancelbutton.addEventListener('click', function() {
+            video.pause();
+            video.srcObject.getTracks()[0].stop();
+            cameraContainer.style.display = 'none';
+            openCameraBtn.classList.remove('hidden');
+            authenticateAdvancedContainer.classList.remove('camera-show');
+            cameraContainer.style.display = 'none';
+            console.log('Video stream stopped');
+        });
     }
-
-    // Cancel photo
-    cancelbutton.addEventListener('click', function() {
-        openCameraBtn.classList.remove('hidden');
-        imageRegistration.classList.remove('camera-show');
-        video.pause();
-        video.srcObject.getTracks()[0].stop();
-        cameraContainer.style.display = 'none';
-        console.log('Video stream stopped');
-    });
 </script>
