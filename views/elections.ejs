@@ -48,13 +48,13 @@
           <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav ms-auto">
                   <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
                       <a class="nav-link" href="/register">Register</a>
                   </li>
                   <li class="nav-item">
                       <a class="nav-link" href="/candidates">Candidates</a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="/elections">Elections</a>
                   </li>
                   <li class="nav-item">
                       <a class="nav-link" href="https://setusu.ie/">SETUSU Home</a>
@@ -63,55 +63,51 @@
           </div>
       </nav>
 
-      <div class="banner">
-        <img src="/assets/Banner.png" alt="Banner Image" class="banner-image">
-        <div class="banner-content">
-          <img src="/assets/Logo.png" alt="SETUSU Logo">
-          <div class="banner-text">
-            <h1>Your Union, Your Voice!</h1>
-            <p>Your student union at SETU Ireland is here to represent all of your wants and needs
-              as a student. SETUSU handles important decisions about your student life, and every student
-              deserves a say in who gets to represent you.</p>
-            <div class="banner-btn">
-              <button class="primaryBtnBlue" id="register-now-btn" onclick="location.href='/register'">REGISTER NOW</button>
-              <p><a href="https://setusu.ie/">Learn more about SETUSU</a></p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="electionList">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h2>Upcoming Elections</h2>
-          <button class="primaryBtn" onclick="location.href='/elections'">VIEW ALL ELECTIONS</button>
-        </div>
-        <div class="ui five column stackable grid" id="electionCards">
+      <div class="electionList" style="min-height: 75vh; padding-top: 5%;">
           <% 
-            const today = new Date().setHours(0, 0, 0, 0);
-            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= today);
+            const now = new Date();
+            const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
+
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
-            const limitedElections = sortedElections.slice(0, 5);
-            if (limitedElections.length > 0) {
-              limitedElections.forEach(function (election) { %>
-                <div class="column">
-                  <div class="ui fluid card">
-                    <div class="image">
-                      <% if (election.Icon_path) { %>
-                        <img src="<%= election.Icon_path %>" alt="Election Icon">
-                      <% } else { %>
-                        <img src="/assets/Placeholder-icon1.jpg" alt="Election Icon" class="placeholder-icon">
-                      <% } %>
-                    </div>
-                    <div class="content">
-                      <p class="header"><%= election.Description %></p>
-                      <div class="meta">
-                        <span><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+      
+            if (sortedElections.length > 0) {
+              const groups = Math.ceil(sortedElections.length / 5);
+              for (let i = 0; i < groups; i++) {
+                const groupStart = i * 5;
+                const groupEnd = groupStart + 5;
+                const groupElections = sortedElections.slice(groupStart, groupEnd);
+          %>
+                <div class="ui five column stackable grid" id ="electionCards">
+                  <% 
+                    groupElections.forEach((election) => {
+                  %>
+                      <div class="column">
+                        <div class="ui fluid card">
+                          <div class="image">
+                            <% if(election.Icon_path) { %>
+                              <img src="<%= election.Icon_path %>" alt ="Election Icon">
+                            <% } else { %>
+                              <img src="/assets/Placeholder-icon1.jpg" alt ="Election Icon" class="placeholder-icon">
+                            <% } %>
+                          </div>
+                          <div class="content">
+                            <p class="header"><%= election.Description %></p>
+                            <div class="meta">
+                              <span>
+                                <%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                  <% 
+                    });
+                  %>
                 </div>
-            <% });
-            } else { %>
+          <% 
+              }
+            } else {
+          %>
               <div class="column">
                 <div class="ui fluid card">
                   <div class="content">
@@ -122,56 +118,9 @@
                   </div>
                 </div>
               </div>
-            <% } %>
-        </div>
-      </div>
-
-      <div class="candidateList">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h2>Upcoming Candidates</h2>
-          <button class="primaryBtn" onclick="location.href='/candidates'">VIEW ALL CANDIDATES</button>
-        </div>
-        <div class="ui five column stackable grid" id="candidateCards">
-          <%
-          const filteredElections = data.filter((v, i, a) => v.Id !== null && new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= today);
-          const sortedFilteredElections = filteredElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
-          candidateData = sortedFilteredElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
-          const limitedCandidates = candidateData.slice(0, 5);
-          if (limitedCandidates.length > 0) { %>
-            <% limitedCandidates.forEach(function (candidate) { 
-                if (candidate.CandidateId) { %>
-                  <div class="column">
-                    <div class="ui fluid card">
-                      <div class="image">
-                        <% if(candidate.Picture_Path) { %>
-                          <img src="<%= candidate.Picture_Path %>" alt ="Candidate Thumbnail">
-                        <% } else { %>
-                          <img src="/assets/Person-Placeholder.png" alt ="Candidate Thumbnail">
-                        <% } %>
-                      </div>
-                      <div class="content">
-                        <p class="header"><%= candidate.fName %> <%= candidate.lName %></p>
-                        <div class="meta">
-                          <span><%= candidate.Description %></span>
-                        </div>
-                        <div class="description">Running for <%= candidate.CategoryName %> </div>
-                      </div>
-                    </div>
-                  </div>
-                <% } 
-              }); %>
-          <% } else { %>
-            <div class="column">
-              <div class="ui fluid card">
-                <div class="content">
-                  <p class="header">No Candidates Yet</p>
-                  <div class="meta">
-                    <span>Check back later!</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          <% } %>
+          <% 
+            }
+          %>
         </div>
       </div>
   </body>

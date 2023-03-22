@@ -31,4 +31,62 @@ router.get('/', function(req, res, next) {
   })
 });
 
+/* GET election list page. */
+router.get('/elections', function(req, res, next) {
+  database.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlSearch =
+        `select Id, Description, ElectionDate, Icon_path,
+        Candidate.CandidateId, fName, lName, CategoryName,
+          Picture_Path
+          FROM Election
+          LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
+          LEFT OUTER JOIN Candidate_Category
+          ON Candidate.CandidateId = Candidate_Category.CandidateId
+          LEFT OUTER JOIN Category
+          ON Candidate_Category.CategoryId = Category.CategoryId;`
+    await connection.query (sqlSearch, async (err, result) => {
+        connection.release()
+        
+        if (err) throw (err)
+        if (result.length == 0) {
+          console.log("Nothing Registered.")
+          res.render('elections', { title: 'ALL ELECTIONS', data:result});
+        }
+        else {
+          res.render('elections', { title: 'ALL ELECTIONS', data:result});
+        }
+    })
+  })
+});
+
+/* GET candidate list page. */
+router.get('/candidates', function(req, res, next) {
+  database.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlSearch =
+        `select Id, Description, ElectionDate, Icon_path,
+        Candidate.CandidateId, fName, lName, CategoryName,
+          Picture_Path
+          FROM Election
+          LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
+          LEFT OUTER JOIN Candidate_Category
+          ON Candidate.CandidateId = Candidate_Category.CandidateId
+          LEFT OUTER JOIN Category
+          ON Candidate_Category.CategoryId = Category.CategoryId;`
+    await connection.query (sqlSearch, async (err, result) => {
+        connection.release()
+        
+        if (err) throw (err)
+        if (result.length == 0) {
+          console.log("Nothing Registered.")
+          res.render('candidates', { title: 'ALL CANDIDATES', data:result});
+        }
+        else {
+          res.render('candidates', { title: 'ALL CANDIDATES', data:result});
+        }
+    })
+  })
+});
+
 module.exports = router;

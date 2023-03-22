@@ -346,6 +346,7 @@ form > input {
     font-weight: bold;
     padding: 0.5em;
     border: none;
+    font-size: 1.4vw;
 }
 
 .primaryBtnBlue {
@@ -364,6 +365,8 @@ form > input {
 
 #electionCards, #candidateCards {
   margin-left: 1em !important;
+  margin-right: 1em !important;
+  padding-top: 1% !important;
 }
 
 #electionCards .card .image,
