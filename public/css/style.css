@@ -108,8 +108,22 @@ footer {
 
 #copyright, #copyright h4 {
   text-align: right;
-  font-size: 1vw;
+  font-size: 1.5vw;
   align-items: center;
+}
+
+@media (max-width: 1300px) {
+  .social-icons div {
+    width: 40% !important;
+    text-align: center;
+  }
+
+  .wd-links, .cw-links {
+    text-align: center;
+    padding-left: 15%;
+    padding-right: 15%;
+    width: 100% !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -123,7 +137,7 @@ footer {
   }
 
   .social-icons div {
-    width: 50%;
+    width: 50% !important;
     text-align: center;
   }
 
@@ -219,7 +233,7 @@ footer {
   color:#eb2c5c;
 }
 
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 755px) {
   .banner {
     height: auto;
     text-align: center;
@@ -252,7 +266,7 @@ footer {
     height: 100% !important;
   }
   .banner-content .banner-text {
-    font-size: 1.2em;
+    font-size: 3vw;
     padding-left: 1em;
     padding-right: 1em;
     width: 100%;
@@ -264,7 +278,7 @@ footer {
     transform: none !important;
   }
   .banner-content p {
-    font-size: 1em;
+    font-size: 2.5vw;
     margin-bottom: 1em;
     font-family: 'Aileron', sans-serif !important;
   }
@@ -352,6 +366,39 @@ form > input {
   margin-left: 1em !important;
 }
 
+#electionCards .card .image,
+#candidateCards .card .image {
+  height: 0;
+  padding-bottom: 100%;
+  position: relative;
+}
+
+#electionCards .card .image img,
+#candidateCards .card .image img {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+}
+
+#electionCards .card .content .header,
+#candidateCards .card .content .header {
+  font-size: 1.4vw;
+}
+
+#electionCards .card .content .meta,
+#candidateCards .card .content .meta {
+  font-size: 1.2vw;
+  line-height: normal;
+}
+
+#candidateCards .card .content .description {
+  font-size: 1.4vw;
+  line-height: normal;
+} 
+
 .column {
   padding-top: 0em !important;
 }
@@ -377,6 +424,25 @@ form > input {
     object-fit: cover !important;
     width: 100% !important;
   }
+
+  #electionCards .card .image, #candidateCards .card .image {
+    padding-bottom: 10em !important;
+  }
+
+  #electionCards .card .content .header,
+  #candidateCards .card .content .header {
+    font-size: initial;
+  }
+
+  #electionCards .card .content .meta,
+  #candidateCards .card .content .meta {
+    font-size: initial;
+  }
+
+  #candidateCards .card .content .description {
+    font-size: initial;
+    line-height: normal;
+  } 
 }
 
 .container.login {

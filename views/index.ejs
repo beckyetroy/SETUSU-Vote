@@ -83,58 +83,97 @@
       <div class="electionList">
         <h2> Upcoming Elections</h2>
         <div class="ui five column stackable grid" id="electionCards">
-          <div class="column">
-            <div class="ui fluid card">
-              <div class="image">
-                <img src="/assets/Placeholder-icon1.jpg">
-              </div>
-              <div class="content">
-                <p class="header">Election Title</p>
-                <div class="meta">
-                  <span>19th March 2023</span>
+          <%
+            electionData = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => (t.Id === v.Id)) === i);
+            if(electionData.length > 0) {
+              electionData.forEach(function(election){
+            %>
+            <div class="column">
+              <div class="ui fluid card">
+                <div class="image">
+                  <% if(election.Icon_path) { %>
+                    <img src="<%= election.Icon_path %>" alt ="Election Icon">
+                  <% } else { %>
+                    <img src="/assets/Placeholder-icon1.jpg" alt ="Election Icon" class="placeholder-icon">
+                  <% } %>
+                </div>
+                <div class="content">
+                  <p class="header"><%= election.Description %></p>
+                  <div class="meta">
+                    <span>
+                      <%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="column">
-            <div class="ui fluid card">
-              <div class="image">
-                <img src="/assets/Placeholder-icon2.jpg">
-              </div>
-              <div class="content">
-                <p class="header">Election Title 2</a>
+            <%
+                });
+            } else {
+            %>
+            <div class="column">
+              <div class="ui fluid card">
+                <div class="content">
+                  <p class="header">No Elections Yet</p>
+                  <div class="meta">
+                    <span>Check back later!</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+            <%
+            }
+            %>
         </div>
       </div>
 
       <div class="candidateList">
         <h2> Upcoming Candidates </h2>
         <div class="ui five column stackable grid" id="candidateCards">
-          <div class="column">
-            <div class="ui fluid card">
-              <div class="image">
-                <img src="/assets/Person-Placeholder.png">
-              </div>
-              <div class="content">
-                <p class="header">Candidate Name</p>
-                <div class="meta">
-                  <span>19th March 2023</span>
+          <%
+                candidateData = data.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                if(candidateData.length > 0) {
+                  candidateData.forEach(function(candidate){
+                        if (candidate.CandidateId) {
+                %>
+                <div class="column">
+                  <div class="ui fluid card">
+                    <div class="image">
+                      <% if(candidate.Picture_Path) { %>
+                        <img src="<%= candidate.Picture_Path %>" alt ="Candidate Thumbnail">
+                      <% } else { %>
+                        <img src="/assets/Person-Placeholder.png" alt ="Candidate Thumbnail">
+                      <% } %>
+                    </div>
+                    <div class="content">
+                      <p class="header"><%= candidate.fName %> <%= candidate.lName %></p>
+                      <div class="meta">
+                        <span><%= candidate.Description %></span>
+                      </div>
+                      <div class="description">Running for <%= candidate.CategoryName %> </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="column">
-            <div class="ui fluid card">
-              <div class="image">
-                <img src="/assets/Placeholder-icon2.jpg">
-              </div>
-              <div class="content">
-                <p class="header">Election Title 2</a>
-              </div>
-            </div>
-          </div>
+                <%
+                        } else {}
+                    });
+                }
+                else
+                {
+                %>
+                <div class="column">
+                  <div class="ui fluid card">
+                    <div class="content">
+                      <p class="header">No Candidates Yet</p>
+                      <div class="meta">
+                        <span>Check back later!</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <%
+                }
+                %>
         </div>
       </div>
   </body>
@@ -168,4 +207,18 @@
       </div>
     </div>
   </footer>
+  <script>
+    const placeholderImages = document.querySelectorAll('.placeholder-icon');
+
+    const placeholderImageSources = [
+      '/assets/Placeholder-icon1.jpg',
+      '/assets/Placeholder-icon2.jpg'
+    ];
+
+    placeholderImages.forEach(function(img) {
+      const randomIndex = Math.floor(Math.random() * placeholderImageSources.length);
+      img.src = placeholderImageSources[randomIndex];
+    });
+
+  </script>
 </html>
