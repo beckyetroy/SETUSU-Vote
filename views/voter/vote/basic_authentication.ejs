@@ -6,14 +6,22 @@
         <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate">
             <h3 class="formTitle">Please enter your details</h3>
             <div class="vote-error"><%= message %></div>
-                <label>Student Number : </label>
-                <input type="text" placeholder="Enter Student Number" name="studentno" required>
-                <label>First Name(s) : </label>
-                <input type="text" placeholder="Enter First Name(s)" name="fname" required>
-                <label>Last Name : </label>
-                <input type="text" placeholder="Enter Last Name" name="lname" required>
-                <label>Student Email : </label>
-                <input type="text" placeholder="Enter Email" name="email" required>
+            <div class="form-floating">
+                <input type="text" placeholder="Enter Student Number" name="studentno" id="studentno" class="form-control" required>
+                <label for="studentno">Student Number : </label>
+            </div>
+            <div class="form-floating">
+                <input type="text" placeholder="Enter Email" name="email" class="form-control" id="email" required>
+                <label for="email">Student Email : </label>
+            </div>
+            <div class="form-floating">
+                <input type="text" placeholder="Enter First Name(s)" name="fname" class="form-control" id="fname" required>
+                <label for="fname">First Name(s) : </label>
+            </div>
+            <div class="form-floating">
+                <input type="text" placeholder="Enter Last Name" name="lname" class="form-control" id="lname" required>
+                <label for="lname">Last Name : </label>
+            </div>
                 <br>
                 <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
         </form>
