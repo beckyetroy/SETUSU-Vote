@@ -69,7 +69,7 @@
             const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
 
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
-            const candidateData = sortedElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+            const candidateData = sortedElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election');
 
             if (candidateData.length > 0) {
               const groups = Math.ceil(candidateData.length / 5);

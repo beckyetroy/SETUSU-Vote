@@ -646,6 +646,27 @@ form.login {
   padding: 2em;
 }
 
+#vote-success {
+  width: 50vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  height: 50vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2em;
+}
+
 #vote-error > #retake {
   height: 25%;
 }
@@ -667,6 +688,10 @@ form.login {
   }
 
   #vote-error {
+    width: 90vw !important;
+  }
+
+  #vote-success {
     width: 90vw !important;
   }
 
@@ -791,15 +816,42 @@ form.login {
   transition: transform 0.3s ease-in-out;
 }
 
+#container-vote {
+  padding: 2em;
+  text-align: center;
+}
+
+#container-vote > button, .choices button {
+  font-size: 2vw !important;
+  margin: 1em !important;
+  width: 20% !important;
+}
+
+.choices {
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  padding: 1em;
+  background-color: #4666b1;
+  color: white;
+  border-radius: 25px;
+  background: #4666b1;
+}
+
+.choices h4 {
+  font-size: 2vw;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 #vote-option {
   background-color: #4363B1 !important;
   border: 1px solid #ccc !important;
-  max-width: 80% !important;
-  min-width: 50% !important;
+  max-width: 60% !important;
   margin: 1em auto !important;
   overflow: hidden !important;
   padding-left: 0 !important;
-  max-height: 20% !important;
+  max-height: 15% !important;
 }
   
 .card-img-top {
@@ -816,7 +868,7 @@ form.login {
 .card-name, #vote-name, #vote-name.card-body {
   position: relative;
   margin: 0;
-  font-size: 5vw;
+  font-size: 4vw;
   background-color: #4363B1 !important;
   color: white;
   font-family: 'Inter' !important;
@@ -832,7 +884,7 @@ form.login {
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  font-size: 4vw;
+  font-size: 3vw;
 }
 
 .radio-container input {

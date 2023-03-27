@@ -2,29 +2,36 @@
     <% if (categorydata.length === 0) { %>
         No Categories Found for this Election
     <% } else if (message === 'Success') { %>
-        Vote submitted successfully!
+        <div class="vote-success" id="vote-success">
+            <h3>Vote Submitted Successfully!</h3>
+            <p id="successMessage"> Thank you for voting.</p>
+            <button class="primaryBtn" onclick="location.href='/'">BACK TO HOME</button>
+        </div>
     <% } else if (currentcategory >= categorydata.length) { %>
         <h3>Confirm your choices</h3>
-        <form method="POST" action="/vote/<%= data[0].Id %>/submit">
-        <% Object.keys(selectedOptions).forEach(function(categoryIndex) { %>
-            <h4><%= categorydata[categoryIndex].CategoryName %></h4>
-            <% if (selectedOptions[categoryIndex] !== '-1') { %>
-                <% for (let i = 0; i < data.length; i++) { %>
-                    <% if (data[i].CandidateId === parseInt(selectedOptions[categoryIndex])) { %>
-                        <h5>You voted for: </h5>
-                        <p><%= data[i].fName %> <%= data[i].lName %> </p>
-                        <input type="hidden" name="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>" value="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>">
+        <div class ="choices">
+            <form method="POST" action="/vote/<%= data[0].Id %>/submit">
+            <% Object.keys(selectedOptions).forEach(function(categoryIndex) { %>
+                <h4><%= categorydata[categoryIndex].CategoryName %></h4>
+                <% if (selectedOptions[categoryIndex] !== '-1') { %>
+                    <% for (let i = 0; i < data.length; i++) { %>
+                        <% if (data[i].CandidateId === parseInt(selectedOptions[categoryIndex])) { %>
+                            <h5>You voted for: </h5>
+                            <p><%= data[i].fName %> <%= data[i].lName %> </p>
+                            <input type="hidden" name="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>" value="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>">
+                        <% } %>
                     <% } %>
+                <% } else { %>
+                <p>No candidate selected</p>
                 <% } %>
-            <% } else { %>
-              <p>No candidate selected</p>
-            <% } %>
-        <% }); %>
-        <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">BACK</button>
-        <button class="primaryBtn" id="submit-vote" type="submit">SUBMIT VOTE</button>
-        </form>
+            <% }); %>
+            <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">BACK</button>
+            <button class="primaryBtn" id="submit-vote" type="submit">SUBMIT VOTE</button>
+            </form>
+        </div>
     <% } else { %>
-        <h3>You are voting for the role of: <%= categorydata[currentcategory].CategoryName %></h3>
+        <% var stepNo = currentcategory + 1 %>
+        <h3>Step <%= stepNo %>/<%= categorydata.length %>: Voting for the Position of: <strong><u><%= categorydata[currentcategory].CategoryName %></u></strong></h3>
 
         <% var candidatesFound = false; %>
 
@@ -60,10 +67,7 @@
                 </div>
             </div>
         </div>
-        <% } });
-        if (!candidatesFound) { %>
-          No Candidates Found for this Category
-        <% } %>
+        <% } }); %>
 
         <div id="errorMessageVote">
             <% message %>
@@ -71,14 +75,9 @@
 
         <% if ((categorydata.length > 1) && (candidatesFound)) { %>
             <% if (currentcategory > 0) { %>
-                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">← PREVIOUS</button>
             <% } %>
-            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">CONFIRM</button>
-        <% } else if ((categorydata.length > 1) && (!candidatesFound)) { %>
-            <% if (currentcategory > 0) { %>
-                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">PREVIOUS</button>
-            <% } %>
-            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT</button>
+            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT →</button>
         <% } %>
     <% } %>
 </div>
@@ -90,11 +89,14 @@
             selectedOption = "-1";
         }
         const url = `/vote/${electionId}/${currentcategory}?fromButton=true&selectedOption=${selectedOption}`;
-        $.get(url, function(data) {
-            var tempContainer = $('<div>').html(data);
-            var container = tempContainer.find('#container-vote');
-            $('#container-vote').html(container.html());
-        });
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                var tempContainer = $('<div>').html(data);
+                var container = tempContainer.find('#container-vote');
+                $('#container-vote').html(container.html());
+            })
+            .catch(error => console.error(error));
     }
 
     function previousCategory(electionId, currentcategory) {
@@ -103,11 +105,14 @@
             selectedOption = "-1";
         }
         const url = `/vote/${electionId}/${currentcategory}?fromPrevButton=true&selectedOption=${selectedOption}`;
-        $.get(url, function(data) {
-            var tempContainer = $('<div>').html(data);
-            var container = tempContainer.find('#container-vote');
-            $('#container-vote').html(container.html());
-        });
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                var tempContainer = $('<div>').html(data);
+                var container = tempContainer.find('#container-vote');
+                $('#container-vote').html(container.html());
+            })
+            .catch(error => console.log(error));
     }
 
     function submitVote(electionId, currentcategory) {
@@ -116,10 +121,14 @@
             selectedOption = "-1";
         }
         const url = `/vote/${electionId}/${currentcategory}?fromPrevButton=true&selectedOption=${selectedOption}`;
-        $.get(url, function(data) {
-            var tempContainer = $('<div>').html(data);
-            var container = tempContainer.find('#container-vote');
-            $('#container-vote').html(container.html());
-        });
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                var tempContainer = $('<div>').html(data);
+                var container = tempContainer.find('#container-vote');
+                $('#container-vote').html(container.html());
+            })
+            .catch(error => console.log(error));
     }
+
 </script>

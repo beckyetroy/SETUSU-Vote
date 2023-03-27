@@ -242,6 +242,10 @@
             instructions.classList.add('hidden');
             cameraContainer.style.display = 'block';
 
+            if (!errorMessageDiv.classList.contains('hidden')) {
+                errorMessageDiv.classList.add('hidden');
+            }
+
             // Get user media
             if (navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true })
@@ -282,7 +286,14 @@
                             authenticateAdvancedContainer.classList.remove('camera-show');
                             cameraContainer.style.display = 'none';
                             confirmDialog.classList.add('hidden');
-                            errorMessage.textContent = error;
+                            if (error.startsWith("<h1>")) {
+                                //errorMessage.textContent = 'Sorry, there was a problem. Please try again later.';
+                                document.open();
+                                document.write(error);
+                                document.close();
+                            } else {
+                                errorMessage.textContent = error;
+                            }
                             errorMessageDiv.classList.remove('hidden');
                         });
                     } else {

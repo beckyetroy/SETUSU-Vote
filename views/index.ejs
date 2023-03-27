@@ -139,7 +139,7 @@
           const limitedCandidates = candidateData.slice(0, 5);
           if (limitedCandidates.length > 0) { %>
             <% limitedCandidates.forEach(function (candidate) { 
-                if (candidate.CandidateId) { %>
+                if (candidate.CandidateId && (candidate.fName !== 'Reopen') && (candidate.lName !== 'Election')) { %>
                   <div class="column">
                     <div class="ui fluid card">
                       <div class="image">

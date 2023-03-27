@@ -190,6 +190,9 @@ router.post('/election-add', async function(req, res, next) {
                 const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime) values (?,?,?,?)";
                 const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime]);
                 const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
+                const sqlInsertDefaultCandidate = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
+                const sqlInsertDefaultPerCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
+                const sqlInsertDefaultIcon = `UPDATE Candidate_Category SET picture_path = ?, picture_type = ? WHERE CandidateId = ?`;
 
                 await connection.query (insert_query, async (err, result)=> {
                     connection.release();
@@ -203,12 +206,31 @@ router.post('/election-add', async function(req, res, next) {
             
                         const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, electionId]);
                         await connection.query(insert_category_query, async (err, result) => {
-                            if (err) throw (err);
+                            if (err) console.log(err);
+                            const category = result.insertId;
+                            console.log('Category Added');
+                            //Create default candidate 'Reopen Elections' for every category
+                            const insert_default_query = mysql.format(sqlInsertDefaultCandidate,['Reopen', 'Election', 'NA', electionId]);
+                            await connection.query(insert_default_query, async (err, result) => {
+                                if (err) console.log(err);
+                                const candidate = result.insertId;
+                                console.log('Default Candidate Added');
+                                const insert_candidate_category = mysql.format(sqlInsertDefaultPerCategory, [category, candidate]);
+                                await connection.query(insert_candidate_category, async (err, result) => {
+                                    if (err) console.log(err);
+                                    console.log('Default Candidate_Category Added');
+                                    const insert_icon_query = mysql.format(sqlInsertDefaultIcon, ['/assets/Placeholder-icon2.jpg', 'image/jpeg', candidate]);
+                                    await connection.query(insert_icon_query, async (err, result) => {
+                                        if (err) console.log(err);
+                                        console.log('Default Icon Added');
+                                    });
+                                });
+                            });
                         });
                     }
-                    res.redirect('/hj9h8765qzf5jizwwnua');
                 });
             });
+            res.redirect('/hj9h8765qzf5jizwwnua');
         }
     } catch (err) {
         res.redirect('/hj9h8765qzf5jizwwnua');
