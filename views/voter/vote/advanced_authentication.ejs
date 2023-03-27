@@ -1,3 +1,9 @@
+<div class="vote-error" id="vote-error">
+    <h3>Facial Recognition failed.</h3>
+    <p id="errorMessage"></p>
+    <button id="retake" class="primaryBtn">Try Again</button>
+</div>
+
 <div id="carouselInstructions" class="carousel slide" data-interval="false" data-wrap="false">
     <ol class="carousel-indicators">
         <li data-target="#" data-slide-to="0" class="active"></li>
@@ -56,19 +62,20 @@
 </div>
 
 <div class="container-advanced-authentication" id="container-advanced-authentication">
-    <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+    <div id="camera-container" class="camera-container" style="background-color: rgba(0, 0, 0, 0.5); display: none;">
         <video id="video" autoplay></video>
-        <button id="cancelbutton">Cancel</button>
+        <button id="cancelbutton" class="close-btn">×</button>
     </div>
 
     <div id="confirm-dialog" class="hidden">
+        <h3>Are you happy with your photo?</h3>
+        <p>Ensure your face is clearly visible and you are not blinking.</p>
         <img id="photo-preview" src="" alt="Taken photo">
-        <button id="retake">Retake</button>
-        <button id="confirm">Confirm</button>
-        <button id="showInstructions">Revisit Instructions</button>
+        <div class="d-flex align-items-center justify-content-center">
+            <button id="retake" class="primaryBtn">× No</button>
+            <button id="confirm" class="primaryBtn">✓ Yes</button>
+        </div>
     </div>
-
-    <div class="vote-error" id="vote-error"><%= message %></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
@@ -96,10 +103,9 @@
         const confirmDialog = document.getElementById('confirm-dialog');
         const photoPreview = document.getElementById('photo-preview');
         const canvas = document.createElement('canvas');
-        const errorMessage = document.getElementById('vote-error');
         const instructions = document.getElementById('carouselInstructions');
-        const showInstructionsBtn = document.getElementById('showInstructions');
-        const cameraBtn = document.getElementById('cameraBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorMessageDiv = document.getElementById('vote-error');
 
         let stream = null;
         let data = null;
@@ -110,6 +116,7 @@
         var maxLandmarkMovement = 10;
 
         confirmDialog.classList.add('hidden');
+        errorMessageDiv.classList.add('hidden');
 
         openCameraBtn.addEventListener('click', function() {
             // Show camera container and hide other fields
@@ -233,7 +240,6 @@
         retakeButton.addEventListener('click', function () {
             confirmDialog.classList.add('hidden');
             instructions.classList.add('hidden');
-            cameraBtn.classList.add('hidden');
             cameraContainer.style.display = 'block';
 
             // Get user media
@@ -270,27 +276,27 @@
                     method: 'POST',
                     body: imageFormData
                 })
-                .then(res => res.text()).then(htmlStr => {
-                    document.open();
-                    document.write(htmlStr);
-                    document.close();
-                })
+                .then(response => {
+                    if (response.status === 500) {
+                        return response.text().then(error => {
+                            authenticateAdvancedContainer.classList.remove('camera-show');
+                            cameraContainer.style.display = 'none';
+                            confirmDialog.classList.add('hidden');
+                            errorMessage.textContent = error;
+                            errorMessageDiv.classList.remove('hidden');
+                        });
+                    } else {
+                        return response.text().then(htmlStr => {
+                            document.open();
+                            document.write(htmlStr);
+                            document.close();
+                        });
+                    }
+                });
             } catch (error) {
                 console.error('Error uploading image:', error);
             }
         });
-
-        if (!errorMessage.textContent.length === 0) {
-            authenticateAdvancedContainer.classList.remove('camera-show');
-            cameraContainer.style.display = 'none';
-            confirmDialog.classList.add('hidden');
-            cameraBtn.classList.remove('hidden');
-        }
-
-        showInstructionsBtn.addEventListener('click', function() {
-            instructions.classList.remove('hidden');
-            confirmDialog.classList.add('hidden');
-        })
 
         // Cancel photo
         cancelbutton.addEventListener('click', function() {

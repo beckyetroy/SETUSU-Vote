@@ -174,10 +174,10 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
                 rekognition.compareFaces(params, function (err, data) {
                     if (err) {
                         console.error('Error comparing faces:', err);
-                        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.', 0, {});
+                        res.status(500).send('Sorry, there was a problem verifying your details. Please try again later.');
                     } else if (data.FaceMatches.length == 0) {
                         console.log('No matching face found');
-                        renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.', 0, {});
+                        res.status(500).send('Facial recognition failed. Please try again.');
                     } else {
                         console.log('Face match found');
                         const faceData = data.FaceMatches[0].Face;

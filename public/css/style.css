@@ -357,7 +357,7 @@ form > input {
   color: white;
   font-family: 'Inter' !important;
   font-weight: bold;
-  font-size: 1.3rem;
+  font-size: 2rem;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-right: 2em;
@@ -539,128 +539,198 @@ form.login {
 }
 
 .camera-container, .camera {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80%;
-    overflow: hidden;
-    top: 0;
-  }
-  
-  .video-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  
-  #video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    transform: translate(+50%, -0%);
-    height: 100%;
-    object-fit: cover;
-    filter: none;
-  }
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  top: 0;
+}
 
+
+#video {
+  position: absolute;
+  left: 0;
+  max-width: 40%;
+  transform: translate(+75%, -0%);
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+}
+
+#face-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%);
+  z-index: 5;
+  max-width: 35vw;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 5%;
+  background: none;
+  border: none;
+  font-size: 4rem;
+  cursor: pointer;
+  color: white;
+}
+
+.green-frame {
+  filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%);
+}
+
+.white-frame {
+  filter: none;
+}
+
+#confirm-dialog {
+  width: 70vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  height: 75vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#photo-preview {
+  object-fit: cover;
+  width: 30%;
+  height: 55%;
+}
+
+#confirm-dialog div {
+  width: 100%;
+}
+
+#retake,
+#confirm {
+  display: inline-block;
+  margin: 1em;
+  width: 20%;
+  height: 50%;
+}
+
+#vote-error {
+  width: 50vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  height: 50vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2em;
+}
+
+#vote-error > #retake {
+  height: 25%;
+}
+
+@media (max-width: 450px) {
   #face-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -45%);
-    z-index: 5;
-    max-width: 50vw;
+    max-width: 100% !important;
   }
 
-  .green-frame {
-    filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%);
+  #video {
+    max-width: 100% !important;
+    transform: none !important;
   }
 
-  .white-frame {
-    filter: none;
+  #confirm-dialog {
+    width: 90vw !important;
+    margin: 0.1em !important;
+    height: 70vh;
   }
 
-  @media (max-width: 450px) {
-    #face-frame {
-      max-width: 100% !important;
-    }
+  #vote-error {
+    width: 90vw !important;
+  }
 
-    #video {
-      width: 100% !important;
-      transform: none !important;
-    }
+  #photo-preview {
+    object-fit: cover;
+    width: 70%;
+    height: 55%;
   }
-    
-  .button-container {
-    position: absolute;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
+
+  #vote-error > #retake {
+    width: 60%;
   }
+}
   
-  #startbutton,
-  #cancelbutton {
-    position: absolute;
-    margin: 0 5%;
-    padding: 0.8em;
-    background-color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+.button-container {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+}
 
-  #startbutton {
-    bottom: 12%
-  }
-
-  #cancelbutton {
-    bottom: 2%;
-  }
+#startbutton {
+  bottom: 12%
+}
 
 .hidden {
-    display: none;
+  display: none !important;
 }
 
 .container-image-registration, .container-instructions {
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
-    padding: 1em;
-    text-align: center;
-    display:none;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+  padding: 1em;
+  text-align: center;
+  display:none;
 }
 
 .camera-show {
-    width: 100%;
-    height: 90vh;
-    align-items: center;
+  width: 100%;
+  height: 90vh;
+  align-items: center;
 }
 
 .container-basic-registration.slide-out, .container-instructions.slide-out {
-    animation: slide-out 1s forwards;
+  animation: slide-out 1s forwards;
 }
 
 @keyframes slide-out {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+  0% {
+      transform: translateX(0);
+  }
+  100% {
+      transform: translateX(-100%);
+  }
 }
 
 .container-image-registration.fade-in, .container-instructions.fade-in {
-    opacity: 1;
-    transition-delay: -1s;
-    display:block !important;
+  opacity: 1;
+  transition-delay: -1s;
+  display:block !important;
 }
 
 #cardSample {
@@ -668,52 +738,52 @@ form.login {
 }
 
 .image-upload {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease-in-out;
-  }
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease-in-out;
+}
 
-  .camera {
-    transform: translateX(100%);
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  
-  .slider-controls {
-    justify-content: center;
-    margin-top: 5%;
-    position: relative;
-  }
-  
-  .slider-controls button {
-    margin: 0 1%;
-    padding: 1%;
-  }
-  
-  .switch-to-image-upload {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .switch-to-camera {
-    background-color: #4CAF50;
-    color: white;
-  }
+.camera {
+  transform: translateX(100%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 
-  .cameraBtn {
-    background-color: #4363B1;
-    color: white;
-    font-family: 'Inter' !important;
-    padding: 1em;
-    font-size: 1.2em;
-    border: none;
-    margin-top: 4.5%;
-    margin-bottom: 4.5%;
+.slider-controls {
+  justify-content: center;
+  margin-top: 5%;
+  position: relative;
+}
+
+.slider-controls button {
+  margin: 0 1%;
+  padding: 1%;
+}
+
+.switch-to-image-upload {
+  background-color: #f44336;
+  color: white;
+}
+
+.switch-to-camera {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cameraBtn {
+  background-color: #4363B1;
+  color: white;
+  font-family: 'Inter' !important;
+  padding: 1em;
+  font-size: 1.2em;
+  border: none;
+  margin-top: 4.5%;
+  margin-bottom: 4.5%;
 }
 
 .image-upload,
@@ -825,7 +895,8 @@ form.login {
   font-family: 'Inter';
   margin: 0 auto;
   background-color: #e6e6e6;
-  margin-top: 1em;
+  margin-top: 2em;
+  margin-bottom: 2em;
 }
 
 form.authenticate {
