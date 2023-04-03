@@ -1,7 +1,7 @@
 <div class="vote-error" id="vote-error">
     <h3>Facial Recognition failed.</h3>
     <p id="errorMessage"></p>
-    <button id="retake" class="primaryBtn">Try Again</button>
+    <button id="retry" class="primaryBtn">Try Again</button>
 </div>
 
 <div id="carouselInstructions" class="carousel slide" data-interval="false" data-wrap="false">
@@ -67,7 +67,7 @@
         <button id="cancelbutton" class="close-btn">×</button>
     </div>
 
-    <div id="confirm-dialog" class="hidden">
+    <div id="confirm-dialog" class="confirm-dialog">
         <h3>Are you happy with your photo?</h3>
         <p>Ensure your face is clearly visible and you are not blinking.</p>
         <img id="photo-preview" src="" alt="Taken photo">
@@ -79,8 +79,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-recognition"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-api"></script>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
 
 <script>
@@ -115,7 +113,9 @@
         var faceStable = false;
         var maxLandmarkMovement = 10;
 
-        confirmDialog.classList.add('hidden');
+        if (!confirmDialog.classList.contains('hidden')) {
+            confirmDialog.classList.add('hidden');
+        }
         errorMessageDiv.classList.add('hidden');
 
         openCameraBtn.addEventListener('click', function() {
@@ -209,7 +209,9 @@
                                                             stream.getTracks()[0].stop();
 
                                                             photoPreview.src = data;
-                                                            confirmDialog.classList.remove('hidden');
+                                                            if (confirmDialog.classList.contains('hidden')) {
+                                                                confirmDialog.classList.remove('hidden');
+                                                            }
                                                             cameraContainer.style.display = 'none';
                                                             instructions.classList.add('hidden');
                                                                     blinkThreshold = null;
@@ -235,10 +237,39 @@
         });
         
         const retakeButton = document.getElementById('retake');
+        const retryButton = document.getElementById('retry');
         const confirmButton = document.getElementById('confirm');
 
         retakeButton.addEventListener('click', function () {
-            confirmDialog.classList.add('hidden');
+            if (!confirmDialog.classList.contains('hidden')) {
+                confirmDialog.classList.add('hidden');
+            }
+            instructions.classList.add('hidden');
+            cameraContainer.style.display = 'block';
+
+            if (!errorMessageDiv.classList.contains('hidden')) {
+                errorMessageDiv.classList.add('hidden');
+            }
+
+            // Get user media
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = mediaStream;
+                    video.play();
+                })
+                .catch(function(err) {
+                    console.log("An error occurred: " + err);
+                });
+            }
+            photoPreview.src = '';
+        });
+
+        retryButton.addEventListener('click', function () {
+            if (!confirmDialog.classList.contains('hidden')) {
+                confirmDialog.classList.add('hidden');
+            }
             instructions.classList.add('hidden');
             cameraContainer.style.display = 'block';
 
@@ -285,9 +316,11 @@
                         return response.text().then(error => {
                             authenticateAdvancedContainer.classList.remove('camera-show');
                             cameraContainer.style.display = 'none';
-                            confirmDialog.classList.add('hidden');
+                            if (!confirmDialog.classList.contains('hidden')) {
+                                confirmDialog.classList.add('hidden');
+                            }
                             if (error.startsWith("<h1>")) {
-                                //errorMessage.textContent = 'Sorry, there was a problem. Please try again later.';
+                                errorMessage.textContent = 'Sorry, there was a problem. Please try again later.';
                                 document.open();
                                 document.write(error);
                                 document.close();

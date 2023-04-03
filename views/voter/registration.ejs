@@ -118,36 +118,43 @@
           </div>
         </div>
 
-        <div class="container-image-registration">
-          <div class="image-upload">
-            <div id="my-dropzone" class="dropzone"></div>
-            <button id="confirmBtn" disabled>Confirm</button>
+        <div class="container-image-registration" id="container-image-registration">
+          <div id="errorMessageDiv" class="errorMessageDiv hidden">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> The image you submitted is not valid. Please try again.
           </div>
-
-          <div class="camera">
-            <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-              <video id="video" autoplay></video>
-              <button id="startbutton">Take photo</button>
-              <button id="cancelbutton">Cancel</button>
+          <div class="upload-option">
+            <h3>Upload an Image of your Student ID Card</h3>
+            <div class="image-upload">
+              <div id="my-dropzone" class="dropzone"></div>
+              <button class="primaryBtn" id="confirmBtn" disabled>Upload</button>
             </div>
-
-            <div id="confirm-dialog" class="hidden">
-              <img id="photo-preview" src="" alt="Taken photo">
-              <button id="retake">Retake</button>
-              <button id="confirm">Confirm</button>
-            </div>
-              
-            <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
           </div>
 
-          <div class="slider-controls" id="slider-controls">
-            <button class="switch-to-image-upload">Image Upload</button>
-            <button class="switch-to-camera">Camera</button>
-          </div>
+          <h2 id="or"><u>OR</u></h2>
 
-          <div id="errorMessageDiv" class="hidden">
-            This image is not valid. Please try again.
+          <div class="camera-option" id="camera-option">
+            <h3>Take a Photo of your Student ID Card</h3>
+
+            <button class="cameraBtn" id="open-camera-btn"><i class="fas fa-camera"></i><br>Open camera</button>
           </div>
+      </div>
+
+      <div class="container-camera-option" id="container-camera-option">
+        <div id="camera-container" class="camera-container" style="background-color: rgba(0, 0, 0, 0.5); display: none;">
+          <video id="video" autoplay></video>
+          <button id="startbutton"><i class="fas fa-camera"></i></button>
+          <button id="cancelbutton" class="close-btn">×</button>
+        </div>
+
+        <div id="confirm-dialog" class="hidden">
+          <h3>Upload this photo?</h3>
+          <p>Ensure your name, face, and student number are clearly visible on the card.</p>
+          <img id="photo-preview" src="" alt="Taken photo">
+          <div class="d-flex align-items-center justify-content-center">
+              <button id="retake" class="primaryBtn">× No</button>
+              <button id="confirm" class="primaryBtn">✓ Yes</button>
+          </div>
+        </div>
       </div>
 
 <script>
@@ -155,11 +162,12 @@
   const nextButton2 = document.getElementById('next-button-2');
   const basicRegistration = document.querySelector('.container-basic-registration');
   const instructions = document.querySelector('.container-instructions');
-  const imageRegistration = document.querySelector('.container-image-registration');
+  const imageRegistration = document.getElementById('container-image-registration');
   const basicForm = document.querySelector('.register');
   const basicFormError = document.getElementById('basic-form-error');
 
   instructions.classList.add('hidden');
+  imageRegistration.classList.add('hidden');
 
   basicForm.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -200,39 +208,13 @@
     instructions.classList.add('slide-out');
       setTimeout(() => {
         instructions.remove();
+        imageRegistration.classList.remove('hidden');
         imageRegistration.classList.add('fade-in');
-        camera.style.display = 'none';
       }, 1000);
   });
 
-  const switchToImageUploadBtn = document.querySelector('.switch-to-image-upload');
-  const switchToCameraBtn = document.querySelector('.switch-to-camera');
   const imageUpload = document.querySelector('.image-upload');
-  const camera = document.querySelector('.camera');
-
-  switchToImageUploadBtn.addEventListener('click', () => {
-    camera.style.transform = 'translateX(100%)';
-
-  // Wait for the transition to complete before hiding the camera div
-  camera.addEventListener('transitionend', () => {
-    imageUpload.style.display = 'block';
-    imageUpload.style.transform = 'translateX(0)';
-    camera.style.display = 'none';
-  });
-});
-
-switchToCameraBtn.addEventListener('click', () => {
-  imageUpload.style.transform = 'translateX(-100%)';
-
-  // Wait for the transition to complete before hiding the imageUpload div
-  imageUpload.addEventListener('transitionend', () => {
-    camera.style.display = 'block';
-    camera.style.transform = 'translateX(0)';
-    imageUpload.style.display = 'none';
-  });
-});
-
-
+  const cameraOptionContainer = document.getElementById('container-camera-option');
   const openCameraBtn = document.getElementById('open-camera-btn');
   const cameraContainer = document.getElementById('camera-container');
   const video = document.getElementById('video');
@@ -241,7 +223,6 @@ switchToCameraBtn.addEventListener('click', () => {
   const confirmDialog = document.getElementById('confirm-dialog');
   const errorMessageDiv = document.getElementById('errorMessageDiv');
   const photoPreview = document.getElementById('photo-preview');
-  const sliderControls = document.getElementById('slider-controls');
   const canvas = document.createElement('canvas');
   let stream = null;
   let data = null;
@@ -252,10 +233,9 @@ switchToCameraBtn.addEventListener('click', () => {
   openCameraBtn.addEventListener('click', function() {
     // Show camera container and hide other fields
     cameraContainer.style.display = 'block';
-    errorMessageDiv.classList.add('hidden');
-    sliderControls.classList.add('hidden');
-    imageRegistration.classList.add('camera-show');
-    openCameraBtn.classList.add('hidden');
+    cameraOptionContainer.classList.add('camera-show');
+    imageRegistration.classList.remove('fade-in');
+    imageRegistration.classList.add('hidden');
 
     // Get user media
     if (navigator.mediaDevices.getUserMedia) {
@@ -290,7 +270,9 @@ switchToCameraBtn.addEventListener('click', () => {
 
   retakeButton.addEventListener('click', function () {
     confirmDialog.classList.add('hidden');
-    // Show camera container
+    if (!imageRegistration.classList.contains('hidden')) {
+      imageRegistration.classList.add('hidden');
+    }
     cameraContainer.style.display = 'block';
 
     // Get user media
@@ -331,12 +313,13 @@ switchToCameraBtn.addEventListener('click', () => {
       if (data.message === 'Voter registered successfully') {
         window.location.href = '/';
       } else {
-        imageRegistration.classList.remove('camera-show');
+        cameraOptionContainer.classList.remove('camera-show');
         cameraContainer.style.display = 'none';
         confirmDialog.classList.add('hidden');
         errorMessageDiv.classList.remove('hidden');
-        sliderControls.classList.remove('hidden');
-        openCameraBtn.classList.remove('hidden');
+        imageRegistration.classList.remove('hidden');
+        imageRegistration.classList.add('fade-in');
+        
       }
     })
     .catch(error => {
@@ -346,9 +329,9 @@ switchToCameraBtn.addEventListener('click', () => {
 
   // Cancel photo
   cancelbutton.addEventListener('click', function() {
-    sliderControls.classList.remove('hidden');
-    openCameraBtn.classList.remove('hidden');
-    imageRegistration.classList.remove('camera-show');
+    imageRegistration.classList.remove('hidden');
+    imageRegistration.classList.add('fade-in');
+    cameraOptionContainer.classList.remove('camera-show');
     video.pause();
     video.srcObject.getTracks()[0].stop();
     cameraContainer.style.display = 'none';
@@ -361,7 +344,7 @@ switchToCameraBtn.addEventListener('click', () => {
     paramName: "image",
     acceptedFiles: "image/*",
     addRemoveLinks: true,
-    dictDefaultMessage: "Drop files here or click to upload",
+    dictDefaultMessage: '<i class="fa fa-upload" aria-hidden="true"></i> <br> Drag & Drop Image here <br><span class="orMsg"> or </span><br> Click to Browse',
     dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
     dictInvalidFileType: "You can't upload files of this type.",
     dictCancelUpload: "Cancel upload",
@@ -373,10 +356,17 @@ switchToCameraBtn.addEventListener('click', () => {
     init: function() {
       var confirmBtn = document.getElementById("confirmBtn");
       var dz = this;
+      var cameraOptionDiv = document.getElementById("camera-option");
+      var orMessage = document.getElementById("or");
 
       // Display thumbnail of the selected image
       this.on("thumbnail", function(file, dataUrl) {
         confirmBtn.disabled = false;
+        cameraOptionDiv.classList.add("hidden");
+        orMessage.classList.add("hidden");
+        if (!errorMessageDiv.classList.contains('hidden')) {
+          errorMessageDiv.classList.add('hidden');
+        }
         var previewElement = file.previewElement;
         previewElement.classList.remove("dz-file-preview");
         var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
@@ -405,6 +395,14 @@ switchToCameraBtn.addEventListener('click', () => {
         confirmBtn.disabled = true;
       });
 
+      // Handle file removal
+      this.on("removedfile", function(file) {
+        if (dz.files.length === 0) {
+          confirmBtn.disabled = true;
+          cameraOptionDiv.classList.remove("hidden");
+          orMessage.classList.remove("hidden");
+        }
+      });
 
       // Handle upload errors
       this.on("error", function(file, response) {
@@ -413,6 +411,10 @@ switchToCameraBtn.addEventListener('click', () => {
       });
     }
   };
+
+  if (window.matchMedia("(max-width: 769px)").matches) {
+  Dropzone.options.myDropzone.dictDefaultMessage = '<i class="fa fa-upload" aria-hidden="true"></i> <br> Tap to Browse Images';
+}
 </script>
 
         <img class="logoBubble" src="assets/Logo-Bubble.png" alt="SETUSU Logo">

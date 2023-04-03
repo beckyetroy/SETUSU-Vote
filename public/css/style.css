@@ -343,13 +343,13 @@ form > input {
 }
 
 .primaryBtn {
-    background-color: #ffd633;
+    background-color: #e6b800;
     color: white;
     font-family: 'Inter' !important;
     font-weight: bold;
     padding: 0.5em;
     border: none;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
 }
 
 .primaryBtnBlue {
@@ -473,7 +473,7 @@ form > input {
 .container.login {
     background-color: #e6e6e2;
     width: 35%;
-    height: 60vh;
+    min-height: 60vh;
     margin-top: 5%;
 }
 
@@ -509,6 +509,7 @@ form.login {
     right: 4%;
     bottom: 5%;
     border-radius: 50%;
+    z-index: 10;
 }
 
 .header-image {
@@ -547,7 +548,6 @@ form.login {
   overflow: hidden;
   top: 0;
 }
-
 
 #video {
   position: absolute;
@@ -593,7 +593,7 @@ form.login {
   text-align: center;
   font-family: 'Inter' !important;
   margin: 1em;
-  height: 75vh;
+  min-height: 75vh;
   color: white;
   font-size: 1.1rem;
   border-radius: 25px;
@@ -617,12 +617,12 @@ form.login {
   width: 100%;
 }
 
-#retake,
+#retake, #retry,
 #confirm {
   display: inline-block;
   margin: 1em;
-  width: 20%;
-  height: 50%;
+  width: 20% !important;
+  height: 50% !important;
 }
 
 #vote-error {
@@ -632,7 +632,7 @@ form.login {
   font-family: 'Inter' !important;
   margin-top: 2em;
   margin-bottom: 2em;
-  height: 50vh;
+  min-height: 50vh;
   color: white;
   font-size: 1.1rem;
   border-radius: 25px;
@@ -653,7 +653,7 @@ form.login {
   font-family: 'Inter' !important;
   margin-top: 2em;
   margin-bottom: 2em;
-  height: 50vh;
+  min-height: 50vh;
   color: white;
   font-size: 1.1rem;
   border-radius: 25px;
@@ -667,7 +667,7 @@ form.login {
   padding: 2em;
 }
 
-#vote-error > #retake {
+#vote-error > #retry {
   height: 25%;
 }
 
@@ -684,7 +684,7 @@ form.login {
   #confirm-dialog {
     width: 90vw !important;
     margin: 0.1em !important;
-    height: 70vh;
+    min-height: 70vh;
   }
 
   #vote-error {
@@ -701,7 +701,7 @@ form.login {
     height: 55%;
   }
 
-  #vote-error > #retake {
+  #vote-error > #retry {
     width: 60%;
   }
 }
@@ -718,7 +718,26 @@ form.login {
 }
 
 #startbutton {
-  bottom: 12%
+  background-color: darkgray;
+  color: white;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-25%);
+  border: 3px solid white;
+  padding: 1em;
+}
+
+#startbutton:hover {
+  cursor: pointer;
+  background-color: lightgray;
+  color:black;
+  border: 3px solid white;
+}
+
+#startbutton > i {
+  font-size: 2.5rem !important;
 }
 
 .hidden {
@@ -762,12 +781,71 @@ form.login {
     max-width: 50%;
 }
 
+.container-image-registration {
+  padding: 2%;
+}
+
+#errorMessageDiv {
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
+  color: #000000;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+#errorMessageDiv i {
+  color: #ff0000;
+  margin-right: 0.5rem;
+}
+
 .image-upload {
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   transition: transform 0.3s ease-in-out;
+  padding: 2%;
+  margin-bottom: 3%;
+}
+
+.dropzone {
+  width: 80%;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  margin: 0 auto;
+  text-align: center;
+  color:#606060;
+}
+
+.dropzone .fa-upload {
+  width: 80%;
+  font-size: 4rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+.orMsg {
+  font-weight: normal;
+  font-size: 1rem;
+  padding: 0.25rem;
+}
+
+.dropzone.dz-clickable .dz-message {
+  font-weight: 600;
+  font-size: 1.25rem;
+  display: block;
+  color:#606060;
+}
+
+#confirmBtn[disabled] {
+  display: none;
+}
+
+#confirmBtn {
+  margin-top: 2.5%;
+  width: 80%;
 }
 
 .camera {
@@ -777,27 +855,6 @@ form.login {
   width: 100%;
   height: 100%;
   position: relative;
-}
-
-.slider-controls {
-  justify-content: center;
-  margin-top: 5%;
-  position: relative;
-}
-
-.slider-controls button {
-  margin: 0 1%;
-  padding: 1%;
-}
-
-.switch-to-image-upload {
-  background-color: #f44336;
-  color: white;
-}
-
-.switch-to-camera {
-  background-color: #4CAF50;
-  color: white;
 }
 
 .cameraBtn {
@@ -814,6 +871,12 @@ form.login {
 .image-upload,
 .camera {
   transition: transform 0.3s ease-in-out;
+}
+
+@media (max-width: 991px) {
+  .container-instructions button {
+    width: 40% !important;
+  }
 }
 
 #container-vote {
@@ -1016,7 +1079,7 @@ form.authenticate, form.register {
   margin: 1em;
   text-align: center;
   max-width: 50%;
-  height: 75vh;
+  min-height: 75vh;
   background-color: #4666b1;
   color: white;
   font-size: 1vw;
@@ -1030,13 +1093,13 @@ form.authenticate, form.register {
   transform: translateX(-50%);
 }
 
-.container-instructions {
+.container-instructions, .container-image-registration {
   text-align: center;
   font-family: 'Inter' !important;
   margin: 1em;
   text-align: center;
   max-width: 50%;
-  height: 75vh;
+  min-height: 75vh;
   background-color: #4666b1;
   color: white;
   font-size: 1vw;
@@ -1087,18 +1150,25 @@ form.authenticate, form.register {
   margin-top: 0.5em;
 }
 
+.camera-option > #open-camera-btn {
+  margin-top: 0.5em;
+  font-size: 1.25rem;
+  width: 80%;
+  background-color: #334a80;
+}
+
 @media (max-width: 669px) {
   #faceSample, #blinkSample {
     max-width: 50vw;
     max-height: 50vw;
   }
 
-  .container-instructions {
+  .container-instructions, .container-image-registration {
     transform: translateX(+15%) !important;
   }
 
   .container-authentication-instructions, .container-authentication-liveness-instructions, 
-  .container-instructions, .container-authentication-intro-instructions {
+  .container-instructions, .container-authentication-intro-instructions, .container-image-registration {
     max-width: 80%;
   }
 
@@ -1110,7 +1180,7 @@ form.authenticate, form.register {
   #open-camera-btn {
     padding-right: 0.5em !important;
     padding-left: 0.5em !important;
-    font-size: 5vw !important;
+    font-size: 1.25rem !important;
     margin-top: 0 !important;
   }
 
