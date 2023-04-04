@@ -16,8 +16,7 @@
                 <% if (selectedOptions[categoryIndex] !== '-1') { %>
                     <% for (let i = 0; i < data.length; i++) { %>
                         <% if (data[i].CandidateId === parseInt(selectedOptions[categoryIndex])) { %>
-                            <h5>You voted for: </h5>
-                            <p><%= data[i].fName %> <%= data[i].lName %> </p>
+                            <h5><%= data[i].fName %> <%= data[i].lName %> </h5>
                             <input type="hidden" name="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>" value="<%= categorydata[categoryIndex].CategoryId %>-<%= parseInt(selectedOptions[categoryIndex]) %>">
                         <% } %>
                     <% } %>
@@ -25,7 +24,7 @@
                 <p>No candidate selected</p>
                 <% } %>
             <% }); %>
-            <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">BACK</button>
+            <button class="primaryBtn" id="cancel-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>', event)">BACK</button>
             <button class="primaryBtn" id="submit-vote" type="submit">SUBMIT VOTE</button>
             </form>
         </div>
@@ -36,8 +35,9 @@
         <% var candidatesFound = false; %>
 
         <% data.forEach(function(candidate) {
-          if (candidate.CategoryId === categorydata[currentcategory].CategoryId) {
+        if (candidate.CategoryId === categorydata[currentcategory].CategoryId) {
             candidatesFound = true;
+            var selectedOption = selectedOptions[currentcategory];
         %>
         <div class="card h-100" id="vote-option">
             <div class="row g-0 align-items-center h-100">
@@ -61,7 +61,7 @@
                 </div>
                 <div class="col-2 d-flex align-items-left h-100">
                     <label class="radio-container">
-                        <input type="radio" name="vote-option-candidate" value="<%= candidate.CandidateId %>">
+                        <input type="radio" name="vote-option-candidate" value="<%= candidate.CandidateId %>" onchange="checkSelection()" <% if (selectedOption === candidate.CandidateId.toString()) { %>checked<% } %>>
                         <span class="checkmark"></span>
                     </label>
                 </div>
@@ -69,20 +69,40 @@
         </div>
         <% } }); %>
 
+
         <div id="errorMessageVote">
             <% message %>
         </div>
 
         <% if ((categorydata.length > 1) && (candidatesFound)) { %>
             <% if (currentcategory > 0) { %>
-                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>')">← PREVIOUS</button>
+                <button class="primaryBtn" id="back-btn" onclick="previousCategory('<%= data[0].Id %>', '<%= currentcategory %>', event)">← PREVIOUS</button>
             <% } %>
-            <button class="primaryBtn" id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT →</button>
+            <button class="primaryBtn" disabled id="confirm-btn1" onclick="nextCategory('<%= data[0].Id %>', '<%= currentcategory %>')">NEXT →</button>
         <% } %>
     <% } %>
 </div>
 
 <script>
+    function checkSelection() {
+        var radios = document.getElementsByName("vote-option-candidate");
+        var nextButton = document.getElementById("confirm-btn1");
+        var anyChecked = false;
+        
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                anyChecked = true;
+                break;
+            }
+        }
+        
+        if (anyChecked) {
+            nextButton.removeAttribute("disabled");
+        } else {
+            nextButton.setAttribute("disabled", "disabled");
+        }
+    }
+
     function nextCategory(electionId, currentcategory) {
         let selectedOption = $('input[name=vote-option-candidate]:checked').val();
         if (!selectedOption) {
@@ -95,11 +115,13 @@
                 var tempContainer = $('<div>').html(data);
                 var container = tempContainer.find('#container-vote');
                 $('#container-vote').html(container.html());
+                checkSelection();
             })
             .catch(error => console.error(error));
     }
 
-    function previousCategory(electionId, currentcategory) {
+    function previousCategory(electionId, currentcategory, event) {
+        event.preventDefault();
         let selectedOption = $('input[name=vote-option-candidate]:checked').val();
         if (!selectedOption) {
             selectedOption = "-1";
@@ -111,6 +133,7 @@
                 var tempContainer = $('<div>').html(data);
                 var container = tempContainer.find('#container-vote');
                 $('#container-vote').html(container.html());
+                checkSelection();
             })
             .catch(error => console.log(error));
     }
