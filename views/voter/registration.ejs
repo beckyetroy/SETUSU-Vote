@@ -48,6 +48,12 @@
                 </div>
             </div>
         </nav>
+        <div class="vote-success" id="vote-success">
+          <h3>Registered Successfully!</h3>
+          <p id="successMessage"></p>
+          <p id="successMessageTimer"></p>
+          <button class="primaryBtn" onclick="location.href='/'">BACK TO HOME</button>
+        </div>
         <div class="container-basic-registration">
             <form action="/register" method="POST" class="register">
                 <h3 class="formTitle">Register to Vote</h3>
@@ -165,9 +171,11 @@
   const imageRegistration = document.getElementById('container-image-registration');
   const basicForm = document.querySelector('.register');
   const basicFormError = document.getElementById('basic-form-error');
+  const successContainer = document.getElementById('vote-success');
 
   instructions.classList.add('hidden');
   imageRegistration.classList.add('hidden');
+  successContainer.classList.add('hidden');
 
   basicForm.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -224,6 +232,8 @@
   const errorMessageDiv = document.getElementById('errorMessageDiv');
   const photoPreview = document.getElementById('photo-preview');
   const canvas = document.createElement('canvas');
+  const successMessage = document.getElementById('successMessage');
+  const successMessageTimer = document.getElementById('successMessageTimer');
   let stream = null;
   let data = null;
 
@@ -310,16 +320,56 @@
     })
     .then(response => response.json())
     .then(data => {
-      if (data.message === 'Voter registered successfully') {
-        window.location.href = '/';
-      } else {
-        cameraOptionContainer.classList.remove('camera-show');
-        cameraContainer.style.display = 'none';
-        confirmDialog.classList.add('hidden');
-        errorMessageDiv.classList.remove('hidden');
-        imageRegistration.classList.remove('hidden');
-        imageRegistration.classList.add('fade-in');
-        
+      if (data.message.includes('election')) {
+        const electionDescription = data.message.replace('Voter registered successfully for election ', '').trim();
+        const electionOpenTime = data.OpenTime;
+        const electionId = data.Id;
+        if (electionDescription && electionOpenTime) {
+          const openTime = new Date(electionOpenTime);
+          const now = new Date();
+          if (now >= openTime) {
+            const voteButton = document.createElement('button');
+            voteButton.setAttribute('class', 'primaryBtnInverted');
+            voteButton.setAttribute('onclick', `location.href='/vote/${electionId}'`);
+            voteButton.textContent = 'VOTE NOW';
+            successMessageTimer.appendChild(voteButton);
+          }
+          else {
+            var timeRemaining = Math.max(0, openTime.getTime() - now.getTime());
+
+            var timer = setInterval(() => {
+              var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+              var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+              var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+              var timerText = `Voting begins in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              successMessageTimer.textContent = timerText;
+              timeRemaining -= 1000;
+              if (timeRemaining < 0) {
+                clearInterval(timer);
+              }
+            }, 1000);
+          }
+
+          successMessage.innerHTML = `You are now registered for: <strong>${electionDescription}</strong>`;
+          imageRegistration.classList.remove('fade-in');
+          imageRegistration.classList.add('hidden');
+          cameraOptionContainer.classList.add('hidden');
+          successContainer.classList.remove('hidden');
+        }
+        else {
+          successMessage.textContent = `You are now registered!`;
+          imageRegistration.classList.remove('fade-in');
+          imageRegistration.classList.add('hidden');
+          cameraOptionContainer.classList.add('hidden');
+          successContainer.classList.remove('hidden');
+        }
+      }
+      else {
+        successMessage.textContent = `You are now registered!`;
+        imageRegistration.classList.remove('fade-in');
+        imageRegistration.classList.add('hidden');
+        successContainer.classList.remove('hidden');
       }
     })
     .catch(error => {
@@ -386,9 +436,57 @@
 
         // Handle the success event when the queue has been processed
         dz.on("success", function(file, response) {
-            if (response.message === 'Voter registered successfully') {
-                window.location.href = '/';
+          if (response.message.includes('election')) {
+            const electionDescription = response.message.replace('Voter registered successfully for election ', '').trim();
+            const electionOpenTime = response.OpenTime;
+            const electionId = response.Id;
+            if (electionDescription && electionOpenTime) {
+              const openTime = new Date(electionOpenTime);
+              const now = new Date();
+              if (now >= openTime) {
+                const voteButton = document.createElement('button');
+                voteButton.setAttribute('class', 'primaryBtnInverted');
+                voteButton.setAttribute('onclick', `location.href='/vote/${electionId}'`);
+                voteButton.textContent = 'VOTE NOW';
+                successMessageTimer.appendChild(voteButton);
+              }
+              else {
+                var timeRemaining = Math.max(0, openTime.getTime() - now.getTime());
+
+                var timer = setInterval(() => {
+                  var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                  var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                  var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                  var timerText = `Voting begins in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                  successMessageTimer.textContent = timerText;
+                  timeRemaining -= 1000;
+                  if (timeRemaining < 0) {
+                    clearInterval(timer);
+                  }
+                }, 1000);
+              }
+
+              successMessage.innerHTML = `You are now registered for: <strong>${electionDescription}</strong>`;
+              imageRegistration.classList.remove('fade-in');
+              imageRegistration.classList.add('hidden');
+              cameraOptionContainer.classList.add('hidden');
+              successContainer.classList.remove('hidden');
             }
+            else {
+              successMessage.textContent = `You are now registered!`;
+              imageRegistration.classList.remove('fade-in');
+              imageRegistration.classList.add('hidden');
+              cameraOptionContainer.classList.add('hidden');
+              successContainer.classList.remove('hidden');
+            }
+          }
+          else {
+            successMessage.textContent = `You are now registered!`;
+            imageRegistration.classList.remove('fade-in');
+            imageRegistration.classList.add('hidden');
+            successContainer.classList.remove('hidden');
+          }
         });
 
         // Disable the button after sending the image

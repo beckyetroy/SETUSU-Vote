@@ -164,6 +164,9 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
                 if (err) throw (err)
                 const sqlInsert = "insert into Voter (StudentNo, fName, lName, Email, ElectionId, CardImg, CardImgMimeType) values (?,?,?,?,?,?,?)";
                 const insert_query = mysql.format(sqlInsert,[studentno, fname, lname, email, election, cardImg, mimeType]);
+
+                const get_election = "select * from Election where Id = ?";
+                const get_election_query = mysql.format(get_election,[election]);
     
                 var i = 0;
                 const fetch_voters = `SELECT * From Voter
@@ -177,7 +180,6 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
                     if (err) throw (err);
     
                     if (result.length > 0) {
-                        console.log('here');
                         renderPage(res, 'You are already registered for this election.');
                     }
     
@@ -186,7 +188,15 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
                             connection.release();
                             if (err) throw (err)
                             console.log("Registered Voter");
-                            res.status(200).json({ message: 'Voter registered successfully' });
+                            await connection.query (get_election_query, async (err, result)=> {
+                                if (err) {
+                                    res.status(200).json({ message: 'Voter registered successfully' });
+                                }
+                                else {
+                                    const { Id, Description, OpenTime } = result[0];
+                                    res.status(200).json({ message: `Voter registered successfully for election ${Description}`, OpenTime, Id });
+                                }
+                            });
                         });
                     }
                 });

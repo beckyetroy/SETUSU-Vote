@@ -1192,3 +1192,15 @@ form.authenticate, form.register {
     font-size: 0.8rem !important;
   }
 }
+
+#successMessage {
+  padding: 2rem;
+}
+
+#successMessageTimer {
+  padding-bottom: 2rem;
+}
+
+#successMessageTimer > button {
+  margin-top: 2rem;
+}

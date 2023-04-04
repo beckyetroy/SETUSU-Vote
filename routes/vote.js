@@ -25,9 +25,9 @@ function renderPage(res, electionId, action, message, category, selectedOptions)
       if (err) throw (err);
       const election_query = `SELECT Id, Description, Candidate.CandidateId,
                             fName, lName, Picture_path, CategoryId
-                            FROM Election JOIN Candidate
+                            FROM Election LEFT JOIN Candidate
                             ON Candidate.ElectionId = Election.Id
-                            JOIN Candidate_Category
+                            LEFT JOIN Candidate_Category
                             ON Candidate.CandidateId = Candidate_Category.CandidateId
                             WHERE Id = ?`;
       const category_query = `SELECT * FROM Category WHERE ElectionId = ?`;
