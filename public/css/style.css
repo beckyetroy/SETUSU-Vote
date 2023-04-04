@@ -23,7 +23,7 @@ h3 {
 }
 
 h5 {
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 
 .navbar, .navbar-collapse.collapse.show, .container-fluid, .nav {
@@ -36,8 +36,8 @@ h5 {
 }
 
 .navbar-title {
-  padding-left: 0.75em !important;
-  padding-top: 0.5em !important;
+  padding-left: 0.75rem !important;
+  padding-top: 0.5rem !important;
 }
 
 .nav-link {
@@ -53,7 +53,7 @@ h5 {
 }
 
 .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
 }
 
 @media (max-width: 991px) {
@@ -79,6 +79,9 @@ h5 {
   .nav-item {
     text-align: center;
   }
+  .navbar-title {
+    font-size: 2rem;
+  }
 }
 
 footer {
@@ -97,7 +100,7 @@ footer {
 }
 
 .social-icons div {
-  width: 25%;
+  width: 40%;
 }
 
 .wd-links, .cw-links {
@@ -340,12 +343,13 @@ form > input {
 }
 
 .primaryBtn {
-    background-color: #ffd633;
+    background-color: #e6b800;
     color: white;
     font-family: 'Inter' !important;
     font-weight: bold;
     padding: 0.5em;
     border: none;
+    font-size: 1.25rem;
 }
 
 .primaryBtnBlue {
@@ -353,7 +357,7 @@ form > input {
   color: white;
   font-family: 'Inter' !important;
   font-weight: bold;
-  font-size: 1.3em;
+  font-size: 2rem;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   padding-right: 2em;
@@ -362,8 +366,29 @@ form > input {
   border-radius: 20px;
 }
 
+.primaryBtnInverted {
+  background-color: white;
+  color: #4666b1;
+  font-family: 'Inter' !important;
+  font-weight: bold;
+  font-size: 1.3rem;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-right: 2em;
+  padding-left: 2em;
+  border: none;
+  border-radius: 20px;
+}
+
+.primaryBtnInverted:hover {
+  background-color: #ffd633;
+    color: white;
+}
+
 #electionCards, #candidateCards {
   margin-left: 1em !important;
+  margin-right: 1em !important;
+  padding-top: 1% !important;
 }
 
 #electionCards .card .image,
@@ -448,7 +473,7 @@ form > input {
 .container.login {
     background-color: #e6e6e2;
     width: 35%;
-    height: 60vh;
+    min-height: 60vh;
     margin-top: 5%;
 }
 
@@ -468,9 +493,9 @@ form.login {
 }
 
 .login > .primaryBtn {
-    margin: 2em;
-    padding-left: 2em;
-    padding-right: 2em;
+    margin: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 .login > h3 {
@@ -484,6 +509,7 @@ form.login {
     right: 4%;
     bottom: 5%;
     border-radius: 50%;
+    z-index: 10;
 }
 
 .header-image {
@@ -514,181 +540,332 @@ form.login {
 }
 
 .camera-container, .camera {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 80%;
-    overflow: hidden;
-    top: 0;
-  }
-  
-  .video-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  
-  #video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    transform: translate(+50%, -0%);
-    height: 100%;
-    object-fit: cover;
-    filter: none;
-  }
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  top: 0;
+}
 
+#video {
+  position: absolute;
+  left: 0;
+  max-width: 40%;
+  transform: translate(+75%, -0%);
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+}
+
+#face-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%);
+  z-index: 5;
+  max-width: 35vw;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 5%;
+  background: none;
+  border: none;
+  font-size: 4rem;
+  cursor: pointer;
+  color: white;
+}
+
+.green-frame {
+  filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%);
+}
+
+.white-frame {
+  filter: none;
+}
+
+#confirm-dialog {
+  width: 70vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  min-height: 75vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#photo-preview {
+  object-fit: cover;
+  width: 30%;
+  height: 55%;
+}
+
+#confirm-dialog div {
+  width: 100%;
+}
+
+#retake, #retry,
+#confirm {
+  display: inline-block;
+  margin: 1em;
+  width: 20% !important;
+  height: 50% !important;
+}
+
+#vote-error {
+  width: 50vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  min-height: 50vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2em;
+}
+
+#vote-success {
+  width: 50vw;
+  background-color: #4666b1;
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  min-height: 50vh;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  background: #4666b1;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2em;
+}
+
+#vote-error > #retry {
+  height: 25%;
+}
+
+@media (max-width: 450px) {
   #face-frame {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -45%);
-    z-index: 5;
-    max-width: 40vw;
+    max-width: 100% !important;
   }
 
-  .green-frame {
-    filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%);
+  #video {
+    max-width: 100% !important;
+    transform: none !important;
   }
 
-  .white-frame {
-    filter: none;
+  #confirm-dialog {
+    width: 90vw !important;
+    margin: 0.1em !important;
+    min-height: 70vh;
   }
 
-  @media (max-width: 450px) {
-    #face-frame {
-      max-width: 100% !important;
-    }
+  #vote-error {
+    width: 90vw !important;
+  }
 
-    #video {
-      width: 100% !important;
-      transform: none !important;
-    }
+  #vote-success {
+    width: 90vw !important;
   }
-    
-  .button-container {
-    position: absolute;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
+
+  #photo-preview {
+    object-fit: cover;
+    width: 70%;
+    height: 55%;
   }
+
+  #vote-error > #retry {
+    width: 60%;
+  }
+}
   
-  #startbutton,
-  #cancelbutton {
-    position: absolute;
-    margin: 0 5%;
-    padding: 0.8em;
-    background-color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+.button-container {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+}
 
-  #startbutton {
-    bottom: 12%
-  }
+#startbutton {
+  background-color: darkgray;
+  color: white;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-25%);
+  border: 3px solid white;
+  padding: 1em;
+}
 
-  #cancelbutton {
-    bottom: 2%;
-  }
+#startbutton:hover {
+  cursor: pointer;
+  background-color: lightgray;
+  color:black;
+  border: 3px solid white;
+}
+
+#startbutton > i {
+  font-size: 2.5rem !important;
+}
 
 .hidden {
-    display: none;
+  display: none !important;
 }
 
 .container-image-registration, .container-instructions {
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
-    padding: 1em;
-    text-align: center;
-    display:none;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+  padding: 1em;
+  text-align: center;
+  display:none;
 }
 
 .camera-show {
-    width: 100%;
-    height: 90vh;
-    align-items: center;
+  width: 100%;
+  height: 90vh;
+  align-items: center;
 }
 
 .container-basic-registration.slide-out, .container-instructions.slide-out {
-    animation: slide-out 1s forwards;
+  animation: slide-out 1s forwards;
 }
 
 @keyframes slide-out {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+  0% {
+      transform: translateX(0);
+  }
+  100% {
+      transform: translateX(-100%);
+  }
 }
 
 .container-image-registration.fade-in, .container-instructions.fade-in {
-    opacity: 1;
-    transition-delay: -1s;
-    display:block !important;
+  opacity: 1;
+  transition-delay: -1s;
+  display:block !important;
 }
 
 #cardSample {
     max-width: 50%;
 }
 
+.container-image-registration {
+  padding: 2%;
+}
+
+#errorMessageDiv {
+  background-color: #ffcccc;
+  border: 1px solid #ff0000;
+  color: #000000;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+#errorMessageDiv i {
+  color: #ff0000;
+  margin-right: 0.5rem;
+}
+
 .image-upload {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease-in-out;
-  }
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease-in-out;
+  padding: 2%;
+  margin-bottom: 3%;
+}
 
-  .camera {
-    transform: translateX(100%);
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  
-  .slider-controls {
-    justify-content: center;
-    margin-top: 5%;
-    position: relative;
-  }
-  
-  .slider-controls button {
-    margin: 0 1%;
-    padding: 1%;
-  }
-  
-  .switch-to-image-upload {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .switch-to-camera {
-    background-color: #4CAF50;
-    color: white;
-  }
+.dropzone {
+  width: 80%;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  margin: 0 auto;
+  text-align: center;
+  color:#606060;
+}
 
-  .cameraBtn {
-    background-color: #4363B1;
-    color: white;
-    font-family: 'Inter' !important;
-    padding: 1em;
-    font-size: 1.2em;
-    border: none;
-    margin-top: 4.5%;
-    margin-bottom: 4.5%;
+.dropzone .fa-upload {
+  width: 80%;
+  font-size: 4rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+.orMsg {
+  font-weight: normal;
+  font-size: 1rem;
+  padding: 0.25rem;
+}
+
+.dropzone.dz-clickable .dz-message {
+  font-weight: 600;
+  font-size: 1.25rem;
+  display: block;
+  color:#606060;
+}
+
+#confirmBtn[disabled] {
+  display: none;
+}
+
+#confirmBtn {
+  margin-top: 2.5%;
+  width: 80%;
+}
+
+.camera {
+  transform: translateX(100%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.cameraBtn {
+  background-color: #4363B1;
+  color: white;
+  font-family: 'Inter' !important;
+  padding: 1em;
+  font-size: 1.2em;
+  border: none;
+  margin-top: 4.5%;
+  margin-bottom: 4.5%;
 }
 
 .image-upload,
@@ -696,15 +873,48 @@ form.login {
   transition: transform 0.3s ease-in-out;
 }
 
+@media (max-width: 991px) {
+  .container-instructions button {
+    width: 40% !important;
+  }
+}
+
+#container-vote {
+  padding: 2em;
+  text-align: center;
+}
+
+#container-vote > button, .choices button {
+  font-size: 2vw !important;
+  margin: 1em !important;
+  width: 20% !important;
+}
+
+.choices {
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  padding: 1em;
+  background-color: #4666b1;
+  color: white;
+  border-radius: 25px;
+  background: #4666b1;
+}
+
+.choices h4 {
+  font-size: 2vw;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 #vote-option {
   background-color: #4363B1 !important;
   border: 1px solid #ccc !important;
-  max-width: 80% !important;
-  min-width: 50% !important;
+  max-width: 60% !important;
   margin: 1em auto !important;
   overflow: hidden !important;
   padding-left: 0 !important;
-  max-height: 20% !important;
+  max-height: 15% !important;
 }
   
 .card-img-top {
@@ -721,7 +931,7 @@ form.login {
 .card-name, #vote-name, #vote-name.card-body {
   position: relative;
   margin: 0;
-  font-size: 5vw;
+  font-size: 4vw;
   background-color: #4363B1 !important;
   color: white;
   font-family: 'Inter' !important;
@@ -737,7 +947,7 @@ form.login {
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  font-size: 4vw;
+  font-size: 3vw;
 }
 
 .radio-container input {
@@ -793,4 +1003,204 @@ form.login {
 
 .radio-container .checkmark:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+.container-basic-authentication, .container-basic-registration {
+  width: 60%;
+  font-family: 'Inter';
+  margin: 0 auto;
+  background-color: #e6e6e6;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+form.authenticate, form.register {
+  text-align: center;
+}
+
+.form-floating {
+  width: 40% !important;
+  display: inline-block;
+  padding-bottom: 1em;
+}
+
+.select-election {
+  width: 60% !important;
+  padding: 1em;
+  display: inline-block;
+}
+
+.authenticate > .primaryBtn, .register > .primaryBtn {
+  margin: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.authenticate > h3, .register > h3 {
+  padding-top: 2em;
+  padding-bottom: 1em;
+  font-weight: bold;
+}
+
+@media (max-width: 991px) {
+  .container-basic-authentication, .container-basic-registration {
+    width: 95% !important;
+  }
+  
+  .form-floating, .select-election {
+    width: 90% !important;
+  }
+}
+
+#faceSample, #blinkSample {
+  max-width: 30%;
+}
+
+.carousel-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.carousel-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  height: 100%;
+}
+
+.container-authentication-instructions,
+.container-authentication-liveness-instructions, .container-authentication-intro-instructions {
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  text-align: center;
+  max-width: 50%;
+  min-height: 75vh;
+  background-color: #4666b1;
+  color: white;
+  font-size: 1vw;
+  border-radius: 25px;
+  background: #4666b1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.container-instructions, .container-image-registration {
+  text-align: center;
+  font-family: 'Inter' !important;
+  margin: 1em;
+  text-align: center;
+  max-width: 50%;
+  min-height: 75vh;
+  background-color: #4666b1;
+  color: white;
+  font-size: 1vw;
+  border-radius: 25px;
+  background: #4666b1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transform: translateX(+50%);
+}
+
+.container-authentication-intro-instructions h3 {
+  padding: 1em;
+  padding-bottom: 0em;
+}
+
+.container-instructions h3 {
+  padding: 1em;
+}
+
+.container-instructions button {
+  width: 20%;
+}
+
+.container-authentication-intro-instructions p,
+.container-authentication-liveness-instructions p,
+.container-authentication-instructions p,
+.container-instructions p {
+  max-width: 70%;
+  font-size: 1.1rem;
+}
+
+.container-authentication-liveness-instructions div {
+  padding-top: 0em;
+}
+
+.instructionImg {
+  padding: 1em !important;
+}
+
+.fas.fa-camera {
+  font-size: 10vw;
+  padding: 0.1em;
+}
+
+#open-camera-btn {
+  margin-top: 0.5em;
+}
+
+.camera-option > #open-camera-btn {
+  margin-top: 0.5em;
+  font-size: 1.25rem;
+  width: 80%;
+  background-color: #334a80;
+}
+
+@media (max-width: 669px) {
+  #faceSample, #blinkSample {
+    max-width: 50vw;
+    max-height: 50vw;
+  }
+
+  .container-instructions, .container-image-registration {
+    transform: translateX(+15%) !important;
+  }
+
+  .container-authentication-instructions, .container-authentication-liveness-instructions, 
+  .container-instructions, .container-authentication-intro-instructions, .container-image-registration {
+    max-width: 80%;
+  }
+
+  .fas.fa-camera {
+    font-size: 40vw;
+    padding: 0.1em;
+  }
+
+  #open-camera-btn {
+    padding-right: 0.5em !important;
+    padding-left: 0.5em !important;
+    font-size: 1.25rem !important;
+    margin-top: 0 !important;
+  }
+
+  .container-authentication-intro-instructions p,
+  .container-authentication-liveness-instructions p,
+  .container-authentication-instructions p,
+  .container-instructions p {
+    max-width: 90%;
+    font-size: 0.8rem !important;
+  }
+}
+
+#successMessage {
+  padding: 2rem;
+}
+
+#successMessageTimer {
+  padding-bottom: 2rem;
+}
+
+#successMessageTimer > button {
+  margin-top: 2rem;
 }

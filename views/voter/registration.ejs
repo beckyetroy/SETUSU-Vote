@@ -22,8 +22,10 @@
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX" crossorigin="anonymous"></script>
 
         <!-- Bootstrap JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -32,17 +34,26 @@
         <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <link rel="icon" type="image/png" href="/assets/Logo.png">
         <title><%= title %></title>
     </head>
     <body>
         <nav class="navbar navbar-expand-lg d-flex justify-content-between">
-            <h1 id="admin-dashboard-title"><%= title %></h1>
+            <h1 id="webpage-title"><%= title %></h1>
             <div class="navbar-nav ms-auto">
                 <div class="nav-item">
                     <a class="nav-link" href="/">Back to Home Page</a>
                 </div>
             </div>
         </nav>
+        <div class="vote-success" id="vote-success">
+          <h3>Registered Successfully!</h3>
+          <p id="successMessage"></p>
+          <p id="successMessageTimer"></p>
+          <button class="primaryBtn" onclick="location.href='/'">BACK TO HOME</button>
+        </div>
         <div class="container-basic-registration">
             <form action="/register" method="POST" class="register">
                 <h3 class="formTitle">Register to Vote</h3>
@@ -51,29 +62,43 @@
                 if(data.length > 0)
                 {
                     %>
-                    <select name="election" id="electionSelect">
-                        <option value="" disabled selected>Select an option</option>
-                        <%
-                        electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
-                        electionData.forEach(function(election){
-                            if (election.Id) {
-                        %>
-                            <option value="<%= election.Id %>"> <%= election.Description %> </option>
-                        <%
-                        } 
-                            else {}
-                        });
-                        %>
-                    </select>
+                    <div class="select-election">
+                      <select name="election" id="electionSelect" class="form-select form-select-lg mb-3">
+                          <option value="" disabled selected>Select Election</option>
+                          <%
+                          electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
+                          const now = new Date();
+                          const upcomingElections = electionData.filter((election) => new Date(election.ElectionDate) >= now);
+                          const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
+                          sortedElections.forEach(function(election){
+                              if (election.Id) {
+                          %>
+                              <option value="<%= election.Id %>"> <%= election.Description %> </option>
+                          <%
+                          } 
+                              else {}
+                          });
+                          %>
+                      </select>
+                    </div>
 
-                    <label>Student Number : </label>
-                    <input type="text" placeholder="Enter Student Number" name="studentno" required>
-                    <label>First Name(s) : </label>
-                    <input type="text" placeholder="Enter First Name(s)" name="fname" required>
-                    <label>Last Name : </label>
-                    <input type="text" placeholder="Enter Last Name" name="lname" required>
-                    <label>Student Email : </label>
-                    <input type="text" placeholder="Enter Email" name="email" required>
+                  <div class="form-floating">
+                      <input type="text" placeholder="Enter Student Number" name="studentno" id="studentno" class="form-control" required>
+                      <label for="studentno">Student Number : </label>
+                  </div>
+
+                  <div class="form-floating">
+                    <input type="text" placeholder="Enter Email" name="email" class="form-control" id="email" required>
+                    <label for="email">Student Email : </label>
+                  </div>
+                  <div class="form-floating">
+                      <input type="text" placeholder="Enter First Name(s)" name="fname" class="form-control" id="fname" required>
+                      <label for="fname">First Name(s) : </label>
+                  </div>
+                  <div class="form-floating">
+                      <input type="text" placeholder="Enter Last Name" name="lname" class="form-control" id="lname" required>
+                      <label for="lname">Last Name : </label>
+                  </div>
                     <br>
                     <button type="submit" value="register" class="primaryBtn" id="next-button">NEXT</button>
                     <%
@@ -89,43 +114,53 @@
         </div>
 
         <div class="container-instructions">
-          <h3> Upload An Image of your Student Card to Complete Registration</h3>
-          <p> The image must clearly show your name, student number, and photo ID as below:</p>
-          <img src="assets/Sample_Card.jpg" alt="Sample Student Card Image" id="cardSample">
-          <br><small><strong>NOTE:</strong> You will only get to upload your card once, so make sure it is clear!</small>
-          <button class="primaryBtn" id="next-button-2">NEXT</button>
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <h3> Upload An Image of your Student Card to Complete Registration</h3>
+            <p> The image must clearly show your name, student number, and photo ID as below:</p>
+            <img src="assets/Sample_Card.jpg" alt="Sample Student Card Image" id="cardSample">
+            <br><p><small><strong>NOTE:</strong> You will only get to upload your card once, so make sure it is clear!</small></p>
+            <br>
+            <button class="primaryBtn" id="next-button-2">NEXT</button>
+          </div>
         </div>
 
-        <div class="container-image-registration">
-          <div class="image-upload">
-            <div id="my-dropzone" class="dropzone"></div>
-            <button id="confirmBtn" disabled>Confirm</button>
+        <div class="container-image-registration" id="container-image-registration">
+          <div id="errorMessageDiv" class="errorMessageDiv hidden">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i> The image you submitted is not valid. Please try again.
           </div>
-
-          <div class="camera">
-            <div id="camera-container" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
-              <video id="video" autoplay></video>
-              <button id="startbutton">Take photo</button>
-              <button id="cancelbutton">Cancel</button>
+          <div class="upload-option">
+            <h3>Upload an Image of your Student ID Card</h3>
+            <div class="image-upload">
+              <div id="my-dropzone" class="dropzone"></div>
+              <button class="primaryBtn" id="confirmBtn" disabled>Upload</button>
             </div>
-
-            <div id="confirm-dialog" class="hidden">
-              <img id="photo-preview" src="" alt="Taken photo">
-              <button id="retake">Retake</button>
-              <button id="confirm">Confirm</button>
-            </div>
-              
-            <button class="cameraBtn" id="open-camera-btn">Open camera <i class="fas fa-camera"></i></button>
           </div>
 
-          <div class="slider-controls" id="slider-controls">
-            <button class="switch-to-image-upload">Image Upload</button>
-            <button class="switch-to-camera">Camera</button>
-          </div>
+          <h2 id="or"><u>OR</u></h2>
 
-          <div id="errorMessageDiv" class="hidden">
-            This image is not valid. Please try again.
+          <div class="camera-option" id="camera-option">
+            <h3>Take a Photo of your Student ID Card</h3>
+
+            <button class="cameraBtn" id="open-camera-btn"><i class="fas fa-camera"></i><br>Open camera</button>
           </div>
+      </div>
+
+      <div class="container-camera-option" id="container-camera-option">
+        <div id="camera-container" class="camera-container" style="background-color: rgba(0, 0, 0, 0.5); display: none;">
+          <video id="video" autoplay></video>
+          <button id="startbutton"><i class="fas fa-camera"></i></button>
+          <button id="cancelbutton" class="close-btn">×</button>
+        </div>
+
+        <div id="confirm-dialog" class="hidden">
+          <h3>Upload this photo?</h3>
+          <p>Ensure your name, face, and student number are clearly visible on the card.</p>
+          <img id="photo-preview" src="" alt="Taken photo">
+          <div class="d-flex align-items-center justify-content-center">
+              <button id="retake" class="primaryBtn">× No</button>
+              <button id="confirm" class="primaryBtn">✓ Yes</button>
+          </div>
+        </div>
       </div>
 
 <script>
@@ -133,9 +168,14 @@
   const nextButton2 = document.getElementById('next-button-2');
   const basicRegistration = document.querySelector('.container-basic-registration');
   const instructions = document.querySelector('.container-instructions');
-  const imageRegistration = document.querySelector('.container-image-registration');
+  const imageRegistration = document.getElementById('container-image-registration');
   const basicForm = document.querySelector('.register');
   const basicFormError = document.getElementById('basic-form-error');
+  const successContainer = document.getElementById('vote-success');
+
+  instructions.classList.add('hidden');
+  imageRegistration.classList.add('hidden');
+  successContainer.classList.add('hidden');
 
   basicForm.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -159,6 +199,7 @@
         setTimeout(() => {
           basicRegistration.remove();
           basicFormError.textContent = '';
+          instructions.classList.remove('hidden');
           instructions.classList.add('fade-in');
         }, 1000);
       }
@@ -175,39 +216,13 @@
     instructions.classList.add('slide-out');
       setTimeout(() => {
         instructions.remove();
+        imageRegistration.classList.remove('hidden');
         imageRegistration.classList.add('fade-in');
-        camera.style.display = 'none';
       }, 1000);
   });
 
-  const switchToImageUploadBtn = document.querySelector('.switch-to-image-upload');
-  const switchToCameraBtn = document.querySelector('.switch-to-camera');
   const imageUpload = document.querySelector('.image-upload');
-  const camera = document.querySelector('.camera');
-
-  switchToImageUploadBtn.addEventListener('click', () => {
-    camera.style.transform = 'translateX(100%)';
-
-  // Wait for the transition to complete before hiding the camera div
-  camera.addEventListener('transitionend', () => {
-    imageUpload.style.display = 'block';
-    imageUpload.style.transform = 'translateX(0)';
-    camera.style.display = 'none';
-  });
-});
-
-switchToCameraBtn.addEventListener('click', () => {
-  imageUpload.style.transform = 'translateX(-100%)';
-
-  // Wait for the transition to complete before hiding the imageUpload div
-  imageUpload.addEventListener('transitionend', () => {
-    camera.style.display = 'block';
-    camera.style.transform = 'translateX(0)';
-    imageUpload.style.display = 'none';
-  });
-});
-
-
+  const cameraOptionContainer = document.getElementById('container-camera-option');
   const openCameraBtn = document.getElementById('open-camera-btn');
   const cameraContainer = document.getElementById('camera-container');
   const video = document.getElementById('video');
@@ -216,8 +231,9 @@ switchToCameraBtn.addEventListener('click', () => {
   const confirmDialog = document.getElementById('confirm-dialog');
   const errorMessageDiv = document.getElementById('errorMessageDiv');
   const photoPreview = document.getElementById('photo-preview');
-  const sliderControls = document.getElementById('slider-controls');
   const canvas = document.createElement('canvas');
+  const successMessage = document.getElementById('successMessage');
+  const successMessageTimer = document.getElementById('successMessageTimer');
   let stream = null;
   let data = null;
 
@@ -227,10 +243,9 @@ switchToCameraBtn.addEventListener('click', () => {
   openCameraBtn.addEventListener('click', function() {
     // Show camera container and hide other fields
     cameraContainer.style.display = 'block';
-    errorMessageDiv.classList.add('hidden');
-    sliderControls.classList.add('hidden');
-    imageRegistration.classList.add('camera-show');
-    openCameraBtn.classList.add('hidden');
+    cameraOptionContainer.classList.add('camera-show');
+    imageRegistration.classList.remove('fade-in');
+    imageRegistration.classList.add('hidden');
 
     // Get user media
     if (navigator.mediaDevices.getUserMedia) {
@@ -265,7 +280,9 @@ switchToCameraBtn.addEventListener('click', () => {
 
   retakeButton.addEventListener('click', function () {
     confirmDialog.classList.add('hidden');
-    // Show camera container
+    if (!imageRegistration.classList.contains('hidden')) {
+      imageRegistration.classList.add('hidden');
+    }
     cameraContainer.style.display = 'block';
 
     // Get user media
@@ -303,15 +320,56 @@ switchToCameraBtn.addEventListener('click', () => {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.message === 'Voter registered successfully') {
-        window.location.href = '/';
-      } else {
-        imageRegistration.classList.remove('camera-show');
-        cameraContainer.style.display = 'none';
-        confirmDialog.classList.add('hidden');
-        errorMessageDiv.classList.remove('hidden');
-        sliderControls.classList.remove('hidden');
-        openCameraBtn.classList.remove('hidden');
+      if (data.message.includes('election')) {
+        const electionDescription = data.message.replace('Voter registered successfully for election ', '').trim();
+        const electionOpenTime = data.OpenTime;
+        const electionId = data.Id;
+        if (electionDescription && electionOpenTime) {
+          const openTime = new Date(electionOpenTime);
+          const now = new Date();
+          if (now >= openTime) {
+            const voteButton = document.createElement('button');
+            voteButton.setAttribute('class', 'primaryBtnInverted');
+            voteButton.setAttribute('onclick', `location.href='/vote/${electionId}'`);
+            voteButton.textContent = 'VOTE NOW';
+            successMessageTimer.appendChild(voteButton);
+          }
+          else {
+            var timeRemaining = Math.max(0, openTime.getTime() - now.getTime());
+
+            var timer = setInterval(() => {
+              var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+              var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+              var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+              var timerText = `Voting begins in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+              successMessageTimer.textContent = timerText;
+              timeRemaining -= 1000;
+              if (timeRemaining < 0) {
+                clearInterval(timer);
+              }
+            }, 1000);
+          }
+
+          successMessage.innerHTML = `You are now registered for: <strong>${electionDescription}</strong>`;
+          imageRegistration.classList.remove('fade-in');
+          imageRegistration.classList.add('hidden');
+          cameraOptionContainer.classList.add('hidden');
+          successContainer.classList.remove('hidden');
+        }
+        else {
+          successMessage.textContent = `You are now registered!`;
+          imageRegistration.classList.remove('fade-in');
+          imageRegistration.classList.add('hidden');
+          cameraOptionContainer.classList.add('hidden');
+          successContainer.classList.remove('hidden');
+        }
+      }
+      else {
+        successMessage.textContent = `You are now registered!`;
+        imageRegistration.classList.remove('fade-in');
+        imageRegistration.classList.add('hidden');
+        successContainer.classList.remove('hidden');
       }
     })
     .catch(error => {
@@ -321,9 +379,9 @@ switchToCameraBtn.addEventListener('click', () => {
 
   // Cancel photo
   cancelbutton.addEventListener('click', function() {
-    sliderControls.classList.remove('hidden');
-    openCameraBtn.classList.remove('hidden');
-    imageRegistration.classList.remove('camera-show');
+    imageRegistration.classList.remove('hidden');
+    imageRegistration.classList.add('fade-in');
+    cameraOptionContainer.classList.remove('camera-show');
     video.pause();
     video.srcObject.getTracks()[0].stop();
     cameraContainer.style.display = 'none';
@@ -336,7 +394,7 @@ switchToCameraBtn.addEventListener('click', () => {
     paramName: "image",
     acceptedFiles: "image/*",
     addRemoveLinks: true,
-    dictDefaultMessage: "Drop files here or click to upload",
+    dictDefaultMessage: '<i class="fa fa-upload" aria-hidden="true"></i> <br> Drag & Drop Image here <br><span class="orMsg"> or </span><br> Click to Browse',
     dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
     dictInvalidFileType: "You can't upload files of this type.",
     dictCancelUpload: "Cancel upload",
@@ -348,10 +406,17 @@ switchToCameraBtn.addEventListener('click', () => {
     init: function() {
       var confirmBtn = document.getElementById("confirmBtn");
       var dz = this;
+      var cameraOptionDiv = document.getElementById("camera-option");
+      var orMessage = document.getElementById("or");
 
       // Display thumbnail of the selected image
       this.on("thumbnail", function(file, dataUrl) {
         confirmBtn.disabled = false;
+        cameraOptionDiv.classList.add("hidden");
+        orMessage.classList.add("hidden");
+        if (!errorMessageDiv.classList.contains('hidden')) {
+          errorMessageDiv.classList.add('hidden');
+        }
         var previewElement = file.previewElement;
         previewElement.classList.remove("dz-file-preview");
         var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
@@ -371,15 +436,71 @@ switchToCameraBtn.addEventListener('click', () => {
 
         // Handle the success event when the queue has been processed
         dz.on("success", function(file, response) {
-            if (response.message === 'Voter registered successfully') {
-                window.location.href = '/';
+          if (response.message.includes('election')) {
+            const electionDescription = response.message.replace('Voter registered successfully for election ', '').trim();
+            const electionOpenTime = response.OpenTime;
+            const electionId = response.Id;
+            if (electionDescription && electionOpenTime) {
+              const openTime = new Date(electionOpenTime);
+              const now = new Date();
+              if (now >= openTime) {
+                const voteButton = document.createElement('button');
+                voteButton.setAttribute('class', 'primaryBtnInverted');
+                voteButton.setAttribute('onclick', `location.href='/vote/${electionId}'`);
+                voteButton.textContent = 'VOTE NOW';
+                successMessageTimer.appendChild(voteButton);
+              }
+              else {
+                var timeRemaining = Math.max(0, openTime.getTime() - now.getTime());
+
+                var timer = setInterval(() => {
+                  var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                  var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                  var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                  var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                  var timerText = `Voting begins in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                  successMessageTimer.textContent = timerText;
+                  timeRemaining -= 1000;
+                  if (timeRemaining < 0) {
+                    clearInterval(timer);
+                  }
+                }, 1000);
+              }
+
+              successMessage.innerHTML = `You are now registered for: <strong>${electionDescription}</strong>`;
+              imageRegistration.classList.remove('fade-in');
+              imageRegistration.classList.add('hidden');
+              cameraOptionContainer.classList.add('hidden');
+              successContainer.classList.remove('hidden');
             }
+            else {
+              successMessage.textContent = `You are now registered!`;
+              imageRegistration.classList.remove('fade-in');
+              imageRegistration.classList.add('hidden');
+              cameraOptionContainer.classList.add('hidden');
+              successContainer.classList.remove('hidden');
+            }
+          }
+          else {
+            successMessage.textContent = `You are now registered!`;
+            imageRegistration.classList.remove('fade-in');
+            imageRegistration.classList.add('hidden');
+            successContainer.classList.remove('hidden');
+          }
         });
 
         // Disable the button after sending the image
         confirmBtn.disabled = true;
       });
 
+      // Handle file removal
+      this.on("removedfile", function(file) {
+        if (dz.files.length === 0) {
+          confirmBtn.disabled = true;
+          cameraOptionDiv.classList.remove("hidden");
+          orMessage.classList.remove("hidden");
+        }
+      });
 
       // Handle upload errors
       this.on("error", function(file, response) {
@@ -388,8 +509,42 @@ switchToCameraBtn.addEventListener('click', () => {
       });
     }
   };
+
+  if (window.matchMedia("(max-width: 769px)").matches) {
+  Dropzone.options.myDropzone.dictDefaultMessage = '<i class="fa fa-upload" aria-hidden="true"></i> <br> Tap to Browse Images';
+}
 </script>
 
-        <img class="logoBubble" src="assets/Logo.png" alt="SETUSU Logo">
+        <img class="logoBubble" src="assets/Logo-Bubble.png" alt="SETUSU Logo">
     </body>
+
+    <footer>
+      <div class="row">
+          <div class="col-md-6 col-sm-12">
+          <h4 class="footer-h4">Follow us on</h4>
+          <div class="social-icons">
+              <div>
+              <h5>Waterford Campus</h5>
+              <div class="wd-links">
+                  <a href="https://www.instagram.com/setusu.wd/" target="_blank"><i class="fab fa-instagram fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                  <a href="https://twitter.com/setusu_wd/" target="_blank"><i class="fab fa-twitter fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                  <a href="https://www.facebook.com/setusu.wd/" target="_blank"><i class="fab fa-facebook fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+              </div>
+              </div>
+              <div>
+              <h5>Carlow Campus</h5>
+              <div class="cw-links">
+                  <a href="https://www.instagram.com/setusu.cw/" target="_blank"><i class="fab fa-instagram fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                  <a href="https://twitter.com/setusu_cw/" target="_blank"><i class="fab fa-twitter fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                  <a href="https://www.facebook.com/setusu.cw/" target="_blank"><i class="fab fa-facebook fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+              </div>
+              </div>
+          </div>
+          </div>
+          <div class="col-md-6 col-sm-12" id="copyright">
+          <h4>&copy; 2023 SETUSU. All rights reserved.</h4>
+          <p>Designed by Rebecca Troy (20088744)</p>
+          </div>
+      </div>
+  </footer>
 </html>

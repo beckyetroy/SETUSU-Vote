@@ -25,9 +25,9 @@ function renderPage(res, electionId, action, message, category, selectedOptions)
       if (err) throw (err);
       const election_query = `SELECT Id, Description, Candidate.CandidateId,
                             fName, lName, Picture_path, CategoryId
-                            FROM Election JOIN Candidate
+                            FROM Election LEFT JOIN Candidate
                             ON Candidate.ElectionId = Election.Id
-                            JOIN Candidate_Category
+                            LEFT JOIN Candidate_Category
                             ON Candidate.CandidateId = Candidate_Category.CandidateId
                             WHERE Id = ?`;
       const category_query = `SELECT * FROM Category WHERE ElectionId = ?`;
@@ -174,10 +174,10 @@ router.post('/:id/authenticate', upload.single('image'), async function(req, res
                 rekognition.compareFaces(params, function (err, data) {
                     if (err) {
                         console.error('Error comparing faces:', err);
-                        renderPage(res, election, 'advancedAuthentication', 'Sorry, there was a problem verifying your details. Please try again later.', 0, {});
+                        res.status(500).send('Sorry, there was a problem verifying your details. Please try again later.');
                     } else if (data.FaceMatches.length == 0) {
                         console.log('No matching face found');
-                        renderPage(res, election, 'advancedAuthentication', 'Image invalid. Please try again.', 0, {});
+                        res.status(500).send('Facial recognition failed. Please try again.');
                     } else {
                         console.log('Face match found');
                         const faceData = data.FaceMatches[0].Face;
