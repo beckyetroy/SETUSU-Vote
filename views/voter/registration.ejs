@@ -83,20 +83,20 @@
                     </div>
 
                   <div class="form-floating">
-                      <input type="text" placeholder="Enter Student Number" name="studentno" id="studentno" class="form-control" required>
+                      <input type="text" placeholder="Enter Student Number" name="studentno" id="studentno" class="form-control">
                       <label for="studentno">Student Number : </label>
                   </div>
 
                   <div class="form-floating">
-                    <input type="text" placeholder="Enter Email" name="email" class="form-control" id="email" required>
+                    <input type="text" placeholder="Enter Email" name="email" class="form-control" id="email">
                     <label for="email">Student Email : </label>
                   </div>
                   <div class="form-floating">
-                      <input type="text" placeholder="Enter First Name(s)" name="fname" class="form-control" id="fname" required>
+                      <input type="text" placeholder="Enter First Name(s)" name="fname" class="form-control" id="fname">
                       <label for="fname">First Name(s) : </label>
                   </div>
                   <div class="form-floating">
-                      <input type="text" placeholder="Enter Last Name" name="lname" class="form-control" id="lname" required>
+                      <input type="text" placeholder="Enter Last Name" name="lname" class="form-control" id="lname">
                       <label for="lname">Last Name : </label>
                   </div>
                     <br>
@@ -181,35 +181,121 @@
     event.preventDefault();
   });
 
-  nextButton.addEventListener('click', () => {
-    const formData = new FormData(basicForm);
-    const body = new URLSearchParams(formData).toString();
-
-    fetch('/register', {
-      method: 'POST',
-      body: body,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.message === 'Basic form saved') {
-        basicRegistration.classList.add('slide-out');
-        setTimeout(() => {
-          basicRegistration.remove();
-          basicFormError.textContent = '';
-          instructions.classList.remove('hidden');
-          instructions.classList.add('fade-in');
-        }, 1000);
-      }
-      else if (data.message === 'You are already registered for this election.') {
-        basicFormError.textContent = 'You are already registered for this election.';
-      }
-    })
-    .catch(error => {
-      console.error(error);
+  document.querySelectorAll('input, select').forEach(function(element) {
+    element.addEventListener('input', function() {
+        element.classList.remove('inputerror');
+        basicFormError.innerHTML = '';
     });
+  });
+
+  nextButton.addEventListener('click', () => {
+    const studentNoInput = document.getElementById('studentno');
+    const emailInput = document.getElementById('email');
+    const lastNameInput = document.getElementById('lname');
+    const firstNameInput = document.getElementById('fname');
+    const electionSelect = document.getElementById('electionSelect');
+
+    const studentNoRegex = /^\d{8}$/; // matches 8 digits
+    const emailRegex = /^\d{8}@mail.(wit|itcarlow).ie$/; // matches studentno@mail.wit.ie or studentno@mail.itcarlow.ie
+    const specialCharsRegex = /^(?=[A-Za-z])(?!.*?[ '-]{2})[A-Za-z'-]+(?:\s[A-Za-z'-]+)*$/;
+
+    let isValid = false;
+
+    if (firstNameInput.value && lastNameInput.value && studentNoInput.value && emailInput.value && !(electionSelect.value === '')) {
+      if (emailRegex.test(emailInput.value) && studentNoRegex.test(studentNoInput.value) &&
+        specialCharsRegex.test(firstNameInput.value) && specialCharsRegex.test(lastNameInput.value)) {
+          const studentNoMatch = emailInput.value.match(emailRegex);
+          const studentNoFromEmail = studentNoMatch[0].split('@')[0];
+          const studentNo = studentNoInput.value;
+          if (studentNoFromEmail === studentNo) {
+            isValid = true;
+          }
+          else {
+            studentNoInput.classList.add('inputerror');
+            emailInput.classList.add('inputerror');
+            firstNameInput.classList.remove('inputerror');
+            lastNameInput.classList.remove('inputerror');
+            electionSelect.classList.remove('inputerror');
+          }
+      }
+      else {
+        if (!studentNoRegex.test(studentNoInput.value)) {
+          studentNoInput.classList.add('inputerror');
+        } else {
+          studentNoInput.classList.remove('inputerror');
+        }
+
+        if (!emailRegex.test(emailInput.value)) {
+          emailInput.classList.add('inputerror');
+        } else {
+          emailInput.classList.remove('inputerror');
+        }
+
+        if (!specialCharsRegex.test(lastNameInput.value)) {
+          lastNameInput.classList.add('inputerror');
+        } else {
+          lastNameInput.classList.remove('inputerror');
+        }
+
+        if (!specialCharsRegex.test(firstNameInput.value)) {
+          firstNameInput.classList.add('inputerror');
+        } else {
+          firstNameInput.classList.remove('inputerror');
+        }
+      }
+    } else {
+      if (!firstNameInput.value) {
+        firstNameInput.classList.add('inputerror');
+      }
+      if (!lastNameInput.value){
+        lastNameInput.classList.add('inputerror');
+      }
+      if (!studentNoInput.value) {
+        studentNoInput.classList.add('inputerror');
+      }
+      if (!emailInput.value) {
+        emailInput.classList.add('inputerror');
+      }
+      if (electionSelect.value === '') {
+        electionSelect.classList.add('inputerror');
+      }
+      basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+      return;
+    }
+
+    if (isValid) {
+      const formData = new FormData(basicForm);
+      const body = new URLSearchParams(formData).toString();
+
+      fetch('/register', {
+        method: 'POST',
+        body: body,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'Basic form saved') {
+          basicRegistration.classList.add('slide-out');
+          setTimeout(() => {
+            basicRegistration.remove();
+            basicFormError.innerHTML = '';
+            instructions.classList.remove('hidden');
+            instructions.classList.add('fade-in');
+          }, 1000);
+        }
+        else if (data.message === 'You are already registered for this election.') {
+          basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> You are already registered for this election.';
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    }
+    else {
+      basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check your details.';
+    }
   });
 
   nextButton2.addEventListener('click', () => {
