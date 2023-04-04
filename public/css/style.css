@@ -1,3 +1,7 @@
+html {
+  height: 100%;
+}
+
 body {
     background-color: #c4c4c4 !important;
 }
@@ -800,6 +804,17 @@ form.login {
   margin-right: 0.5rem;
 }
 
+.register .form-control.inputerror, .inputerror {
+  background-color: #ffe6e6 !important;
+  border: 1px solid #ff0000 !important;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    background-color: #fff !important;
+}
+
 .image-upload {
   top: 0;
   left: 0;
@@ -882,12 +897,13 @@ form.login {
 #container-vote {
   padding: 2em;
   text-align: center;
+  min-height: 70vh;
 }
 
 #container-vote > button, .choices button {
-  font-size: 2vw !important;
+  font-size: 1.25rem !important;
   margin: 1em !important;
-  width: 20% !important;
+  width: 15% !important;
 }
 
 .choices {
@@ -902,9 +918,10 @@ form.login {
 }
 
 .choices h4 {
-  font-size: 2vw;
+  font-size: 1.5rem;
   font-weight: bold;
   text-decoration: underline;
+  padding-top: 1rem;
 }
 
 #vote-option {
@@ -931,13 +948,15 @@ form.login {
 .card-name, #vote-name, #vote-name.card-body {
   position: relative;
   margin: 0;
-  font-size: 4vw;
+  font-size: 3rem;
   background-color: #4363B1 !important;
   color: white;
   font-family: 'Inter' !important;
   max-width: 100%;
   max-height: 100%;
   z-index: 1;
+  width: 100%;
+  text-align: left;
 }
 
 .radio-container {
@@ -1005,6 +1024,72 @@ form.login {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+@media (max-width: 991px) {
+  #container-vote {
+    padding: 0.5em !important;
+    padding-top: 1em !important;
+  }
+  
+  #container-vote > button, .choices button {
+    font-size: 1.25rem !important;
+    width: 50% !important;
+  }
+
+  #container-vote h3 {
+    font-size: 1.3rem;
+  }
+  
+  #vote-option {
+    width: 95% !important;
+    max-width: 95% !important;
+    margin: 0em !important;
+    margin-bottom: 0.5em !important;
+  }
+
+  #vote-option div {
+    width: 100% !important;
+  }
+  
+  .card-name, #vote-name, #vote-name.card-body {
+    position: relative;
+    margin: 0;
+    font-size: 2rem !important;
+  }
+  
+  .radio-container {
+    font-size: 1.25rem !important;
+  }
+}
+
+#confirm-btn1:disabled {
+  background-color: #606060;
+  color: #fff;
+}
+
+.already-voted {
+  width: 60%;
+  margin: 0 auto;
+  background-color: #e6e6e6;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 2.5rem;
+  text-align: center;
+  height: 70vh;
+}
+
+.already-voted h2 {
+  padding-bottom: 0.5rem;
+}
+
+.already-voted button {
+  margin-bottom: 1rem;
+}
+
+.already-voted p {
+  font-size: 1.2rem;
+  padding-bottom: 2rem;
+}
+
 .container-basic-authentication, .container-basic-registration {
   width: 60%;
   font-family: 'Inter';
@@ -1049,6 +1134,17 @@ form.authenticate, form.register {
   
   .form-floating, .select-election {
     width: 90% !important;
+  }
+
+  .already-voted {
+    padding-left: 0rem !important;
+    padding-right: 0rem !important;
+    width: 100% !important;
+  }
+
+  .already-voted h2, .already-voted p {
+    width: 100%;
+    padding:0.2rem;
   }
 }
 
