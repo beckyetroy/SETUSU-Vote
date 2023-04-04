@@ -1,11 +1,15 @@
 <div class="container-basic-authentication" id="container-basic-authentication">
     <% if (message === 'Already Voted') { %>
-        You have already voted in this election.
-        <button class="primaryBtn" onclick="location.href='/'" type="button"> HOME </button>
+        <div class ="already-voted">
+            <h2>You have already voted in this election.</h2>
+            <p>Thank you, your vote has already been counted!</p>
+            <button class="primaryBtn" onclick="location.href='/'" type="button"> BACK TO HOME </button><br>
+            <button class="primaryBtn" onclick="location.href='/elections'" type="button"> SEE MORE ELECTIONS </button>
+        </div>
     <% } else { %>
-        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate">
+        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate" id="authenticate-basic-form">
             <h3 class="formTitle">Please enter your details</h3>
-            <div class="vote-error"><%= message %></div>
+            <div class="vote-error" id="basic-auth-error"><%= message %></div>
             <div class="form-floating">
                 <input type="text" placeholder="Enter Student Number" name="studentno" id="studentno" class="form-control" required>
                 <label for="studentno">Student Number : </label>
@@ -25,5 +29,96 @@
                 <br>
                 <button type="submit" value="authenticate" class="primaryBtn" id="authenticate-basic">NEXT</button>
         </form>
+        <script>
+            const nextButton = document.getElementById('authenticate-basic');
+            const form = document.getElementById('authenticate-basic-form');
+            const error = document.getElementById('basic-auth-error');
+        
+            document.querySelectorAll('input, select').forEach(function(element) {
+                element.addEventListener('input', function() {
+                    element.classList.remove('inputerror');
+                    error.innerHTML = '';
+                });
+            });
+            
+            nextButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                const studentNoInput = document.getElementById('studentno');
+                const emailInput = document.getElementById('email');
+                const lastNameInput = document.getElementById('lname');
+                const firstNameInput = document.getElementById('fname');
+        
+                const studentNoRegex = /^\d{8}$/; // matches 8 digits
+                const emailRegex = /^\d{8}@mail.(wit|itcarlow).ie$/; // matches studentno@mail.wit.ie or studentno@mail.itcarlow.ie
+                const specialCharsRegex = /^(?=[A-Za-z])(?!.*?[ '-]{2})[A-Za-z'-]+(?:\s[A-Za-z'-]+)*$/;
+        
+                let isValid = false;
+        
+                if (firstNameInput.value && lastNameInput.value && studentNoInput.value && emailInput.value) {
+                    if (emailRegex.test(emailInput.value) && studentNoRegex.test(studentNoInput.value) &&
+                    specialCharsRegex.test(firstNameInput.value) && specialCharsRegex.test(lastNameInput.value)) {
+                        const studentNoMatch = emailInput.value.match(emailRegex);
+                        const studentNoFromEmail = studentNoMatch[0].split('@')[0];
+                        const studentNo = studentNoInput.value;
+                        if (studentNoFromEmail === studentNo) {
+                            isValid = true;
+                        }
+                        else {
+                            studentNoInput.classList.add('inputerror');
+                            emailInput.classList.add('inputerror');
+                            firstNameInput.classList.remove('inputerror');
+                            lastNameInput.classList.remove('inputerror');
+                        }
+                    }
+                    else {
+                        if (!studentNoRegex.test(studentNoInput.value)) {
+                            studentNoInput.classList.add('inputerror');
+                        } else {
+                            studentNoInput.classList.remove('inputerror');
+                        }
+        
+                        if (!emailRegex.test(emailInput.value)) {
+                            emailInput.classList.add('inputerror');
+                        } else {
+                            emailInput.classList.remove('inputerror');
+                        }
+        
+                        if (!specialCharsRegex.test(lastNameInput.value)) {
+                            lastNameInput.classList.add('inputerror');
+                        } else {
+                            lastNameInput.classList.remove('inputerror');
+                        }
+        
+                        if (!specialCharsRegex.test(firstNameInput.value)) {
+                            firstNameInput.classList.add('inputerror');
+                        } else {
+                            firstNameInput.classList.remove('inputerror');
+                        }
+                    }
+                } else {
+                    if (!firstNameInput.value) {
+                        firstNameInput.classList.add('inputerror');
+                    }
+                    if (!lastNameInput.value){
+                        lastNameInput.classList.add('inputerror');
+                    }
+                    if (!studentNoInput.value) {
+                        studentNoInput.classList.add('inputerror');
+                    }
+                    if (!emailInput.value) {
+                        emailInput.classList.add('inputerror');
+                    }
+                    error.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                    return;
+                }
+        
+                if (isValid) {
+                    form.submit();
+                }
+                else {
+                    error.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check your details.';
+                }
+          });
+        </script>
     <% } %>
 </div>
