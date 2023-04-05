@@ -516,6 +516,13 @@ form.login {
     z-index: 10;
 }
 
+@media (max-width: 991px) {
+  .logoBubble {
+    max-width: 20%;
+  }
+  
+}
+
 .header-image {
     background-position: center;
     background-repeat: no-repeat;
