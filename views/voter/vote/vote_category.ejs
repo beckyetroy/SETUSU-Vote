@@ -1,3 +1,7 @@
+<div id="loading-screen" style="display:none">
+    <div class="loader"></div>
+</div>
+
 <div class="container-vote" id="container-vote">
     <% if (categorydata.length === 0) { %>
         <h1>No Categories Found for this Election. <br> Please Try Again Later.</h1>
@@ -144,12 +148,14 @@
             selectedOption = "-1";
         }
         const url = `/vote/${electionId}/${currentcategory}?fromPrevButton=true&selectedOption=${selectedOption}`;
+        document.getElementById('loading-screen').style.display = 'flex';
         fetch(url)
             .then(response => response.text())
             .then(data => {
                 var tempContainer = $('<div>').html(data);
                 var container = tempContainer.find('#container-vote');
                 $('#container-vote').html(container.html());
+                document.getElementById('loading-screen').style.display = 'none';
             })
             .catch(error => console.log(error));
     }

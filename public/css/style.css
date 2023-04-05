@@ -35,7 +35,7 @@ h5 {
   position: sticky !important;
   top: 0;
   width: 100%;
-  z-index: 3;
+  z-index: 10;
   color: white;
 }
 
@@ -516,6 +516,13 @@ form.login {
     z-index: 10;
 }
 
+@media (max-width: 991px) {
+  .logoBubble {
+    max-width: 20%;
+  }
+  
+}
+
 .header-image {
     background-position: center;
     background-repeat: no-repeat;
@@ -584,7 +591,7 @@ form.login {
 }
 
 .green-frame {
-  filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%);
+  filter: grayscale(100%) brightness(80%) sepia(300%) hue-rotate(50deg) saturate(500%) !important;
 }
 
 .white-frame {
@@ -706,7 +713,7 @@ form.login {
   }
 
   #vote-error > #retry {
-    width: 60%;
+    width: 60% !important;
   }
 }
   
@@ -1299,4 +1306,34 @@ form.authenticate, form.register {
 
 #successMessageTimer > button {
   margin-top: 2rem;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #c4c4c4;
+  z-index: 9;
+  display: none;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -30px;
+  margin-left: -30px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

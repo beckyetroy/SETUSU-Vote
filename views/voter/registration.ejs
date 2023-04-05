@@ -48,6 +48,9 @@
                 </div>
             </div>
         </nav>
+        <div id="loading-screen" style="display:none">
+          <div class="loader"></div>
+        </div>
         <div class="vote-success" id="vote-success">
           <h3>Registered Successfully!</h3>
           <p id="successMessage"></p>
@@ -327,6 +330,7 @@
   errorMessageDiv.classList.add('hidden');
 
   openCameraBtn.addEventListener('click', function() {
+    document.getElementById('loading-screen').style.display = 'flex';
     // Show camera container and hide other fields
     cameraContainer.style.display = 'block';
     cameraOptionContainer.classList.add('camera-show');
@@ -340,6 +344,7 @@
             stream = mediaStream;
             video.srcObject = mediaStream;
             video.play();
+            document.getElementById('loading-screen').style.display = 'none';
         })
         .catch(function(err) {
           console.log("An error occurred: " + err);
@@ -387,6 +392,8 @@
   });
 
   confirmButton.addEventListener('click', function () {
+    document.getElementById('loading-screen').style.display = 'flex';
+    cameraOptionContainer.classList.remove('camera-show');
     // convert data to Blob object
     const byteString = atob(data.split(',')[1]);
     const ab = new ArrayBuffer(byteString.length);
@@ -406,7 +413,8 @@
     })
     .then(response => response.json())
     .then(data => {
-      if (data.message.includes('election')) {
+      confirmDialog.classList.add('hidden');
+      if (!(data.status === 500) && data.message.includes('election')) {
         const electionDescription = data.message.replace('Voter registered successfully for election ', '').trim();
         const electionOpenTime = data.OpenTime;
         const electionId = data.Id;
@@ -451,12 +459,18 @@
           successContainer.classList.remove('hidden');
         }
       }
-      else {
+      else if (!data.status === 500 && !data.message.includes('election')){
         successMessage.textContent = `You are now registered!`;
         imageRegistration.classList.remove('fade-in');
         imageRegistration.classList.add('hidden');
         successContainer.classList.remove('hidden');
       }
+      else {
+        imageRegistration.classList.add('fade-in');
+        imageRegistration.classList.remove('hidden');
+        errorMessageDiv.classList.remove('hidden');
+      }
+      document.getElementById('loading-screen').style.display = 'none';
     })
     .catch(error => {
       console.error('Error uploading image:', error);

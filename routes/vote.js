@@ -97,7 +97,7 @@ router.post('/:id', function(req, res, next) {
             if (err) throw (err);
 
             if (result.length === 0) {
-                renderPage(res, election, 'basicAuthentication', 'Invalid Details. Please try again.', 0, {})
+                renderPage(res, election, 'basicAuthentication', 'Voter not found. Please try again.', 0, {})
                 return;
             }
 

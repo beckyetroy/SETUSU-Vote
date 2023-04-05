@@ -1,3 +1,7 @@
+<div id="loading-screen" style="display:none">
+    <div class="loader"></div>
+</div>
+
 <div class="vote-error" id="vote-error">
     <h3>Facial Recognition failed.</h3>
     <p id="errorMessage"></p>
@@ -82,6 +86,34 @@
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
 
 <script>
+    document.getElementById('loading-screen').style.display = 'flex';
+    const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
+    const id = '<%= data[0].Id %>';
+
+    const openCameraBtn = document.getElementById('open-camera-btn');
+    const cameraContainer = document.getElementById('camera-container');
+    const video = document.getElementById('video');
+    const cancelbutton = document.getElementById('cancelbutton');
+    const confirmDialog = document.getElementById('confirm-dialog');
+    const photoPreview = document.getElementById('photo-preview');
+    const canvas = document.createElement('canvas');
+    const instructions = document.getElementById('carouselInstructions');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorMessageDiv = document.getElementById('vote-error');
+
+    errorMessageDiv.classList.add('hidden');
+
+    let stream = null;
+    let data = null;
+
+    var prevLandmarks = null;
+    var prevFrameTime = null;
+    var faceStable = false;
+    var maxLandmarkMovement = 10;
+
+    if (!confirmDialog.classList.contains('hidden')) {
+        confirmDialog.classList.add('hidden');
+    }
     Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
         faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
@@ -90,35 +122,12 @@
     ]).then(start);
 
     function start() {
+        document.getElementById('loading-screen').style.display = 'none';
         console.log('Service started.');
-        const authenticateAdvancedContainer = document.getElementById('container-advanced-authentication');
-        const id = '<%= data[0].Id %>';
-
-        const openCameraBtn = document.getElementById('open-camera-btn');
-        const cameraContainer = document.getElementById('camera-container');
-        const video = document.getElementById('video');
-        const cancelbutton = document.getElementById('cancelbutton');
-        const confirmDialog = document.getElementById('confirm-dialog');
-        const photoPreview = document.getElementById('photo-preview');
-        const canvas = document.createElement('canvas');
-        const instructions = document.getElementById('carouselInstructions');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorMessageDiv = document.getElementById('vote-error');
-
-        let stream = null;
-        let data = null;
-
-        var prevLandmarks = null;
-        var prevFrameTime = null;
-        var faceStable = false;
-        var maxLandmarkMovement = 10;
-
-        if (!confirmDialog.classList.contains('hidden')) {
-            confirmDialog.classList.add('hidden');
-        }
-        errorMessageDiv.classList.add('hidden');
 
         openCameraBtn.addEventListener('click', function() {
+            // Show loading screen until ready
+            document.getElementById('loading-screen').style.display = 'flex';
             // Show camera container and hide other fields
             cameraContainer.style.display = 'block';
             authenticateAdvancedContainer.classList.add('camera-show');
@@ -137,7 +146,9 @@
                 .then(function (mediaStream) {
                     stream = mediaStream;
                     video.srcObject = mediaStream;
-                    video.play();
+                    video.play().then(_ => {
+                        document.getElementById('loading-screen').style.display = 'none';
+                    });
                     // When the video is playing, start the face detection and head movement check
                     video.addEventListener('playing', function () {
                         // Resize the canvas to match the video size
@@ -193,12 +204,13 @@
                                                 // Check if the user is blinking
                                                 var leftEye = result.landmarks.getLeftEye();
                                                 var rightEye = result.landmarks.getRightEye();
-                                                var blinkTimeout = null;
+                                                blinkTimeout = null;
                                                 var blinkDelay = 1000;
                                                 var blinkThreshold = 0.45;
                                                 var blinkRatio = (leftEye[3].y - leftEye[1].y) / (leftEye[4].y - leftEye[0].y + rightEye[4].y - rightEye[0].y);
                                                 if (blinkRatio < blinkThreshold) {
                                                     // User blinked
+                                                    cancelbutton.setAttribute('disabled', 'disabled');
                                                     if (blinkTimeout == null) {
                                                         blinkTimeout = setTimeout(function() {
                                                             canvas.width = video.videoWidth;
@@ -241,11 +253,13 @@
         const confirmButton = document.getElementById('confirm');
 
         retakeButton.addEventListener('click', function () {
+            document.getElementById('loading-screen').style.display = 'flex';
             if (!confirmDialog.classList.contains('hidden')) {
                 confirmDialog.classList.add('hidden');
             }
             instructions.classList.add('hidden');
             cameraContainer.style.display = 'block';
+            cancelbutton.removeAttribute("disabled");
 
             if (!errorMessageDiv.classList.contains('hidden')) {
                 errorMessageDiv.classList.add('hidden');
@@ -257,7 +271,9 @@
                 .then(function (mediaStream) {
                     stream = mediaStream;
                     video.srcObject = mediaStream;
-                    video.play();
+                    video.play().then(_ => {
+                        document.getElementById('loading-screen').style.display = 'none';
+                    });
                 })
                 .catch(function(err) {
                     console.log("An error occurred: " + err);
@@ -267,11 +283,13 @@
         });
 
         retryButton.addEventListener('click', function () {
+            document.getElementById('loading-screen').style.display = 'flex';
             if (!confirmDialog.classList.contains('hidden')) {
                 confirmDialog.classList.add('hidden');
             }
             instructions.classList.add('hidden');
             cameraContainer.style.display = 'block';
+            cancelbutton.removeAttribute("disabled");
 
             if (!errorMessageDiv.classList.contains('hidden')) {
                 errorMessageDiv.classList.add('hidden');
@@ -283,7 +301,9 @@
                 .then(function (mediaStream) {
                     stream = mediaStream;
                     video.srcObject = mediaStream;
-                    video.play();
+                    video.play().then(_ => {
+                        document.getElementById('loading-screen').style.display = 'none';
+                    });
                 })
                 .catch(function(err) {
                     console.log("An error occurred: " + err);
@@ -293,6 +313,7 @@
         });
 
         confirmButton.addEventListener('click', function () {
+            document.getElementById('loading-screen').style.display = 'flex';
             // convert data to Blob object
             const byteString = atob(data.split(',')[1]);
             const ab = new ArrayBuffer(byteString.length);
@@ -336,6 +357,7 @@
                             document.close();
                         });
                     }
+                    document.getElementById('loading-screen').style.display = 'none';
                 });
             } catch (error) {
                 console.error('Error uploading image:', error);
@@ -344,6 +366,7 @@
 
         // Cancel photo
         cancelbutton.addEventListener('click', function() {
+            blinkTimeout = null;
             video.pause();
             video.srcObject.getTracks()[0].stop();
             cameraContainer.style.display = 'none';
