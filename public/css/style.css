@@ -898,7 +898,7 @@ ol li:before {
   padding: 2em;
 }
 
-#vote-success {
+#vote-success, #vote-unavailable {
   width: 50vw;
   background-color: #4666b1;
   text-align: center;
@@ -943,7 +943,7 @@ ol li:before {
     width: 90vw !important;
   }
 
-  #vote-success {
+  #vote-success, #vote-unavailable {
     width: 90vw !important;
   }
 
@@ -1549,11 +1549,11 @@ form.authenticate, form.register {
   }
 }
 
-#successMessage {
+#successMessage, #accessMessage {
   padding: 2rem;
 }
 
-#successMessageTimer {
+#successMessageTimer, #accessMessageTimer {
   padding-bottom: 2rem;
 }
 

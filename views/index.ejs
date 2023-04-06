@@ -81,6 +81,46 @@
       </div>
 
       <div class="electionList">
+          <% 
+          const now = new Date();
+          const ongoingElections = data.filter((v) => {
+            const electionDate = new Date(v.ElectionDate);
+            const openTime = new Date(v.OpenTime);
+            const closeTime = new Date(v.CloseTime);
+            const sameDate = now.toDateString() === electionDate.toDateString();
+            const withinInterval = now >= openTime && now < closeTime;
+            return v.Id !== null && sameDate && withinInterval;
+          });
+          const filteredOngoingElections = ongoingElections.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i);
+          const limitedOngoingElections = filteredOngoingElections.slice(0, 5);
+          if (limitedOngoingElections.length > 0) {
+          %>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Ongoing Elections</h2>
+          </div>
+          <div class="ui five column stackable grid" id="electionCards">
+            <%
+            limitedOngoingElections.forEach(function (election) { %>
+                <div class="column">
+                  <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer;">
+                    <div class="image">
+                      <% if (election.Icon_path) { %>
+                        <img src="<%= election.Icon_path %>" alt="Election Icon">
+                      <% } else { %>
+                        <img src="/assets/Placeholder-icon1.jpg" alt="Election Icon" class="placeholder-icon">
+                      <% } %>
+                    </div>
+                    <div class="content">
+                      <p class="header"><%= election.Description %></p>
+                      <div class="meta">
+                        <span><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            <% }); %>
+          </div>
+          <% } %>
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h2>Upcoming Elections</h2>
           <button class="primaryBtn" onclick="location.href='/elections'">VIEW ALL ELECTIONS</button>
@@ -88,13 +128,13 @@
         <div class="ui five column stackable grid" id="electionCards">
           <% 
             const today = new Date().setHours(0, 0, 0, 0);
-            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= today);
+            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && new Date(v.ElectionDate).setHours(0, 0, 0, 0) > today);
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
             const limitedElections = sortedElections.slice(0, 5);
             if (limitedElections.length > 0) {
               limitedElections.forEach(function (election) { %>
                 <div class="column">
-                  <div class="ui fluid card">
+                  <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer;">
                     <div class="image">
                       <% if (election.Icon_path) { %>
                         <img src="<%= election.Icon_path %>" alt="Election Icon">
@@ -141,7 +181,7 @@
             <% limitedCandidates.forEach(function (candidate) { 
                 if (candidate.CandidateId && (candidate.fName !== 'Reopen') && (candidate.lName !== 'Election')) { %>
                   <div class="column">
-                    <div class="ui fluid card">
+                    <div class="ui fluid card" onclick="location.href='/candidate/<%=candidate.CandidateId%>'" style="cursor: pointer;">
                       <div class="image">
                         <% if(candidate.Picture_Path) { %>
                           <img src="<%= candidate.Picture_Path %>" alt ="Candidate Thumbnail">

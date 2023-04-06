@@ -1,0 +1,40 @@
+<div id="loading-screen" style="display:none">
+    <div class="loader"></div>
+</div>
+
+<div class="vote-unavailable" id="vote-unavailable">
+    <h3 id="accessMessage">Voting Unavailable for this Election</h3>
+    <p id="accessMessageTimer"></p>
+    <button class="primaryBtn" onclick="location.href='/'">BACK TO HOME</button>
+</div>
+
+<script>
+    const accessMessage = document.getElementById('accessMessage');
+    const accessMessageTimer = document.getElementById('accessMessageTimer');
+    const electionOpenTime = '<%=data[0].OpenTime%>';
+    const openTime = new Date(electionOpenTime);
+    const now = new Date();
+    if (now >= openTime) {
+        document.getElementById('loading-screen').style.display = 'flex';
+        accessMessageTimer.innerText = 'Voting has closed.';
+        document.getElementById('loading-screen').style.display = 'none';
+    }
+    else {
+        document.getElementById('loading-screen').style.display = 'flex';
+        var timeRemaining = Math.max(0, openTime.getTime() - now.getTime());
+
+        var timer = setInterval(() => {
+            var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+            var timerText = `Voting begins in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+            accessMessageTimer.textContent = timerText;
+            timeRemaining -= 1000;
+            if (timeRemaining < 0) {
+                clearInterval(timer);
+            }
+            document.getElementById('loading-screen').style.display = 'none';
+        }, 1000);
+    }
+</script>

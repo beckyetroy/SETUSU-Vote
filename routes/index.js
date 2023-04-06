@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
     const sqlSearch =
         `select Id, Description, ElectionDate, Icon_path,
         Candidate.CandidateId, fName, lName, CategoryName,
-          Picture_Path
+          Picture_Path, OpenTime, CloseTime
           FROM Election
           LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
           LEFT OUTER JOIN Candidate_Category

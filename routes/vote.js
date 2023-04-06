@@ -24,7 +24,8 @@ function renderPage(res, electionId, action, message, category, selectedOptions)
     database.getConnection(async (err, connection) => {
       if (err) throw (err);
       const election_query = `SELECT Id, Description, Candidate.CandidateId,
-                            fName, lName, Picture_path, CategoryId
+                            fName, lName, Picture_path, CategoryId, OpenTime, CloseTime,
+                            ElectionDate
                             FROM Election LEFT JOIN Candidate
                             ON Candidate.ElectionId = Election.Id
                             LEFT JOIN Candidate_Category
@@ -37,11 +38,24 @@ function renderPage(res, electionId, action, message, category, selectedOptions)
         const electionData = result;
         if (err) throw (err);
         await connection.query(query2, async (err, result) => {
-          if (err) throw (err);
-          const categoryData = result;
-          connection.release();
-          res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: electionData,
-            categorydata: categoryData, action: action, currentcategory: category, selectedOptions: selectedOptions});
+            if (err) throw (err);
+            const categoryData = result;
+            connection.release();
+            const now = new Date();
+            const electionDate = new Date(electionData[0].ElectionDate);
+            const openTime = new Date(electionData[0].OpenTime);
+            const closeTime = new Date(electionData[0].CloseTime);
+            const sameDate = now.toDateString() === electionDate.toDateString();
+            const withinInterval = now >= openTime && now < closeTime;
+            if (withinInterval && sameDate) {
+                res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: message, data: electionData,
+                    categorydata: categoryData, action: action, currentcategory: category, selectedOptions: selectedOptions});
+                return;
+            } else {
+                res.render('voter/vote.ejs', { title: 'Cast Your Vote', message: "", data: electionData,
+                    categorydata: "", action: 'noAccess', currentcategory: "", selectedOptions: ""});
+                return;
+            }
         });
       });
     });

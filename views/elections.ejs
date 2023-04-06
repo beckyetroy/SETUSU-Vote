@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
     <link rel="icon" type="image/png" href="/assets/Logo.png">
-    <title>SETUSU Vote</title>
+    <title>SETUSU Vote - Elections</title>
   </head>
   <body>
       <nav class="navbar navbar-expand-lg">
@@ -48,16 +48,13 @@
           <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav ms-auto">
                   <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                  </li>
-                  <li class="nav-item">
                       <a class="nav-link" href="/register">Register</a>
                   </li>
                   <li class="nav-item">
                       <a class="nav-link" href="/candidates">Candidates</a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link" href="https://setusu.ie/">SETUSU Home</a>
+                    <a class="nav-link" href="/">Home</a>
                   </li>
               </ul>
           </div>
@@ -66,7 +63,7 @@
       <div class="electionList" style="min-height: 75vh; padding-top: 5%;">
           <% 
             const now = new Date();
-            const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
+            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= now);
 
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
       
@@ -82,7 +79,7 @@
                     groupElections.forEach((election) => {
                   %>
                       <div class="column">
-                        <div class="ui fluid card">
+                        <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer;">
                           <div class="image">
                             <% if(election.Icon_path) { %>
                               <img src="<%= election.Icon_path %>" alt ="Election Icon">

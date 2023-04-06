@@ -36,7 +36,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <link rel="icon" type="image/png" href="/assets/Logo.png">
-    <title>SETUSU Vote</title>
+    <title>SETUSU Vote - <%= data[0].Description %></title>
   </head>
   <body>
       <nav class="navbar navbar-expand-lg">
@@ -65,7 +65,19 @@
       <div class="content-wrapper">
         <div class="header-image-election">
           <h2 class="election-header"><%= data[0].Description %>
-            <br><span class="candidateslogan" id="candidateslogan"></span></h2>
+            <br><span class="candidateslogan" id="candidateslogan">
+              <%
+                const now = new Date();
+                const electionDate = new Date(data[0].ElectionDate);
+                const openTime = new Date(data[0].OpenTime);
+                const closeTime = new Date(data[0].CloseTime);
+                const sameDate = now.toDateString() === electionDate.toDateString();
+                const withinInterval = now >= openTime && now < closeTime;
+                if (withinInterval && sameDate) {
+              %>
+                <button class="primaryBtnBlue" onclick="window.location.href='/vote/<%=data[0].Id%>'">VOTE NOW!</button>
+              <% } %>
+            </span></h2>
         </div>
         <% if (data[0].Icon_Path) { %>
           <img src="<%= data[0].Icon_Path %>" alt="Main Campaign Image" class="election-thumbnail">
@@ -208,6 +220,8 @@
               </div>
             <% } %>
           </div>
+        </div>
+      </div>
 
       <img class="logoBubble" src="/assets/Logo-Bubble.png" alt="SETUSU Logo">
 
