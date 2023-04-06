@@ -60,7 +60,9 @@
         <div class="container-basic-registration">
             <form action="/register" method="POST" class="register">
                 <h3 class="formTitle">Register to Vote</h3>
-                <div class="basic-form-error" id="basic-form-error"></div>
+                <div class="basic-form-error" id="basic-form-error">Please enter your details carefully.
+                  <br><small><strong>NOTE:</strong> You will not get to update these later.</small>
+                </div>
                 <%
                 if(data.length > 0)
                 {
@@ -69,17 +71,32 @@
                       <select name="election" id="electionSelect" class="form-select form-select-lg mb-3">
                           <option value="" disabled selected>Select Election</option>
                           <%
-                          electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
                           const now = new Date();
-                          const upcomingElections = electionData.filter((election) => new Date(election.ElectionDate) >= now);
+                          const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
+
                           const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
-                          sortedElections.forEach(function(election){
-                              if (election.Id) {
+
+                          const ongoingElections = data.filter((v) => {
+                            const electionDate = new Date(v.ElectionDate);
+                            const openTime = new Date(v.OpenTime);
+                            const closeTime = new Date(v.CloseTime);
+                            const sameDate = now.toDateString() === electionDate.toDateString();
+                            const withinInterval = now >= openTime && now < closeTime;
+                            return v.Id !== null && sameDate && withinInterval;
+                          });
+
+                          const filteredElections = ongoingElections.concat(sortedElections);
+                          filteredElections.forEach(function(election){
+                              if (election.Id && ongoingElections.includes(election)) {
+                          %>
+                              <option value="<%= election.Id %>" style="font-weight: bold;"><%= election.Description %> <small><i>(In Progress)</i></small></option>
+                          <%
+                          } 
+                              else if (election.Id && !ongoingElections.includes(election)){
                           %>
                               <option value="<%= election.Id %>"> <%= election.Description %> </option>
                           <%
-                          } 
-                              else {}
+                              }
                           });
                           %>
                       </select>

@@ -37,7 +37,7 @@ router.get('/elections', function(req, res, next) {
   database.getConnection ( async (err, connection)=> {
     if (err) throw (err)
     const sqlSearch =
-        `select Id, Description, ElectionDate, Icon_path,
+        `select Id, Description, ElectionDate, OpenTime, CloseTime, Icon_path,
         Candidate.CandidateId, fName, lName, CategoryName,
           Picture_Path
           FROM Election
@@ -66,7 +66,7 @@ router.get('/candidates', function(req, res, next) {
   database.getConnection ( async (err, connection)=> {
     if (err) throw (err)
     const sqlSearch =
-        `select Id, Description, ElectionDate, Icon_path,
+        `select Id, Description, ElectionDate, Icon_path, OpenTime, CloseTime,
         Candidate.CandidateId, fName, lName, CategoryName,
           Picture_Path
           FROM Election

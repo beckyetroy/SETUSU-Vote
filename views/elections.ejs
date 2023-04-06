@@ -60,11 +60,59 @@
           </div>
       </nav>
 
-      <div class="electionList" style="min-height: 75vh; padding-top: 5%;">
-          <% 
-            const now = new Date();
-            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= now);
-
+      <div class="electionList" style="min-height: 75vh;">
+        <% 
+          const now = new Date();
+          const ongoingElections = data.filter((v) => {
+            const electionDate = new Date(v.ElectionDate);
+            const openTime = new Date(v.OpenTime);
+            const closeTime = new Date(v.CloseTime);
+            const sameDate = now.toDateString() === electionDate.toDateString();
+            const withinInterval = now >= openTime && now < closeTime;
+            return v.Id !== null && sameDate && withinInterval;
+          });
+          const filteredOngoingElections = ongoingElections.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i);
+          if (filteredOngoingElections.length > 0) {
+            const groupsOngoing = Math.ceil(filteredOngoingElections.length / 5);
+            for (let i = 0; i < groupsOngoing; i++) {
+              const groupOngoingStart = i * 5;
+              const groupOngoingEnd = groupOngoingStart + 5;
+              const groupOngoingElections = filteredOngoingElections.slice(groupOngoingStart, groupOngoingEnd);
+          %>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Ongoing Elections</h2>
+          </div>
+          <div class="ui five column stackable grid" id="electionCards">
+              <% 
+                groupOngoingElections.forEach((election) => {
+              %>
+                <div class="column">
+                  <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer; margin-bottom: 0%;">
+                    <div class="image">
+                      <% if (election.Icon_path) { %>
+                        <img src="<%= election.Icon_path %>" alt="Election Icon">
+                      <% } else { %>
+                        <img src="/assets/Placeholder-icon1.jpg" alt="Election Icon" class="placeholder-icon">
+                      <% } %>
+                    </div>
+                    <div class="content">
+                      <p class="header"><%= election.Description %></p>
+                      <div class="meta">
+                        <span><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="primaryBtnBlue" onclick="window.location.href='/vote/<%=data[0].Id%>'" style="margin-top: 0%; width: 100%; padding: 1rem; border-radius: 0%;">VOTE NOW!</button>
+                </div>
+            <% }); %>
+          </div>
+          <% } 
+          } %>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Upcoming Elections</h2>
+          </div>
+          <%
+            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= now || new Date(v.OpenTime) > now));
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
       
             if (sortedElections.length > 0) {
@@ -118,7 +166,54 @@
           <% 
             }
           %>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Past Elections</h2>
+          </div>
+          <%
+            const pastElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now || new Date(v.CloseTime) < now));
+            const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
+      
+            if (sortedPastElections.length > 0) {
+              const groups = Math.ceil(sortedPastElections.length / 5);
+              for (let i = 0; i < groups; i++) {
+                const groupPastStart = i * 5;
+                const groupPastEnd = groupPastStart + 5;
+                const groupPastElections = sortedPastElections.slice(groupPastStart, groupPastEnd);
+          %>
+                <div class="ui five column stackable grid" id ="electionCards">
+                  <% 
+                    groupPastElections.forEach((election) => {
+                  %>
+                      <div class="column">
+                        <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer;">
+                          <div class="image">
+                            <% if(election.Icon_path) { %>
+                              <img src="<%= election.Icon_path %>" alt ="Election Icon">
+                            <% } else { %>
+                              <img src="/assets/Placeholder-icon1.jpg" alt ="Election Icon" class="placeholder-icon">
+                            <% } %>
+                          </div>
+                          <div class="content">
+                            <p class="header"><%= election.Description %></p>
+                            <div class="meta">
+                              <span>
+                                <%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                  <% 
+                    });
+                  %>
+                </div>
+          <% 
+              }
+            } else {
+            }
+          %>
         </div>
+      </div>
       </div>
     <img class="logoBubble" src="assets/Logo-Bubble.png" alt="SETUSU Logo">
   </body>

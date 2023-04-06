@@ -102,7 +102,7 @@
             <%
             limitedOngoingElections.forEach(function (election) { %>
                 <div class="column">
-                  <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer;">
+                  <div class="ui fluid card" onclick="location.href='/election/<%=election.Id%>'" style="cursor: pointer; margin-bottom: 0%;">
                     <div class="image">
                       <% if (election.Icon_path) { %>
                         <img src="<%= election.Icon_path %>" alt="Election Icon">
@@ -117,6 +117,7 @@
                       </div>
                     </div>
                   </div>
+                  <button class="primaryBtnBlue" onclick="window.location.href='/vote/<%=data[0].Id%>'" style="margin-top: 0%; width: 100%; padding: 1rem; border-radius: 0%;">VOTE NOW!</button>
                 </div>
             <% }); %>
           </div>

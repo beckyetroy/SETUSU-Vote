@@ -602,6 +602,10 @@ form.login {
     font-size: 1.1rem !important;
     font-style: italic;
   }
+
+  .candidateslogan > button {
+    font-size: 1.1rem !important;
+  }
   
   .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
     width: 200px;
@@ -1055,6 +1059,20 @@ ol li:before {
 .register .form-control.inputerror, .inputerror {
   background-color: #ffe6e6 !important;
   border: 1px solid #ff0000 !important;
+}
+
+.register-suggest {
+  padding-bottom: 2rem;
+  padding-top: 0.5rem;
+  font-family: 'Inter';
+}
+
+.register-suggest a {
+  color: #4666b1;
+}
+
+.register-suggest a:hover{
+  color: #eb2c5c;
 }
 
 input:-webkit-autofill,

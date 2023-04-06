@@ -60,13 +60,23 @@
           </div>
       </nav>
 
-      <div class="candidateList" style="min-height: 75vh; padding-top: 5%;">
+      <div class="candidateList" style="min-height: 75vh;">
+        <h2>Upcoming Candidates</h2>
           <% 
             const now = new Date();
             const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
 
             const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
-            const candidateData = sortedElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election');
+
+            const ongoingElections = data.filter((v) => {
+              const electionDate = new Date(v.ElectionDate);
+              const openTime = new Date(v.OpenTime);
+              const closeTime = new Date(v.CloseTime);
+              const sameDate = now.toDateString() === electionDate.toDateString();
+              const withinInterval = now >= openTime && now < closeTime;
+              return v.Id !== null && sameDate && withinInterval;
+            });
+            const candidateData = ongoingElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election').concat(sortedElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election'));
 
             if (candidateData.length > 0) {
               const groups = Math.ceil(candidateData.length / 5);
@@ -78,6 +88,62 @@
                 <div class="ui five column stackable grid" id ="electionCards">
                   <% 
                     groupCandidates.forEach((candidate) => {
+                  %>
+                    <div class="column">
+                      <div class="ui fluid card" onclick="location.href='/candidate/<%=candidate.CandidateId%>'" style="cursor: pointer;">
+                        <div class="image">
+                            <% if(candidate.Picture_Path) { %>
+                            <img src="<%= candidate.Picture_Path %>" alt ="Candidate Thumbnail">
+                            <% } else { %>
+                            <img src="/assets/Person-Placeholder.png" alt ="Candidate Thumbnail">
+                            <% } %>
+                        </div>
+                        <div class="content">
+                            <p class="header"><%= candidate.fName %> <%= candidate.lName %></p>
+                            <div class="meta">
+                            <span><%= candidate.Description %></span>
+                            </div>
+                            <div class="description">Running for <%= candidate.CategoryName %> </div>
+                        </div>
+                        </div>
+                    </div>
+                  <% 
+                    });
+                  %>
+                </div>
+          <% 
+              }
+            } else {
+          %>
+              <div class="column">
+                <div class="ui fluid card">
+                  <div class="content">
+                    <p class="header">No Candidates Yet</p>
+                    <div class="meta">
+                      <span>Check back later!</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          <% 
+            }
+          %>
+          <h2>Past Candidates</h2>
+        <%
+            const pastElections = data.filter((v, i, a) => v.Id !== null && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now || new Date(v.CloseTime) < now));
+            const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
+
+            const candidatePastData = sortedPastElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election');
+            if (candidatePastData.length > 0) {
+              const pastGroups = Math.ceil(candidatePastData.length / 5);
+              for (let i = 0; i < pastGroups; i++) {
+                const groupPastStart = i * 5;
+                const groupPastEnd = groupPastStart + 5;
+                const groupPastCandidates = candidatePastData.slice(groupPastStart, groupPastEnd);
+          %>
+                <div class="ui five column stackable grid" id ="electionCards">
+                  <% 
+                    groupPastCandidates.forEach((candidate) => {
                   %>
                     <div class="column">
                       <div class="ui fluid card" onclick="location.href='/candidate/<%=candidate.CandidateId%>'" style="cursor: pointer;">
