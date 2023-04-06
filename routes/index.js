@@ -96,7 +96,14 @@ router.get('/election/:id', function(req, res, next) {
   database.getConnection ( async (err, connection)=> {
     if (err) throw (err)
     const sqlElection =
-        `select * from Election
+        `select Id, Description, ElectionDate, OpenTime, CloseTime, 
+        Category.CategoryId, CategoryName, CategoryDescription,
+        Candidate.CandidateId, fName, lName, Picture_path
+        from Election LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
+          LEFT OUTER JOIN Candidate_Category
+          ON Candidate.CandidateId = Candidate_Category.CandidateId
+          LEFT OUTER JOIN Category
+          ON Candidate_Category.CategoryId = Category.CategoryId
         where Id = ?;`
       const query = mysql.format(sqlElection, [election]);
     await connection.query (query, async (err, result) => {
@@ -106,7 +113,7 @@ router.get('/election/:id', function(req, res, next) {
           res.redirect('/');
         }
         else {
-          res.render('election_info', { data:result[0]});
+          res.render('election_info', { data:result});
         }
     })
   })
@@ -121,7 +128,7 @@ router.get('/candidate/:id', function(req, res, next) {
         `select Candidate.CandidateId, fName, lName, Email,
         Instagram, Twitter, Facebook, ContactNo,
         Category.CategoryId, CategoryName, Slogan, Overview,
-        Description, AgendaId, Summary, Picture_Path, 
+        Description, Id, AgendaId, Summary, Picture_Path, 
         file_id, File_Path, Type
         from Candidate join Candidate_Category
         on Candidate.CandidateId = Candidate_Category.CandidateId
@@ -139,6 +146,9 @@ router.get('/candidate/:id', function(req, res, next) {
         connection.release()
         if (err) throw (err)
         if (result.length == 0) {
+          res.redirect('/');
+        }
+        else if ((result[0].fName === 'Reopen') && (result[0].lName === 'Election')) {
           res.redirect('/');
         }
         else {

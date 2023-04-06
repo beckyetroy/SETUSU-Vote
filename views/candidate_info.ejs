@@ -29,6 +29,10 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <!-- Semantic UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js" integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <link rel="icon" type="image/png" href="/assets/Logo.png">
@@ -52,7 +56,7 @@
                       <a class="nav-link" href="/elections">Elections</a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link" href="https://setusu.ie/">SETUSU Home</a>
+                      <a class="nav-link" href="/">Home</a>
                   </li>
               </ul>
           </div>
@@ -72,6 +76,10 @@
             <div class = "contact clearfix">
                 <ul>
                     <li>
+                        <strong>Running in:</strong>
+                        <br><%= data[0].Description %>
+                    </li>
+                    <li>
                         <strong>Contact Number:</strong>
                         <br><%= data[0].ContactNo %>
                     </li>
@@ -83,6 +91,9 @@
                         <a href="<%= data[0].Facebook %>"><i class="fab fa-facebook-square fa-3x"></i></a>
                         <a href="<%= data[0].Twitter %>"><i class="fab fa-twitter-square fa-3x"></i></a>
                         <a href="<%= data[0].Instagram %>"><i class="fab fa-instagram fa-3x"></i></a>
+                    </li>
+                    <li>
+                        <button class="primaryBtn" onclick="location.href='/election/<%= data[0].Id %>'" id="election-link">MORE ABOUT THIS ELECTION</button>
                     </li>
                 </ul>
             </div>
@@ -205,7 +216,7 @@
                                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 <span class="sr-only">Next</span>
                                 </a>
-                        </div>
+                            </div>
                         </div>
                     </div>
                     <% } %>

@@ -537,12 +537,24 @@ form.login {
   padding: 5em;
 }
 
-.campaign-header, #candidateslogan {
+.header-image-election {
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  background: url(/assets/SETU2.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  padding: 5em;
+}
+
+.campaign-header, #candidateslogan, .election-header {
   display: inline-block;
   width: 100%;
 }
 
-.campaign-header {
+.campaign-header, .election-header {
   font-size: 3rem;
   text-align: left;
   background-color: #999999;
@@ -557,26 +569,26 @@ form.login {
   font-style: italic;
 }
 
-.campaign-thumbnail {
+.campaign-thumbnail, .election-thumbnail, #election-thumbnail {
   width: 300px;
   height: 300px;
   transform: translate(+10%, -95%);
 }
 
 @media (max-width: 991px) {
-  .header-image {
+  .header-image, .header-image-election {
     padding-top: 15em;
     padding-bottom: 0em;
     padding-left: 0em !important;
     padding-right: 0em !important;
   }
   
-  .campaign-header, #candidateslogan {
+  .campaign-header, #candidateslogan, .election-header {
     display: inline-block;
     width: 100%;
   }
   
-  .campaign-header {
+  .campaign-header, .election-header {
     font-size: 2rem;
     text-align: center;
     background-color: #999999;
@@ -591,10 +603,10 @@ form.login {
     font-style: italic;
   }
   
-  .campaign-thumbnail {
+  .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
     width: 200px;
     height: 200px;
-    transform: translate(+50%, -160%);
+    transform: translate(+25vw, -50vh);
   }
 }
 
@@ -607,7 +619,7 @@ form.login {
 .all-content {
   display: flex;
   width: 100%;
-  transform: translate(0%, -42.5%);
+  transform: translate(0%, -42vh);
 }
 
 .info, .contact {
@@ -636,7 +648,7 @@ form.login {
 @media (max-width: 991px) {
   .all-content {
     display: inline-block;
-    transform: translate(0%, -15%);
+    transform: translate(0%, -30vh);
   }
   
   .info, .contact {
@@ -678,6 +690,7 @@ form.login {
 ol {
   list-style: none;
   counter-reset: item;
+  padding-left: 0% !important;
 }
 
 ol li {
@@ -696,14 +709,14 @@ ol li:before {
   display: inline-block;
 }
 
-.manifesto-header, .agenda-header, .media-header {
+.manifesto-header, .agenda-header, .media-header, .category-header {
   font-size: 1.5rem;
   font-family: 'Aileron', sans-serif !important;
   color:#eb2c5c;
   font-weight: bold;
 }
 
-.agenda-header, .media-header {
+.agenda-header, .media-header, .category-header {
   padding-top: 1rem;
 }
 
@@ -712,9 +725,21 @@ ol li:before {
   padding-bottom: 0.5rem;
 }
 
-.manifesto-content, .agenda-content, .media-content {
+.manifesto-content, .agenda-content, .media-content, .category-content {
   font-size: 1rem;
   font-family: 'Inter';
+  text-align: justify;
+}
+
+.category-content {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.category-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
 }
 
 #campaign-carousel {
