@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var database = require('../database');
+var mysql = require('mysql');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -84,6 +85,64 @@ router.get('/candidates', function(req, res, next) {
         }
         else {
           res.render('candidates', { title: 'ALL CANDIDATES', data:result});
+        }
+    })
+  })
+});
+
+/* GET election info page. */
+router.get('/election/:id', function(req, res, next) {
+  const election = req.params.id;
+  database.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlElection =
+        `select * from Election
+        where Id = ?;`
+      const query = mysql.format(sqlElection, [election]);
+    await connection.query (query, async (err, result) => {
+        connection.release()
+        if (err) throw (err)
+        if (result.length == 0) {
+          res.redirect('/');
+        }
+        else {
+          res.render('election_info', { data:result[0]});
+        }
+    })
+  })
+});
+
+/* GET candidate info page. */
+router.get('/candidate/:id', function(req, res, next) {
+  const candidate = req.params.id;
+  database.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlCandidate =
+        `select Candidate.CandidateId, fName, lName, Email,
+        Instagram, Twitter, Facebook, ContactNo,
+        Category.CategoryId, CategoryName, Slogan, Overview,
+        Description, AgendaId, Summary, Picture_Path, 
+        file_id, File_Path, Type
+        from Candidate join Candidate_Category
+        on Candidate.CandidateId = Candidate_Category.CandidateId
+        left join Category
+        on Candidate_Category.CategoryId = Category.CategoryId
+        left join Election
+        on Candidate.ElectionId = Election.Id
+        left join Agenda
+        on Candidate.CandidateId = Agenda.CandidateId
+        left join Candidate_Media
+        on Candidate.CandidateId = Candidate_Media.CandidateId
+        where Candidate.CandidateId = ?;`
+      const query = mysql.format(sqlCandidate, [candidate]);
+    await connection.query (query, async (err, result) => {
+        connection.release()
+        if (err) throw (err)
+        if (result.length == 0) {
+          res.redirect('/');
+        }
+        else {
+          res.render('candidate_info', { data:result});
         }
     })
   })
