@@ -41,7 +41,8 @@ function renderDashboard(res, title, action, username) {
             `select Candidate.CandidateId, fName, lName, Email,
                     Instagram, Twitter, Facebook, ContactNo,
                     Category.CategoryId, CategoryName, NumVotes, Slogan, Overview,
-                    Description, Username, Summary, Picture_Path, File_Path, Type
+                    Description, Username, AgendaId, Summary, Picture_Path, 
+                    file_id, File_Path, Type
                     from Candidate join Candidate_Category
                     on Candidate.CandidateId = Candidate_Category.CandidateId
                     left join Category

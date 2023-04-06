@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Fonts -->
+    <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto Condensed' rel='stylesheet'>
+    <link href="https://fonts.cdnfonts.com/css/aileron" rel="stylesheet">
+
+    <!-- CSS-->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Semantic UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js" integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="icon" type="image/png" href="/assets/Logo.png">
+    <title>SETUSU Vote - <%= data[0].Description %></title>
+  </head>
+  <body>
+      <nav class="navbar navbar-expand-lg">
+          <h1 id="webpage-title" class="navbar-title">SETUSU Vote</h1>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ms-auto">
+                  <li class="nav-item">
+                      <a class="nav-link" href="/register">Register</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/candidates">Candidates</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/elections">Elections</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/">Home</a>
+                  </li>
+              </ul>
+          </div>
+      </nav>
+
+      <div class="content-wrapper">
+        <div class="header-image-election">
+          <h2 class="election-header"><%= data[0].Description %>
+            <br><span class="candidateslogan" id="candidateslogan">
+              <%
+                const now = new Date();
+                const electionDate = new Date(data[0].ElectionDate);
+                const openTime = new Date(data[0].OpenTime);
+                const closeTime = new Date(data[0].CloseTime);
+                const sameDate = now.toDateString() === electionDate.toDateString();
+                const withinInterval = now >= openTime && now < closeTime;
+                if (withinInterval && sameDate) {
+              %>
+                <button class="primaryBtnBlue" onclick="window.location.href='/vote/<%=data[0].Id%>'">VOTE NOW!</button>
+              <% } %>
+            </span></h2>
+        </div>
+        <% if (data[0].Icon_Path) { %>
+          <img src="<%= data[0].Icon_Path %>" alt="Main Campaign Image" class="election-thumbnail">
+        <% } else { %>
+          <img src="/assets/Placeholder-icon1.jpg" alt ="Election Icon" class="placeholder-icon" id="election-thumbnail">
+        <% } %>
+        <div class="all-content">
+            <div class = "contact clearfix">
+                <ul>
+                    <li>
+                        <strong>Date:</strong>
+                        <br><%= new Date(data[0].ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                    </li>
+                    <li>
+                        <strong>Voting Open:</strong>
+                        <br><%= new Date(data[0].OpenTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }); %>
+                        - <%= new Date(data[0].CloseTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }); %>
+                    </li>
+                    <li>
+                      <strong>Number of Categories:</strong>
+                      <%
+                      categoryData = data.filter((v, i, a) => v.CategoryId !== null && a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                      %>
+                      <%= categoryData.length %>
+                    </li>
+                    <li>
+                      <strong>Number of Candidates:</strong>
+                      <%
+                      candidateData = data.filter((v, i, a) => v.CandidateId !== null && v.fName !== 'Reopen' && v.lName !== 'Election' && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                      %>
+                      <%= candidateData.length %>
+                    </li>
+                </ul>
+            </div>
+            <div class="info clearfix">
+                <div class="categories">
+                    <h3 class="category-header">Categories</h3>
+                    <% if (categoryData.length > 0) { %>
+                    <ol>
+                      <%
+                      categoryData.forEach(function(category) {
+                    %>
+                            <li class = "category-content"> <span class="category-name"> <%= category.CategoryName%></span>
+                            <br><%= category.CategoryDescription%>
+                            </li>
+                    <%
+                    });
+                    %>
+                    </ol>
+                    <%
+                  } else { %>
+                        <p class="agenda-content">No categories just yet ... Please check back later!</p>
+                    <% } %>
+                </div>
+                <div class="candidate-media">
+                  <h3 class="category-header">Candidates</h3>
+                  <% var images = [];
+                      if (candidateData.length === 0) { %>
+                      <p class="media-content">No candidates yet ... Check back later!</p>
+                  <% } else { %>
+                  
+                  <div id="campaign-carousel" class="carousel slide" data-ride="carousel">
+                      <div class="carousel-inner">
+                          <% for (var i = 0; i < candidateData.length; i+=3) { %>
+                          <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                              <div class="row">
+                              <% for (var j = i; j < i+3 && j < candidateData.length; j++) { %>
+                                  <% var media = candidateData[j]; %>
+                                  <% images.push(media.Picture_path); %>
+                                  <div class="col-12 col-sm-6 col-md-4">
+                                    <div class="column">
+                                    <div class="ui fluid card campaign-image" onclick="window.location.href='/candidate/<%=media.CandidateId%>'">
+                                      <div class="image">
+                                        <% if(media.Picture_path) { %>
+                                          <img src="<%= media.Picture_path %>" alt ="Candidate Thumbnail">
+                                        <% } else { %>
+                                          <img src="/assets/Person-Placeholder.png" alt ="Candidate Thumbnail">
+                                        <% } %>
+                                      </div>
+                                      <div class="content">
+                                        <p class="header"><%= media.fName %> <%= media.lName %></p>
+                                        <div class="description">Running for <%= media.CategoryName %> </div>
+                                      </div>
+                                  </div>
+                                  </div>
+                                  </div>
+                              <% } %>
+                              </div>
+                          </div>
+                          <% } %>
+                      </div>
+                      <% if (images.length > 3) { %>
+                          <a class="carousel-control-prev" href="#campaign-carousel" role="button" data-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="sr-only">Previous</span>
+                          </a>
+                          <a class="carousel-control-next" href="#campaign-carousel" role="button" data-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="sr-only">Next</span>
+                          </a>
+                      <% } %>
+                      </div>
+                  </div>
+
+                  <div id="mobile-campaign-carousel" class="carousel slide" data-ride="carousel" style="display:none">
+                    <div class="carousel-inner">
+                        <% for (var i = 0; i < candidateData.length; i++) { %>
+                          <% var media = candidateData[i]; %>
+                        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                                <div class="col-12 col-sm-6 col-md-4">
+                                  <div class="column">
+                                  <div class="ui fluid card campaign-image" onclick="window.location.href='/candidate/<%=media.CandidateId%>'">
+                                    <div class="image">
+                                      <% if(media.Picture_path) { %>
+                                        <img src="<%= media.Picture_path %>" alt ="Candidate Thumbnail">
+                                      <% } else { %>
+                                        <img src="/assets/Person-Placeholder.png" alt ="Candidate Thumbnail">
+                                      <% } %>
+                                    </div>
+                                    <div class="content">
+                                      <p class="header"><%= media.fName %> <%= media.lName %></p>
+                                      <div class="description">Running for <%= media.CategoryName %> </div>
+                                    </div>
+                                </div>
+                                </div>
+                                </div>
+                        </div>
+                        <% } %>
+                      </div>
+                        <a class="carousel-control-prev" href="#mobile-campaign-carousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#mobile-campaign-carousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <img class="logoBubble" src="/assets/Logo-Bubble.png" alt="SETUSU Logo">
+
+    </body>
+
+    <footer>
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <h4 class="footer-h4">Follow us on</h4>
+          <div class="social-icons">
+            <div>
+              <h5>Waterford Campus</h5>
+              <div class="wd-links">
+                <a href="https://www.instagram.com/setusu.wd/" target="_blank"><i class="fab fa-instagram fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                <a href="https://twitter.com/setusu_wd/" target="_blank"><i class="fab fa-twitter fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                <a href="https://www.facebook.com/setusu.wd/" target="_blank"><i class="fab fa-facebook fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+              </div>
+            </div>
+            <div>
+              <h5>Carlow Campus</h5>
+              <div class="cw-links">
+                <a href="https://www.instagram.com/setusu.cw/" target="_blank"><i class="fab fa-instagram fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                <a href="https://twitter.com/setusu_cw/" target="_blank"><i class="fab fa-twitter fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+                <a href="https://www.facebook.com/setusu.cw/" target="_blank"><i class="fab fa-facebook fa-3x" style="color:white; margin-right: 1vw;"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12" id="copyright">
+          <h4>&copy; 2023 SETUSU. All rights reserved.</h4>
+          <p>Designed by Rebecca Troy (20088744)</p>
+        </div>
+      </div>
+    </footer>
+    <script>
+      if (window.matchMedia("(max-width: 991px)").matches) {
+          document.getElementById("campaign-carousel").style.display = "none";
+          document.getElementById("mobile-campaign-carousel").style.display = "block";
+      } else {
+          document.getElementById("campaign-carousel").style.display = "flex";
+          document.getElementById("mobile-campaign-carousel").style.display = "none";
+      }
+
+      const placeholderImages = document.querySelectorAll('.placeholder-icon');
+  
+      const placeholderImageSources = [
+        '/assets/Placeholder-icon1.jpg',
+        '/assets/Placeholder-icon2.jpg'
+      ];
+  
+      placeholderImages.forEach(function(img) {
+        const randomIndex = Math.floor(Math.random() * placeholderImageSources.length);
+        img.src = placeholderImageSources[randomIndex];
+      });
+  
+    </script>
+  </html>

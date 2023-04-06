@@ -1,9 +1,11 @@
 html {
   height: 100%;
+  width: 100%;
 }
 
 body {
-    background-color: #c4c4c4 !important;
+  width: 100%;
+  background-color: #c4c4c4 !important;
 }
 
 h1 {
@@ -507,13 +509,13 @@ form.login {
 }
 
 .logoBubble {
-    max-width: 10%;
-    background-color: #ffdb4d;
-    position: fixed;
-    right: 4%;
-    bottom: 5%;
-    border-radius: 50%;
-    z-index: 10;
+  max-width: 10%;
+  background-color: #ffdb4d;
+  position: fixed;
+  right: 4%;
+  bottom: 5%;
+  border-radius: 50%;
+  z-index: 10;
 }
 
 @media (max-width: 991px) {
@@ -524,30 +526,273 @@ form.login {
 }
 
 .header-image {
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    background: url(/assets/SETU1.jpg) no-repeat center center fixed; 
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-    padding: 5em;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  background: url(/assets/SETU1.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  padding: 5em;
 }
 
-.campaign-header, #candidateslogan {
+.header-image-election {
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  background: url(/assets/SETU2.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  padding: 5em;
+}
+
+.campaign-header, #candidateslogan, .election-header {
+  display: inline-block;
+  width: 100%;
+}
+
+.campaign-header, .election-header {
+  font-size: 3rem;
+  text-align: left;
+  background-color: #999999;
+  color: white;
+  padding: 1rem;
+  padding-left: 300px;
+  font-family: 'Roboto Condensed' !important;
+}
+
+.candidateslogan {
+  font-size: 2rem !important;
+  font-style: italic;
+}
+
+.campaign-thumbnail, .election-thumbnail, #election-thumbnail {
+  width: 300px;
+  height: 300px;
+  transform: translate(+10%, -95%);
+}
+
+@media (max-width: 991px) {
+  .header-image, .header-image-election {
+    padding-top: 15em;
+    padding-bottom: 0em;
+    padding-left: 0em !important;
+    padding-right: 0em !important;
+  }
+  
+  .campaign-header, #candidateslogan, .election-header {
     display: inline-block;
-    width: 45%;
+    width: 100%;
+  }
+  
+  .campaign-header, .election-header {
+    font-size: 2rem;
+    text-align: center;
+    background-color: #999999;
+    color: white;
+    padding: 1rem;
+    font-family: 'Roboto Condensed' !important;
+    width: 100%;
+  }
+  
+  .candidateslogan {
+    font-size: 1.1rem !important;
+    font-style: italic;
+  }
+
+  .candidateslogan > button {
+    font-size: 1.1rem !important;
+  }
+  
+  .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
+    width: 200px;
+    height: 200px;
+    transform: translate(+25vw, -50vh);
+  }
 }
 
-.campaign-thumbnail {
-    max-width: 10%;
-    max-height: 10%;
+.content-wrapper {
+  position: relative !important;
+  display: inline-block;
+  width: 100%;
 }
 
-.campaign-media > img, .campaign-media > video {
-    max-width: 15%;
-    max-height: 15%;
+.all-content {
+  display: flex;
+  width: 100%;
+  transform: translate(0%, -42vh);
+}
+
+.info, .contact {
+  flex-grow: 1;
+}
+
+.info {
+  float: right;
+  padding: 1em;
+  width: calc(95vw - 300px) !important;
+  position: relative !important;
+  background-color: #ccc;
+}
+
+.contact {
+  background-color: #4666b1;
+  color: white;
+  width: calc(4vw + 300px) !important;
+  display: flex;
+  flex-direction: column;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 2rem;
+}
+
+@media (max-width: 991px) {
+  .all-content {
+    display: inline-block;
+    transform: translate(0%, -30vh);
+  }
+  
+  .info, .contact {
+    flex-grow: unset;
+  }
+  
+  .info {
+    float: none;
+    width: 100% !important;
+  }
+  
+  .contact {
+    width: 100% !important;
+    display: inline-block;
+    flex-direction: unset;
+    padding-left: 1.5rem;
+  }
+}
+
+.contact ul {
+  list-style: none;
+  font-family: 'Inter';
+  font-size: 1.1rem;
+}
+
+.contact ul li {
+  padding-bottom: 2rem;
+}
+
+.contact ul li a {
+  color: #fff;
+  margin-right: 1rem;
+}
+
+.contact ul li a:hover {
+  color: #eb2c5c;
+}
+
+ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 0% !important;
+}
+
+ol li {
+  counter-increment: item;
+  margin-bottom: 5px;
+}
+
+ol li:before {
+  margin-right: 10px;
+  content: counter(item);
+  background: #4666b1;
+  border-radius: 80%;
+  color: white;
+  width: 1.4rem;
+  text-align: center;
+  display: inline-block;
+}
+
+.manifesto-header, .agenda-header, .media-header, .category-header {
+  font-size: 1.5rem;
+  font-family: 'Aileron', sans-serif !important;
+  color:#eb2c5c;
+  font-weight: bold;
+}
+
+.agenda-header, .media-header, .category-header {
+  padding-top: 1rem;
+}
+
+.media-header {
+  font-style: italic;
+  padding-bottom: 0.5rem;
+}
+
+.manifesto-content, .agenda-content, .media-content, .category-content {
+  font-size: 1rem;
+  font-family: 'Inter';
+  text-align: justify;
+}
+
+.category-content {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.category-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+}
+
+#campaign-carousel {
+  padding-top: 2em;
+  padding-bottom: 2em;
+  background-color: #999999;
+  position: relative !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.campaign-image, .campaign-video {
+  max-width: 100%;
+  height: auto;
+}
+
+.carousel-item:last-child {
+  margin-right: 0;
+}
+
+.campaign-video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+}
+
+.campaign-video-wrapper video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#fullscreen img, #fullscreen video{
+  cursor: default;
+}
+
+#fullscreen div {
+  text-align: center;
+  max-width: 35%;
+  transform: translate(0%, +10%);
+}
+
+#fullscreen {
+  cursor: pointer;
 }
 
 .camera-container, .camera {
@@ -657,7 +902,7 @@ form.login {
   padding: 2em;
 }
 
-#vote-success {
+#vote-success, #vote-unavailable {
   width: 50vw;
   background-color: #4666b1;
   text-align: center;
@@ -702,7 +947,7 @@ form.login {
     width: 90vw !important;
   }
 
-  #vote-success {
+  #vote-success, #vote-unavailable {
     width: 90vw !important;
   }
 
@@ -814,6 +1059,20 @@ form.login {
 .register .form-control.inputerror, .inputerror {
   background-color: #ffe6e6 !important;
   border: 1px solid #ff0000 !important;
+}
+
+.register-suggest {
+  padding-bottom: 2rem;
+  padding-top: 0.5rem;
+  font-family: 'Inter';
+}
+
+.register-suggest a {
+  color: #4666b1;
+}
+
+.register-suggest a:hover{
+  color: #eb2c5c;
 }
 
 input:-webkit-autofill,
@@ -1164,6 +1423,10 @@ form.authenticate, form.register {
   align-items: center;
   justify-content: center;
   height: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 .carousel-item {
@@ -1173,6 +1436,14 @@ form.authenticate, form.register {
   flex-direction: column;
   text-align: center;
   height: 100%;
+}
+
+.carousel-item img {
+  cursor: pointer;
+}
+
+.carousel-item video {
+  cursor: pointer;
 }
 
 .container-authentication-instructions,
@@ -1296,11 +1567,11 @@ form.authenticate, form.register {
   }
 }
 
-#successMessage {
+#successMessage, #accessMessage {
   padding: 2rem;
 }
 
-#successMessageTimer {
+#successMessageTimer, #accessMessageTimer {
   padding-bottom: 2rem;
 }
 
