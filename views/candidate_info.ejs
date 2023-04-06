@@ -160,7 +160,7 @@
                             </div>
                             <% } %>
                         </div>
-                        <% if (images.length > 0) { %>
+                        <% if (images.length > 3) { %>
                             <a class="carousel-control-prev" href="#campaign-carousel" role="button" data-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="sr-only">Previous</span>
@@ -170,6 +170,42 @@
                             <span class="sr-only">Next</span>
                             </a>
                         <% } %>
+                        </div>
+                    </div>
+
+                    <div id="mobile-campaign-carousel" class="carousel slide" data-ride="carousel" style="display:none">
+                        <div class="carousel-inner">
+                            <% for (var i = 0; i < mediaData.length; i++) { %>
+                                <% var media = mediaData[i]; %>
+                                <% images.push(media.File_Path); %>
+                                    <% if (media.Type === 'image') { %>
+                                        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                                            <div class="col-12 col-sm-6 col-md-4">
+                                                <img src="<%= media.File_Path %>" alt="Campaign Image" class="campaign-image img-fluid">
+                                            </div>
+                                        </div>
+                                    <% } else if (media.Type === 'video') { %>
+                                        <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                                            <div class="col-12 col-sm-6 col-md-4">
+                                                <div class="campaign-video-wrapper">
+                                                <video class="campaign-video" poster="<%= media.File_Path %>?width=400" controls>
+                                                    <source src="<%= media.File_Path %>" type="video/mp4">
+                                                </video>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                            <a class="carousel-control-prev" href="#mobile-campaign-carousel" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#mobile-campaign-carousel" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                                </a>
+                        </div>
                         </div>
                     </div>
                     <% } %>
@@ -210,6 +246,14 @@
       </div>
     </footer>
     <script>
+        if (window.matchMedia("(max-width: 991px)").matches) {
+            document.getElementById("campaign-carousel").style.display = "none";
+            document.getElementById("mobile-campaign-carousel").style.display = "block";
+        } else {
+            document.getElementById("campaign-carousel").style.display = "flex";
+            document.getElementById("mobile-campaign-carousel").style.display = "none";
+        }
+
         function openFullscreen(elem) {
             var fullscreenDiv = document.createElement('div');
             fullscreenDiv.id = 'fullscreen';
@@ -242,20 +286,6 @@
                     fullscreenDiv.remove();
                 }
             });
-        }
-
-
-      const placeholderImages = document.querySelectorAll('.placeholder-icon');
-  
-      const placeholderImageSources = [
-        '/assets/Placeholder-icon1.jpg',
-        '/assets/Placeholder-icon2.jpg'
-      ];
-  
-      placeholderImages.forEach(function(img) {
-        const randomIndex = Math.floor(Math.random() * placeholderImageSources.length);
-        img.src = placeholderImageSources[randomIndex];
-      });
-  
+        }  
     </script>
   </html>
