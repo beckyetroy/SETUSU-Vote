@@ -1608,3 +1608,15 @@ form.authenticate, form.register {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.tableRowElection {
+  background-color: #4666b1;
+  cursor: pointer;
+  color: white;
+}
+
+tr.subheading {
+  background-color: #eb2c5c;
+  color: white;
+  font-family: 'Aileron', sans-serif;
+}
