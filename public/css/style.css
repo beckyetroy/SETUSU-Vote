@@ -1061,6 +1061,10 @@ ol li:before {
   border: 1px solid #ff0000 !important;
 }
 
+.form-floating textarea {
+  height: auto !important;
+}
+
 .register-suggest {
   padding-bottom: 2rem;
   padding-top: 0.5rem;

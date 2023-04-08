@@ -22,7 +22,7 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 1000 * 1024 * 1024 },
   fileFilter: function (req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|mp4)$/)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|webp|mp4)$/)) {
       return cb(new Error('Only image and video files are allowed'));
     }
     cb(null, true);

@@ -6,7 +6,28 @@ const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
+const multer = require('multer');
 const blockTime = 15; //15 minutes
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/uploads/');
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 1000 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|webp|mp4)$/)) {
+        return cb(new Error('Only image and video files are allowed'));
+        }
+        cb(null, true);
+    }
+});
 
 function renderDashboard(res, title, action) {
     database.getConnection ( async (err, connection)=> {
@@ -173,6 +194,12 @@ router.post('/register-election', async function(req, res, next) {
     }
 });
 
+/* Upload Election Icon */
+router.post('/upload-icon', upload.single('image'), (req, res) => {
+    const filePath = req.file.path;
+    res.status(200).json({ message: "File uploaded successfully!", filePath: filePath});
+});
+
 /* Register Election */
 router.post('/election-add', async function(req, res, next) {
     const token = req.cookies.token;
@@ -184,11 +211,12 @@ router.post('/election-add', async function(req, res, next) {
             const opentime = date + ' ' + req.body.electionopeningtime + ':00';
             const closetime = date + ' ' + req.body.electionclosingtime + ':00';
             const categories = JSON.parse(req.body.categories);
+            const picture = req.body.picture ? req.body.picture.replace('public', '') : null;
 
             database.getConnection( async (err, connection) => {
                 if (err) throw (err)
-                const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime) values (?,?,?,?)";
-                const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime]);
+                const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime, Icon_path) values (?,?,?,?,?)";
+                const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime, picture]);
                 const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
                 const sqlInsertDefaultCandidate = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
                 const sqlInsertDefaultPerCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";

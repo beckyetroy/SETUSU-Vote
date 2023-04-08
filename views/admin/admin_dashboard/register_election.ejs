@@ -3,12 +3,12 @@
     <div class="card-body">
         <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm">  
             <div class="container">
-                <h3 class="formTitle">Register Election</h3>
+                <h3 class="formTitle" style="padding:2rem;">Register Election </h3>
                 <div class="basic-form-error" id="basic-form-error">
                 </div>
                 <div class="form-floating">
-                <input type="text" placeholder="Enter Description" name="electiondescription" id="electiondescription" class="form-control">
-                    <label for="electiondescription">Election Description : </label>
+                <input type="text" placeholder="Enter Name" name="electiondescription" id="electiondescription" class="form-control">
+                    <label for="electiondescription">Election Name : </label>
                 </div>
 
                 <div class="form-floating">
@@ -26,21 +26,37 @@
                     <label for="electionclosingtime">Voting Closes : </label>
                 </div>
 
-                <div class="containerCategories">
+                <div class="containerCategories" id="containerCategories">
                     <h5>Categories</h5>
                     <div class="form-floating">
                         <input type="text" placeholder="Enter Name" name="categoryname" id="categoryname" class="form-control">
                         <label for="categoryname">Category Name : </label>
                     </div>
+                    <br>
                     <div class="form-floating">
-                        <input type="text" placeholder="Enter Description" name="categorydescription" id="categorydescription" class="form-control">
-                        <label for="fname">Category Description : </label>
+                        <textarea placeholder="Enter Description" name="categorydescription" id="categorydescription" class="form-control" rows="8"></textarea>
+                        <label for="categorydescription">Category Description : </label>
                     </div>
                     <br>
                     <input type="button" id="addCategory" class="addCategory" value="Add Category"></button>
                         <ol class="categoryList"></ol>
                 </div>
                         <br>
+                        <div class="container-image-upload" id="container-image-upload">
+                            <div id="errorMessageDiv" class="errorMessageDiv hidden">
+                              <i class="fa fa-exclamation-circle" aria-hidden="true"></i> The image you submitted is not valid. Please try again.
+                            </div>
+                            <div class="upload-option">
+                              <h5>(Optional) Upload an Icon for this Election</h3>
+                              <p> This will appear as the thumbnail on the public page.
+                                <br><small>For the best result, please ensure it is square in shape.</small>
+                              </p>
+                              <div class="image-upload">
+                                <div id="my-dropzone" class="dropzone" style="width: 40%; height: 40%;"></div>
+                                <button class="primaryBtn" id="confirmBtn" disabled>Upload</button>
+                              </div>
+                            </div>
+                        </div>
                 <button type="submit" value="add" class="primaryBtn">Register</button>
                 <script>
                     const categoryList = document.querySelector('.categoryList');
@@ -50,8 +66,8 @@
                     let categories = [];
 
                     function deleteCategory(e) {
-                    const parent = e.target.parentNode;
-                    parent.remove();
+                        const parent = e.target.parentNode;
+                        parent.remove();
                     }
 
 
@@ -87,19 +103,133 @@
 
                     const form = document.getElementById("addElectionForm");
 
+                    // Instantiate Dropzone
+                    Dropzone.options.myDropzone = {
+                        url: "/hj9h8765qzf5jizwwnua/upload-icon",
+                        paramName: "image",
+                        acceptedFiles: "image/*",
+                        addRemoveLinks: true,
+                        dictDefaultMessage: '<i class="fa fa-upload" aria-hidden="true"></i> <br> Drag & Drop Image here <br><span class="orMsg"> or </span><br> Click to Browse',
+                        dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+                        dictInvalidFileType: "You can't upload files of this type.",
+                        dictCancelUpload: "Cancel upload",
+                        dictUploadCanceled: "Upload canceled.",
+                        dictRemoveFile: "Remove file",
+                        dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} file.",
+                        maxFiles: 1,
+                        autoProcessQueue: true,
+                        init: function() {
+                            var dz = this;
+
+                            // Display thumbnail of the selected image
+                            this.on("thumbnail", function(file, dataUrl) {
+                                if (!errorMessageDiv.classList.contains('hidden')) {
+                                    errorMessageDiv.classList.add('hidden');
+                                }
+                                var previewElement = file.previewElement;
+                                previewElement.classList.remove("dz-file-preview");
+                                var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                                previewImage.src = dataUrl;
+                            });
+
+                            // Handle upload errors
+                            this.on("error", function(file, response) {
+                                errorMessageDiv.classList.remove('hidden');
+                                this.removeFile(file);
+                            });
+
+                            this.on("success", function(file, response) {
+                                console.log(response);
+                                var input = document.createElement("input");
+                                input.type = "hidden";
+                                input.name = "picture";
+                                input.value = response.filePath;
+                                form.appendChild(input);
+                            });
+                        }
+                    };
+
                     form.addEventListener("submit", function(e) {
                         e.preventDefault();
 
-                        const hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "categories";
-                        hiddenInput.value = JSON.stringify(categories);
-                        console.log(categories);
+                        const basicFormError = document.getElementById('basic-form-error');
+                        const electionDescInput = document.getElementById('electiondescription');
+                        const electionDateInput = document.getElementById('electiondate');
+                        const electionOpenInput = document.getElementById('electionopeningtime');
+                        const electionCloseInput = document.getElementById('electionclosingtime');
+                        const containerCategories = document.getElementById('containerCategories');
 
-                        form.appendChild(hiddenInput);
+                        const specialCharsRegex = /^[a-zA-Z0-9_:-\s]*$/;
+                        let isValid = false;
 
-                        // Submit the form
-                        form.submit();
+                        if (electionCloseInput.value && electionOpenInput.value && electionDescInput.value && electionDateInput.value) {
+                            if (specialCharsRegex.test(electionDateInput.value) && specialCharsRegex.test(electionDescInput.value) &&
+                                specialCharsRegex.test(electionCloseInput.value) && specialCharsRegex.test(electionOpenInput.value)) {
+                                isValid = true;
+                            }
+                            else {
+                                if (!specialCharsRegex.test(electionDescInput.value)) {
+                                    electionDescInput.classList.add('inputerror');
+                                } else {
+                                    electionDescInput.classList.remove('inputerror');
+                                }
+
+                                if (!specialCharsRegex.test(electionDateInput.value)) {
+                                    electionDateInput.classList.add('inputerror');
+                                } else {
+                                    electionDateInput.classList.remove('inputerror');
+                                }
+
+                                if (!specialCharsRegex.test(electionOpenInput.value)) {
+                                    electionOpenInput.classList.add('inputerror');
+                                } else {
+                                    electionOpenInput.classList.remove('inputerror');
+                                }
+
+                                if (!specialCharsRegex.test(electionCloseInput.value)) {
+                                    electionCloseInput.classList.add('inputerror');
+                                } else {
+                                    electionCloseInput.classList.remove('inputerror');
+                                }
+                            }
+                        } else {
+                            if (!electionCloseInput.value) {
+                                electionCloseInput.classList.add('inputerror');
+                            }
+                            if (!electionOpenInput.value){
+                                electionOpenInput.classList.add('inputerror');
+                            }
+                            if (!electionDescInput.value) {
+                                electionDescInput.classList.add('inputerror');
+                            }
+                            if (!electionDateInput.value) {
+                                electionDateInput.classList.add('inputerror');
+                            }
+                            basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                            return;
+                        }
+
+                        if (isValid) {
+                            if ((!categories == []) && (specialCharsRegex.test(categories))) {
+                                const hiddenInput = document.createElement("input");
+                                hiddenInput.type = "hidden";
+                                hiddenInput.name = "categories";
+                                hiddenInput.value = JSON.stringify(categories);
+
+                                form.appendChild(hiddenInput);
+
+                                // Submit the form
+                                form.submit();
+                            }
+                            else {
+                                containerCategories.classList.add('inputerror');
+                                basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                                return;
+                            }
+                        }
+                        else {
+                            basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                        }
                     });
                 </script>
             </div>
