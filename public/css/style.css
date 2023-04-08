@@ -1659,3 +1659,15 @@ tr.subheading {
   border-radius: 25px;
   padding: 1rem;
 }
+
+.candidateBulletList a {
+  text-decoration: none;
+  color: #4666b1;
+  font-family: 'Inter';
+  font-size: 1.1rem;
+}
+
+.candidateBulletList a:hover {
+  text-decoration: none;
+  color: #eb2c5c;
+}

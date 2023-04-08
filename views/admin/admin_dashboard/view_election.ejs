@@ -1,12 +1,16 @@
 <div class="card">
     <div class="card-header">
-        <%= data[0].Description %>
-        <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="GET">
-            <button type="submit">Edit</button>
-        </form>
-        <form action="/hj9h8765qzf5jizwwnua/delete/<%= data[0].Id %>" method="GET">
-            <button type="submit">Delete</button>
-        </form>
+        <div class="row">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="col"><%= data[0].Description %></div>
+                <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="GET">
+                    <button type="submit" class="primaryBtn" style="margin-right: 15% !important; padding-right:1.5rem; padding-left: 1.5rem;"><i class="fas fa-edit"></i></button>
+                </form>
+                <form action="/hj9h8765qzf5jizwwnua/delete/<%= data[0].Id %>" method="GET">
+                    <button type="submit" class="primaryBtn" style="margin-left: 15% !important; padding-right:1.5rem; padding-left: 1.5rem; background-color: red;"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="card-body">
         <div class="row">
@@ -17,7 +21,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <%= data[0].ElectionDate %>
+                    <%= new Date(data[0].ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %>
                 </div>
             </div>
         </div>
@@ -29,7 +33,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <%= data[0].OpenTime %>
+                    <%= new Date(data[0].OpenTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }); %>
                 </div>
             </div>
         </div>
@@ -41,7 +45,7 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <%= data[0].CloseTime %>
+                    <%= new Date(data[0].CloseTime).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }); %>
                 </div>
             </div>
         </div>
@@ -53,26 +57,24 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
-                    <ul>
+                    <ol>
                         <%
-                            var categoriesFound = false;
-                            data.forEach(function(data){
-                                if (data.CategoryName) {
-                                    categoriesFound = true;
+                        categoryData = data.filter((v, i, a) => v.CategoryId !== null && a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                        if (categoryData.length > 0) {
+                            categoryData.forEach(function(data){
                         %>
-                                <%= data.CategoryName %> <br>
-                                <%= data.CategoryDescription %> <br>
+                            <li class = "category-content"> <strong><%= data.CategoryName %></strong> <br>
+                            <%= data.CategoryDescription %> <br>
+                            </li>
                         <%
-                                }
                             });
-                            if (!categoriesFound)
-                            {
+                        } else {
                         %>
                                 No Categories Found for this Election
                         <%
                             }
                         %>
-                    </ul>
+                    </ol>
                 </div>
             </div>
         </div>
@@ -86,17 +88,14 @@
                 <div class="mb-3">
                     <ul>
                     <%
-                        var candidatesFound = false;
-                        data.forEach(function(data){
-                            if (data.CandidateName) {
-                                candidatesFound = true;
+                        candidateData = data.filter((v, i, a) => v.CandidateId !== null && v.CandidateName !== 'Reopen Election' && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
+                        if (candidateData.length > 0) {
+                            candidateData.forEach(function(data) {
                     %>
-                            <li><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
+                            <li class="candidateBulletList"><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= data.CandidateId %>"><%= data.CandidateName %></a></li>
                     <%
-                            }
                         });
-                        if (!candidatesFound)
-                        {
+                    } else {
                     %>
                             No Candidates Found for this Election
                     <%

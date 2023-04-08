@@ -165,7 +165,13 @@
                         if (electionCloseInput.value && electionOpenInput.value && electionDescInput.value && electionDateInput.value) {
                             if (specialCharsRegex.test(electionDateInput.value) && specialCharsRegex.test(electionDescInput.value) &&
                                 specialCharsRegex.test(electionCloseInput.value) && specialCharsRegex.test(electionOpenInput.value)) {
-                                isValid = true;
+                                if (electionCloseInput.value > electionOpenInput.value ) {
+                                    isValid = true;
+                                }
+                                else {
+                                    electionCloseInput.classList.add('inputerror');
+                                    electionOpenInput.classList.add('inputerror');
+                                }
                             }
                             else {
                                 if (!specialCharsRegex.test(electionDescInput.value)) {

@@ -272,7 +272,7 @@ router.get('/view/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
-                    CategoryName, CategoryDescription
+                    CategoryName, CategoryId, CategoryDescription
                     from Election
                     left join Candidate on Election.Id = Candidate.ElectionId
                     left join Category on Election.Id = Category.ElectionId

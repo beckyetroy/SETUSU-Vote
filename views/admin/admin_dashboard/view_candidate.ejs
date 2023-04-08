@@ -1,12 +1,16 @@
 <div class="card">
     <div class="card-header">
-        <%= data[0].fName %> <%= data[0].lName %>
-        <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET">
-            <button type="submit">Edit</button>
-        </form>
-        <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data[0].CandidateId %>" method="GET">
-            <button type="submit">Delete</button>
-        </form>
+        <div class="row">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="col"><%= data[0].fName %> <%= data[0].lName %></div>
+                <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET">
+                    <button type="submit" class="primaryBtn" style="margin-right: 15% !important; padding-right:1.5rem; padding-left: 1.5rem;"><i class="fas fa-edit"></i></button>
+                </form>
+                <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data[0].CandidateId %>" method="GET">
+                    <button type="submit" class="primaryBtn" style="margin-left: 15% !important; padding-right:1.5rem; padding-left: 1.5rem; background-color: red;"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="card-body">
         <div class="row">
