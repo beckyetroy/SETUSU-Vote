@@ -1620,3 +1620,38 @@ tr.subheading {
   color: white;
   font-family: 'Aileron', sans-serif;
 }
+
+#addElectionForm {
+  text-align: center;
+}
+
+.addCategory {
+  background-color: #4666b1;
+  color: white;
+  font-family: 'Inter' !important;
+  font-weight: bold;
+  padding: 0.5em;
+  border: none;
+  font-size: 1rem;
+  padding-right: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.categoryList {
+  text-align: center;
+  background-color: #c4c4c4;
+  max-width: 60%;
+  transform: translate(+30%, +0%);
+}
+
+.categoryList li {
+  padding-left: 1.5rem;
+  border: 2px solid #4666b1;
+  margin-top: 2%;
+}
+
+.containerCategories {
+  background-color: #b3b3b3;
+  border-radius: 25px;
+  padding: 1rem;
+}

@@ -3,25 +3,48 @@
     <div class="card-body">
         <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm">  
             <div class="container">
-                <label>Election Description: </label>
-                <input type="text" placeholder="Enter Description" name="electiondescription" required>
-                <label>Election Date: </label>
-                <input type="date" name="electiondate" required>
-                <label>Election Opening Time: </label>
-                <input type="time" name="electionopeningtime" required>
-                <label>Election Closing Time: </label>
-                <input type="time" name="electionclosingtime" required>
-                <h5>Categories</h5>
-                <label>Category name: </label>
-                <input type="text" placeholder="Enter Name" name="categoryname" id="categoryname">
-                <label>Brief description: </label>
-                <input type="text" placeholder="Enter Description" name="categorydescription" id="categorydescription">
-                <input type="button" value="Add" class="addCategory"></button>
-                <ul class="categoryList"></ul>
-                <button type="submit" value="add">Register</button>
+                <h3 class="formTitle">Register Election</h3>
+                <div class="basic-form-error" id="basic-form-error">
+                </div>
+                <div class="form-floating">
+                <input type="text" placeholder="Enter Description" name="electiondescription" id="electiondescription" class="form-control">
+                    <label for="electiondescription">Election Description : </label>
+                </div>
+
+                <div class="form-floating">
+                    <input type="date" name="electiondate" id="electiondate" class="form-control">
+                    <label for="electiondate">Election Date : </label>
+                </div>
+
+                <div class="form-floating">
+                    <input type="time" name="electionopeningtime"  id="electionopeningtime" class="form-control">
+                    <label for="electionopeningtime">Voting Opens : </label>
+                </div>
+
+                <div class="form-floating">
+                    <input type="time" name="electionclosingtime"  id="electionclosingtime" class="form-control">
+                    <label for="electionclosingtime">Voting Closes : </label>
+                </div>
+
+                <div class="containerCategories">
+                    <h5>Categories</h5>
+                    <div class="form-floating">
+                        <input type="text" placeholder="Enter Name" name="categoryname" id="categoryname" class="form-control">
+                        <label for="categoryname">Category Name : </label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" placeholder="Enter Description" name="categorydescription" id="categorydescription" class="form-control">
+                        <label for="fname">Category Description : </label>
+                    </div>
+                    <br>
+                    <input type="button" id="addCategory" class="addCategory" value="Add Category"></button>
+                        <ol class="categoryList"></ol>
+                </div>
+                        <br>
+                <button type="submit" value="add" class="primaryBtn">Register</button>
                 <script>
                     const categoryList = document.querySelector('.categoryList');
-                    const addBtn = document.querySelector(".addCategory");
+                    const addBtn = document.getElementById("addCategory");
                     const categoryName = document.querySelector('#categoryname');
                     const categoryDescription = document.querySelector('#categorydescription');
                     let categories = [];
@@ -43,11 +66,15 @@
 
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.textContent = 'Remove';
+                        btn.textContent = '×';
+                        btn.classList.add('addCategory');
+                        btn.style.float = 'right';
                         btn.addEventListener("click", (e) => deleteCategory(e));
 
                         const li = document.createElement('li');
-                        li.textContent = `${name}: ${description} `;
+                        li.innerHTML = `<span class="category-name"> ${name}</span>
+                        <br> ${description} `;
+                        li.classList.add('category-content');
                         li.appendChild(btn);
 
                         categoryList.appendChild(li);
