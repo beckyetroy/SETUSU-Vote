@@ -41,7 +41,7 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg d-flex justify-content-between">
-            <a href="/"><h1 id="webpage-title"><%= title %></h1></a>
+            <h1 id="webpage-title"><%= title %></h1>
             <div class="navbar-nav ms-auto">
                 <div class="nav-item">
                     <a class="nav-link" href="/">Back to Home Page</a>
@@ -266,18 +266,28 @@
     } else {
       if (!firstNameInput.value) {
         firstNameInput.classList.add('inputerror');
+      } else {
+        firstNameInput.classList.remove('inputerror');
       }
       if (!lastNameInput.value){
         lastNameInput.classList.add('inputerror');
+      } else {
+        lastNameInput.classList.remove('inputerror');
       }
       if (!studentNoInput.value) {
         studentNoInput.classList.add('inputerror');
+      } else {
+        studentNoInput.classList.remove('inputerror');
       }
       if (!emailInput.value) {
         emailInput.classList.add('inputerror');
+      } else {
+        emailInput.classList.remove('inputerror');
       }
       if (electionSelect.value === '') {
         electionSelect.classList.add('inputerror');
+      } else {
+        electionSelect.classList.remove('inputerror');
       }
       basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
       return;

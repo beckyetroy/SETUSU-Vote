@@ -204,15 +204,23 @@
                         } else {
                             if (!electionCloseInput.value) {
                                 electionCloseInput.classList.add('inputerror');
+                            } else {
+                                electionCloseInput.classList.remove('inputerror');
                             }
                             if (!electionOpenInput.value){
                                 electionOpenInput.classList.add('inputerror');
+                            } else {
+                                electionOpenInput.classList.remove('inputerror');
                             }
                             if (!electionDescInput.value) {
                                 electionDescInput.classList.add('inputerror');
+                            } else {
+                                electionDescInput.classList.remove('inputerror');
                             }
                             if (!electionDateInput.value) {
                                 electionDateInput.classList.add('inputerror');
+                            } else {
+                                electionDateInput.classList.remove('inputerror');
                             }
                             basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
                             return;

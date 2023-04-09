@@ -1,78 +1,180 @@
 <div class="card">
     <div class="card-header">Add Candidate</div>
     <div class="card-body">
-        <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST">  
+        <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST" id ="addCandidateForm">
             <div class="container">
-                <label>First Name(s): </label>
-                <input type="text" placeholder="Enter First Name" name="candidatefname" required>
-                <label>Surname: </label>
-                <input type="text" placeholder="Enter Surname" name="candidatelname" required>
-                <label>Email Address: </label>
-                <input type="text" placeholder="Enter Email" name="candidateemail" required>
-                <label>Registering for Election: </label>
+                <h3 class="formTitle" style="padding:2rem;">Register Candidate </h3>
+                <div class="basic-form-error" id="basic-form-error">
+                </div>
+                <div class="form-floating">
+                    <input type="text" placeholder="Enter First Name" name="candidatefname" id="candidatefname" class="form-control">
+                        <label for="candidatefname">First Name(s) : </label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" placeholder="Enter Last Name" name="candidatelname" id="candidatelname" class="form-control">
+                        <label for="candidatelname">Surname : </label>
+                </div>
+
+                <div class="form-floating">
+                    <input type="text" placeholder="Enter Email" name="candidateemail" id="candidateemail" class="form-control">
+                        <label for="candidateemail">Email Address : </label>
+                </div>
+
                 <%
                 if(data.length > 0)
                 {
                     %>
-                    <select name="election" id="electionSelect">
-                        <option value="" disabled selected>Select an option</option>
-                        <%
-                        electionData = data.filter((v, i, a) => a.findIndex(t => (t.Id === v.Id)) === i);
-                        electionData.forEach(function(election){
-                            if (election.Id) {
-                        %>
-                            <option value="<%= election.Id %>"> <%= election.Description %> </option>
-                        <%
-                        } 
-                            else {}
-                        });
-                        %>
-                    </select>
-                    <select name="category" class="categorySelect">
-                        <%
-                        categoryData = data.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
-                        categoryData.forEach(function(category){
-                            if (category.CategoryId) {
-                        %>
-                            <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %> </option>
+                    <div class="select-election">
+                      <h5> Registering for Election:</h5>
+                      <select name="election" id="electionSelect" class="form-select form-select-lg mb-3">
+                          <option value="" disabled selected>Select Election</option>
+                          <%
+                          const now = new Date();
+                          const upcomingElections = data.filter((election) => new Date(election.ElectionDate) > now);
+                          const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
+                          const filteredElections = sortedElections.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i);
+
+                          filteredElections.forEach(function(election){
+                              if (election.Id) {
+                          %>
+                              <option value="<%= election.Id %>"> <%= election.Description %> </option>
+                          <%
+                              }
+                          });
+                          %>
+                      </select>
+                    </div>
+                    <div class="select-election">
+                        <h5 id="categorySelectTitle"> Running for: </h5>
+                        <select name="category" id="categorySelect" class="form-select form-select-lg mb-3">
+                            <option value="" disabled selected>Select Category</option>
                             <%
-                        }
-                            else {}
-                        });
-                        %>
-                    </select>
+                            categoryData = data.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                            categoryData.forEach(function(category){
+                                if (category.CategoryId) {
+                            %>
+                                <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %> </option>
+                                <%
+                            }
+                                else {}
+                            });
+                            %>
+                        </select>
+                    </div>
+
                     <%
                 }
                 else
                 {
                     %>
                     <tr>
-                        <td colspan="5">No Data Found</td>
+                        <td colspan="5">No elections to register for at this time</td>
                     </tr>
                 <%
                 }
                 %>
-                <button type="submit" value="addCandidate">Add</button>
+                <button type="submit" value="addCandidate" class="primaryBtn">Register</button>
             </div>
         </form>
         <script>
         $(document).ready(function(){
             const electionSelect = document.querySelector("#electionSelect");
-            const categorySelect = document.querySelector(".categorySelect");
-            $('.categorySelect').hide();
+            const categorySelect = document.querySelector("#categorySelect");
+            const categorySelectTitle = document.querySelector("#categorySelectTitle");
+            $('#categorySelect').hide();
+            $('#categorySelectTitle').hide();
             const originalOptions = Array.from(categorySelect.options);
 
             electionSelect.addEventListener("change", e => {
-                $('.categorySelect').show();
+                $('#categorySelect').show();
+                $('#categorySelectTitle').show();
                 const selectedElectionId = e.target.value;
 
                 const filteredOptions = originalOptions.filter(option => parseInt(option.getAttribute("data-election-id")) == parseInt(selectedElectionId));
 
                 categorySelect.innerHTML = "";
-                console.log(filteredOptions);
 
                 filteredOptions.forEach(option => categorySelect.add(option));
             });
+        });
+
+        const form = document.getElementById('addCandidateForm');
+        const basicFormError = document.getElementById('basic-form-error');
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('candidateemail');
+            const lastNameInput = document.getElementById('candidatelname');
+            const firstNameInput = document.getElementById('candidatefname');
+            const electionSelect = document.getElementById('electionSelect');
+            const categorySelect = document.getElementById('categorySelect');
+
+            const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+            const specialCharsRegex = /^(?=[A-Za-z])(?!.*?[ '-]{2})[A-Za-z'-]+(?:\s[A-Za-z'-]+)*$/;
+
+            let isValid = false;
+
+            if (firstNameInput.value && lastNameInput.value && emailInput.value && !(electionSelect.value === '')
+                && !(categorySelect.value === '')) {
+                if (emailRegex.test(emailInput.value) && specialCharsRegex.test(firstNameInput.value)
+                    && specialCharsRegex.test(lastNameInput.value)) {
+                        isValid = true;
+                }
+                else {
+                    if (!emailRegex.test(emailInput.value)) {
+                        emailInput.classList.add('inputerror');
+                    } else {
+                        emailInput.classList.remove('inputerror');
+                    }
+
+                    if (!specialCharsRegex.test(lastNameInput.value)) {
+                        lastNameInput.classList.add('inputerror');
+                    } else {
+                        lastNameInput.classList.remove('inputerror');
+                    }
+
+                    if (!specialCharsRegex.test(firstNameInput.value)) {
+                        firstNameInput.classList.add('inputerror');
+                    } else {
+                        firstNameInput.classList.remove('inputerror');
+                    }
+                }
+            } else {
+                if (!firstNameInput.value) {
+                    firstNameInput.classList.add('inputerror');
+                } else {
+                    firstNameInput.classList.remove('inputerror');
+                }
+                if (!lastNameInput.value){
+                    lastNameInput.classList.add('inputerror');
+                } else {
+                    lastNameInput.classList.remove('inputerror');
+                }
+                if (!emailInput.value) {
+                    emailInput.classList.add('inputerror');
+                } else {
+                    emailInput.classList.remove('inputerror');
+                }
+                if (electionSelect.value === '') {
+                    electionSelect.classList.add('inputerror');
+                } else {
+                    electionSelect.classList.remove('inputerror');
+                }
+                if (categorySelect.value === '') {
+                    categorySelect.classList.add('inputerror');
+                } else {
+                    categorySelect.classList.remove('inputerror');
+                }
+                basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                return;
+            }
+
+            if (isValid) {
+                form.submit();
+            }
+            else {
+                basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+            }
         });
         </script>
     </div>

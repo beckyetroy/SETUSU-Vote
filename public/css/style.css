@@ -1625,7 +1625,8 @@ tr.subheading {
   font-family: 'Aileron', sans-serif;
 }
 
-#addElectionForm, #editElectionForm {
+#addElectionForm, #editElectionForm,
+#addCandidateForm {
   text-align: center;
 }
 

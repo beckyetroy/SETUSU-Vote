@@ -99,15 +99,23 @@
                 } else {
                     if (!firstNameInput.value) {
                         firstNameInput.classList.add('inputerror');
+                    } else {
+                        firstNameInput.classList.remove('inputerror');
                     }
                     if (!lastNameInput.value){
                         lastNameInput.classList.add('inputerror');
+                    } else {
+                        lastNameInput.classList.remove('inputerror');
                     }
                     if (!studentNoInput.value) {
                         studentNoInput.classList.add('inputerror');
+                    } else {
+                        studentNoInput.classList.remove('inputerror');
                     }
                     if (!emailInput.value) {
                         emailInput.classList.add('inputerror');
+                    } else {
+                        emailInput.classList.remove('inputerror');
                     }
                     error.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
                     return;
