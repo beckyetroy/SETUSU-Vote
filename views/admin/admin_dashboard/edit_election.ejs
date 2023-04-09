@@ -91,6 +91,7 @@
                     const newCategoryDescription = document.getElementById('newcategorydescription');
                     const buttons = document.getElementsByTagName("button");
                     let updatedCategories = [];
+                    const today = new Date();
 
                     function deleteCategory(e) {
                         const parent = e.target.parentNode;
@@ -203,9 +204,19 @@
 
                     updateForm.addEventListener("submit", function(e) {
                         e.preventDefault();
+
+                        const basicFormError = document.getElementById('basic-form-error');
+                        const electionDescInput = document.getElementById('electiondescription');
+                        const electionDateInput = document.getElementById('electiondate');
+                        const electionOpenInput = document.getElementById('electionopeningtime');
+                        const electionCloseInput = document.getElementById('electionclosingtime');
+                        const containerCategories = document.getElementById('containerCategories');
+
+                        const specialCharsRegex = /^[a-zA-Z0-9_:-\s]*$/;
+                        let isValid = false;
+
                         const categoryNameInputs = document.querySelectorAll('input[name="addedcategoryname"]');
                         const categoryDescInputs = document.querySelectorAll('textarea[name="addedcategorydescription"]');
-                        console.log(categoryDescInputs);
 
                         categoryNameInputs.forEach((input, index) => {
                             const name = input.value;
@@ -213,13 +224,94 @@
                             updatedCategories.push({ name, description });
                         });
 
-                        const hiddenInput = document.createElement("input");
-                        hiddenInput.type = "hidden";
-                        hiddenInput.name = "updatedCategories";
-                        hiddenInput.value = JSON.stringify(updatedCategories);
+                        if (electionCloseInput.value && electionOpenInput.value && electionDescInput.value && new Date(electionDateInput.value)) {
+                            if (specialCharsRegex.test(electionDateInput.value) && specialCharsRegex.test(electionDescInput.value) &&
+                                specialCharsRegex.test(electionCloseInput.value) && specialCharsRegex.test(electionOpenInput.value)) {
+                                if (new Date(electionDateInput.value) > today) {
+                                    if (electionCloseInput.value > electionOpenInput.value ) {
+                                        isValid = true;
+                                    }
+                                    else {
+                                        electionCloseInput.classList.add('inputerror');
+                                        electionOpenInput.classList.add('inputerror');
+                                    }
+                                } else {
+                                    electionDateInput.classList.add('inputerror');
+                                    console.log('today test');
+                                    console.log(today);
+                                    console.log(electionDateInput.value);
+                                }
+                            }
+                            else {
+                                if (!specialCharsRegex.test(electionDescInput.value)) {
+                                    electionDescInput.classList.add('inputerror');
+                                } else {
+                                    electionDescInput.classList.remove('inputerror');
+                                }
 
-                        updateForm.appendChild(hiddenInput);
-                        updateForm.submit();
+                                if (!specialCharsRegex.test(electionDateInput.value)) {
+                                    electionDateInput.classList.add('inputerror');
+                                } else {
+                                    electionDateInput.classList.remove('inputerror');
+                                }
+
+                                if (!specialCharsRegex.test(electionOpenInput.value)) {
+                                    electionOpenInput.classList.add('inputerror');
+                                } else {
+                                    electionOpenInput.classList.remove('inputerror');
+                                }
+
+                                if (!specialCharsRegex.test(electionCloseInput.value)) {
+                                    electionCloseInput.classList.add('inputerror');
+                                } else {
+                                    electionCloseInput.classList.remove('inputerror');
+                                }
+                            }
+                        } else {
+                            if (!electionCloseInput.value) {
+                                electionCloseInput.classList.add('inputerror');
+                            }
+                            if (!electionOpenInput.value){
+                                electionOpenInput.classList.add('inputerror');
+                            }
+                            if (!electionDescInput.value) {
+                                electionDescInput.classList.add('inputerror');
+                            }
+                            if (!electionDateInput.value) {
+                                electionDateInput.classList.add('inputerror');
+                            }
+                            basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                            return;
+                        }
+
+                        if (isValid) {
+                            let validCategories = true;
+                            for (i = 0; i < updatedCategories.length; i++) {
+                                if (!specialCharsRegex.test(updatedCategories[i].name) ||!specialCharsRegex.test(updatedCategories[i].description)) {
+                                    validCategories = false;
+                                }
+                            }
+
+                            if (validCategories) {
+                                const hiddenInput = document.createElement("input");
+                                hiddenInput.type = "hidden";
+                                hiddenInput.name = "updatedCategories";
+                                hiddenInput.value = JSON.stringify(updatedCategories);
+
+                                updateForm.appendChild(hiddenInput);
+
+                                // Submit the form
+                                updateForm.submit();
+                            }
+                            else {
+                                containerCategories.classList.add('inputerror');
+                                basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                                return;
+                            }
+                        }
+                        else {
+                            basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                        }
                     });
                 </script>
                     <button type="submit" value="edit" class="primaryBtn">Save Changes</button>
