@@ -64,12 +64,12 @@
                     const categoryName = document.querySelector('#categoryname');
                     const categoryDescription = document.querySelector('#categorydescription');
                     let categories = [];
+                    const today = new Date();
 
                     function deleteCategory(e) {
                         const parent = e.target.parentNode;
                         parent.remove();
                     }
-
 
                     function addCategory() {
                         const name = categoryName.value;
@@ -139,7 +139,6 @@
                             });
 
                             this.on("success", function(file, response) {
-                                console.log(response);
                                 var input = document.createElement("input");
                                 input.type = "hidden";
                                 input.name = "picture";
@@ -165,12 +164,16 @@
                         if (electionCloseInput.value && electionOpenInput.value && electionDescInput.value && electionDateInput.value) {
                             if (specialCharsRegex.test(electionDateInput.value) && specialCharsRegex.test(electionDescInput.value) &&
                                 specialCharsRegex.test(electionCloseInput.value) && specialCharsRegex.test(electionOpenInput.value)) {
-                                if (electionCloseInput.value > electionOpenInput.value ) {
-                                    isValid = true;
-                                }
-                                else {
-                                    electionCloseInput.classList.add('inputerror');
-                                    electionOpenInput.classList.add('inputerror');
+                                if (electionDateInput.value > today) {
+                                    if (electionCloseInput.value > electionOpenInput.value ) {
+                                        isValid = true;
+                                    }
+                                    else {
+                                        electionCloseInput.classList.add('inputerror');
+                                        electionOpenInput.classList.add('inputerror');
+                                    }
+                                } else {
+                                    electionDateInput.classList.add('inputerror');
                                 }
                             }
                             else {
@@ -216,7 +219,14 @@
                         }
 
                         if (isValid) {
-                            if ((!categories == []) && (specialCharsRegex.test(categories))) {
+                            let validCategories = true;
+                            for (i = 0; i < categories.length; i++) {
+                                if (!specialCharsRegex.test(categories[i].name) ||!specialCharsRegex.test(categories[i].description)) {
+                                    validCategories = false;
+                                }
+                            }
+
+                            if (validCategories) {
                                 const hiddenInput = document.createElement("input");
                                 hiddenInput.type = "hidden";
                                 hiddenInput.name = "categories";

@@ -299,7 +299,8 @@ router.get('/edit/:id', async function(req, res, next){
     try {
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
-        const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+        const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+                            CategoryName, CategoryDescription, Icon_path
                             from Election left join Category
                             on Election.Id = Category.ElectionId
                             where Id = ?`;
@@ -326,19 +327,23 @@ router.post('/edit/:id', async function(req, res, next){
         jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         var description = req.body.electiondescription;
-        var date = req.body.electiondate;
-        var opentime = date + ' ' + req.body.electionopeningtime + ':00';
-        var closetime = date + ' ' + req.body.electionclosingtime + ':00';
-        const categories = JSON.parse(req.body.updatedCategories);
+        var date = new Date(req.body.electiondate);
+        const formatted_date = date.toISOString().slice(0, 10);
+
+        var opentime = new Date(formatted_date + 'T' + req.body.electionopeningtime + ':00');
+        var closetime = new Date(formatted_date + 'T' + req.body.electionclosingtime + ':00');
+        const categories = req.body.updatedCategories ? JSON.parse(req.body.updatedCategories) : null;
+        const picture = req.body.picture ? req.body.picture.replace('public', '') : null;
 
         var id = req.params.id;
         const update_query = `UPDATE Election
                             SET Description = ?, 
                             ElectionDate = ?, 
                             OpenTime = ?, 
-                            CloseTime = ? 
+                            CloseTime = ?,
+                            Icon_path =?
                             WHERE id = ?`;
-        const query = mysql.format(update_query, [description, date, opentime, closetime, id]);
+        const query = mysql.format(update_query, [description, formatted_date, opentime, closetime, picture, id]);
 
         const remove_category_query = `DELETE FROM Category WHERE ElectionId = ?`;
         const removeCategories = mysql.format(remove_category_query, [id]);
@@ -350,15 +355,17 @@ router.post('/edit/:id', async function(req, res, next){
                 if (err) throw (err);
                 await connection.query(removeCategories, async (err, result) => {
                     if (err) throw (err);
-                    for (let i = 0; i < categories.length; i++) {
-                        const category = categories[i];
-                        const categoryName = category.name;
-                        const categoryDescription = category.description;
-            
-                        const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
-                        await connection.query(insert_category_query, async (err, result) => {
-                            if (err) throw (err);
-                        });
+                    if (categories) {
+                        for (let i = 0; i < categories.length; i++) {
+                            const category = categories[i];
+                            const categoryName = category.name;
+                            const categoryDescription = category.description;
+                
+                            const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                            await connection.query(insert_category_query, async (err, result) => {
+                                if (err) throw (err);
+                            });
+                        }
                     }
                 });
                 connection.release();
@@ -367,6 +374,7 @@ router.post('/edit/:id', async function(req, res, next){
             })
         })
     } catch (err) {
+        console.log(err);
         res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });

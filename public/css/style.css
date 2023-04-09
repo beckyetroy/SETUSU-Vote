@@ -1625,7 +1625,7 @@ tr.subheading {
   font-family: 'Aileron', sans-serif;
 }
 
-#addElectionForm {
+#addElectionForm, #editElectionForm {
   text-align: center;
 }
 
@@ -1641,14 +1641,14 @@ tr.subheading {
   padding-left: 1.25rem;
 }
 
-.categoryList {
+.categoryList, .updatedCategoryList {
   text-align: center;
   background-color: #c4c4c4;
   max-width: 60%;
   transform: translate(+30%, +0%);
 }
 
-.categoryList li {
+.categoryList li, updatedCategoryList li {
   padding-left: 1.5rem;
   border: 2px solid #4666b1;
   margin-top: 2%;
