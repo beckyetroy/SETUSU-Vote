@@ -1630,7 +1630,7 @@ tr.subheading {
   text-align: center;
 }
 
-.addCategory {
+.addCategory, .addNewAgenda {
   background-color: #4666b1;
   color: white;
   font-family: 'Inter' !important;

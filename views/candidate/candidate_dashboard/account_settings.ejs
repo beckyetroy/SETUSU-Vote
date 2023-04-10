@@ -2,7 +2,7 @@
     <div class="card-header">
         <%= data[0].fName %> <%= data[0].lName %>
     </div>
-    <form action="/hj9h/settings" method="POST" id="saveForm">
+    <form action="/hj9h/settings" method="POST" id="saveForm" autocomplete="off">
         <div class="card-body">
             <div class="basic-form-error" id="basic-form-error" style="color: red;"></div>
             <div class="row">
@@ -240,19 +240,19 @@
                             isValid = true;
                     }
                     else {
-                        if (!emailRegex.test(emailInput.value)) {
+                        if (!emailRegex.test(emailInput.value) || emailInput.value.length > 250) {
                             emailInput.classList.add('inputerror');
                         } else {
                             emailInput.classList.remove('inputerror');
                         }
 
-                        if (!specialCharsRegex.test(lastNameInput.value)) {
+                        if (!specialCharsRegex.test(lastNameInput.value) || lastNameInput.value.length > 128) {
                             lastNameInput.classList.add('inputerror');
                         } else {
                             lastNameInput.classList.remove('inputerror');
                         }
 
-                        if (!specialCharsRegex.test(firstNameInput.value)) {
+                        if (!specialCharsRegex.test(firstNameInput.value) || firstNameInput.value.length > 128) {
                             firstNameInput.classList.add('inputerror');
                         } else {
                             firstNameInput.classList.remove('inputerror');

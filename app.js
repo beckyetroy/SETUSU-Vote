@@ -30,8 +30,8 @@ app.use('/hj9h', candidateRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
-  //res.redirect('/');
+  // next(createError(404));
+  res.redirect('/');
 });
 
 // error handler

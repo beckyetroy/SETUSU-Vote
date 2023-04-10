@@ -196,8 +196,16 @@ router.post('/register-election', async function(req, res, next) {
 
 /* Upload Election Icon */
 router.post('/upload-icon', upload.single('image'), (req, res) => {
-    const filePath = req.file.path;
-    res.status(200).json({ message: "File uploaded successfully!", filePath: filePath});
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey1);
+        if (decoded) {
+            const filePath = req.file.path;
+            res.status(200).json({ message: "File uploaded successfully!", filePath: filePath});
+        }
+    } catch {
+        res.redirect('/hj9h8765qzf5jizwwnua');
+    }
 });
 
 /* Register Election */

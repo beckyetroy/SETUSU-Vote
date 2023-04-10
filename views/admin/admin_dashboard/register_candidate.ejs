@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header">Add Candidate</div>
     <div class="card-body">
-        <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST" id ="addCandidateForm">
+        <form action="/hj9h8765qzf5jizwwnua/candidate-add" method="POST" id ="addCandidateForm" autocomplete="off">
             <div class="container">
                 <h3 class="formTitle" style="padding:2rem;">Register Candidate </h3>
                 <div class="basic-form-error" id="basic-form-error">
@@ -121,19 +121,19 @@
                         isValid = true;
                 }
                 else {
-                    if (!emailRegex.test(emailInput.value)) {
+                    if (!emailRegex.test(emailInput.value) || emailInput.value.length > 250) {
                         emailInput.classList.add('inputerror');
                     } else {
                         emailInput.classList.remove('inputerror');
                     }
 
-                    if (!specialCharsRegex.test(lastNameInput.value)) {
+                    if (!specialCharsRegex.test(lastNameInput.value) || lastNameInput.value.length > 128) {
                         lastNameInput.classList.add('inputerror');
                     } else {
                         lastNameInput.classList.remove('inputerror');
                     }
 
-                    if (!specialCharsRegex.test(firstNameInput.value)) {
+                    if (!specialCharsRegex.test(firstNameInput.value) || firstNameInput.value.length > 128) {
                         firstNameInput.classList.add('inputerror');
                     } else {
                         firstNameInput.classList.remove('inputerror');

@@ -12,7 +12,7 @@
                     const withinInterval = now >= openTime && now < closeTime;
                     if (withinInterval && sameDate) {
                     } else { %>
-                    <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET">
+                    <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="GET" autocomplete="off">
                         <button type="submit" class="primaryBtn" style="margin-right: 15% !important; padding-right:1.5rem; padding-left: 1.5rem;"><i class="fas fa-edit"></i></button>
                     </form>
                     <form action="/hj9h8765qzf5jizwwnua/deletecandidate/<%= data[0].CandidateId %>" method="GET" id="delete-form">

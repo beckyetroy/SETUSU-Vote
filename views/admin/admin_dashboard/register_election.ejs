@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header"></div>
     <div class="card-body">
-        <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm">  
+        <form action="/hj9h8765qzf5jizwwnua/election-add" method="POST" id="addElectionForm" autocomplete="off">  
             <div class="container">
                 <h3 class="formTitle" style="padding:2rem;">Register Election </h3>
                 <div class="basic-form-error" id="basic-form-error">
@@ -36,6 +36,7 @@
                     <div class="form-floating">
                         <textarea placeholder="Enter Description" name="categorydescription" id="categorydescription" class="form-control" rows="8"></textarea>
                         <label for="categorydescription">Category Description : </label>
+                        <small><i>Max 500 characters</i></small>
                     </div>
                     <br>
                     <input type="button" id="addCategory" class="addCategory" value="Add Category"></button>
@@ -79,6 +80,16 @@
                         const description = categoryDescription.value;
 
                         if(name.length === 0 || description.length === 0) return;
+
+                        if (description.length > 500) {
+                            categoryDescription.classList.add('inputerror');
+                            return;
+                        }
+
+                        if (name.length > 250) {
+                            categoryName.classList.add('inputerror');
+                            return;
+                        }
 
                         const category = { name: name, description: description };
                         categories.push(category);
@@ -180,7 +191,7 @@
                                 }
                             }
                             else {
-                                if (!specialCharsRegex.test(electionDescInput.value)) {
+                                if (!specialCharsRegex.test(electionDescInput.value) || electionDescInput.value.length > 250) {
                                     electionDescInput.classList.add('inputerror');
                                 } else {
                                     electionDescInput.classList.remove('inputerror');

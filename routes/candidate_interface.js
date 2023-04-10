@@ -41,7 +41,7 @@ function renderDashboard(res, title, action, username) {
             `select Candidate.CandidateId, fName, lName, Email,
                     Instagram, Twitter, Facebook, ContactNo,
                     Category.CategoryId, CategoryName, NumVotes, Slogan, Overview,
-                    Description, Username, AgendaId, Summary, Picture_Path, 
+                    Description, Username, AgendaId, Summary, Picture_path, 
                     file_id, File_Path, Type
                     from Candidate join Candidate_Category
                     on Candidate.CandidateId = Candidate_Category.CandidateId
@@ -311,8 +311,39 @@ router.get('/campaign', async function(req, res, next){
     }
 });
 
+/* Upload Campaign Icon */
+router.post('/upload-icon', upload.single('image'), (req, res) => {
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey2);
+        if (decoded) {
+            const filePath = req.file.path;
+            res.status(200).json({ message: "File uploaded successfully!", filePath: filePath});
+        }
+    } catch {
+        res.redirect('/hj9h');
+    }
+});
+
+/* Upload Campaign Media */
+router.post('/upload-media', upload.array('file', 10), (req, res) => {
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey2);
+        if (decoded) {
+            const filesData = req.files.map(file => ({
+                path: file.path,
+                mimeType: file.mimetype
+            }));
+            res.status(200).json({ message: "Files uploaded successfully!", filesData });
+        }
+    } catch (err) {
+        res.redirect('/hj9h');
+    }
+});
+
 /* Edit User Campaign */
-router.post('/campaign', upload.fields([ { name: 'picture', maxCount: 1 }, { name: 'media-upload' }]), async function(req, res, next){
+router.post('/campaign', async function(req, res, next){
     const token = req.cookies.token;
     try {
         const decoded = jwt.verify(token, process.env.secretKey2);
@@ -325,15 +356,17 @@ router.post('/campaign', upload.fields([ { name: 'picture', maxCount: 1 }, { nam
         var instagram = req.body.candidateinstagram;
         var candidateid = req.body.candidateid;
         var categoryid = req.body.categoryid;
-        const agendas = JSON.parse(req.body.updatedAgendas);
-        const picture = req.files['picture'] ? req.files['picture'][0] : null;
-        const media = req.files['media-upload'] ? req.files['media-upload'] : [];
+        const agendas = req.body.updatedAgendas ? JSON.parse(req.body.updatedAgendas) : [];
+        const picture = req.body.picture ? req.body.picture.replace('public', '') : null;
+        const media = req.body.media ? JSON.parse(req.body.media) : [];
 
         var update_query;
         var query;
 
         const remove_agenda_query = `DELETE FROM Agenda WHERE CandidateId = ?`;
+        const remove_media_query = `DELETE FROM Candidate_Media WHERE CandidateId = ?`;
         const removeAgendas = mysql.format(remove_agenda_query, [candidateid]);
+        const removeMedia = mysql.format(remove_media_query, [candidateid]);
         const sqlInsertAgenda = "insert into Agenda (CandidateId, CategoryId, Summary) values (?,?,?)";
 
         update_query = `UPDATE Candidate
@@ -353,7 +386,7 @@ router.post('/campaign', upload.fields([ { name: 'picture', maxCount: 1 }, { nam
         query = mysql.format(update_query, [contactno, instagram, twitter, facebook, slogan, overview, username]);
 
         database.getConnection( async (err, connection) => {
-            if (err) console.log(err)
+            if (err) throw(err)
             connection.query(query, async (err, result) => {
                 if (err) throw (err);
                 await connection.query(removeAgendas, async (err, result) => {
@@ -365,59 +398,33 @@ router.post('/campaign', upload.fields([ { name: 'picture', maxCount: 1 }, { nam
                         await connection.query(insert_agenda_query, async (err, result) => {
                             if (err) throw (err);
                             connection.query(query, async (err, result) => {
-                                connection.release();
                                 if (err) throw (err);
-
-                                connection.beginTransaction(err => {
-                                    if (err) {
-                                        console.error(err);
-                                        return res.status(500).send('Failed to start transaction');
-                                    }
-                            
-                                    if (picture) {
-                                        const picture_path = picture.path.replace('public', '');
-                                        const candidateid = req.body.candidateid;
-                                        upload_query = `UPDATE Candidate_Category SET picture_path = ?, picture_type = ? WHERE CandidateId = ?`;
-                                        query = mysql.format(upload_query, [picture_path, picture.mimetype, candidateid]);
-                                        connection.query(query, async (err, results) => {
-                                            if (err) {
-                                                console.error(err);
-                                                return connection.rollback(() => {
-                                                    res.status(500).send('Failed to upload image to DB');
-                                                });
-                                            }
-                                        });
-                                    }
-                            
-                                    if (media) {
-                                        const mediaQuery = `INSERT INTO Candidate_Media (CandidateId, CategoryId, file_path, type) VALUES ?`;
-                                        const mediaValues = media.map(file => [candidateid, categoryid, file.path.replace('public', ''), file.mimetype.startsWith('image') ? 'image' : 'video']);
-                                        connection.query(mediaQuery, [mediaValues], async (err, results) => {
-                                            if (err) {
-                                                console.error(err);
-                                                return connection.rollback(() => {
-                                                    res.status(500).send('Failed to upload media to DB');
-                                                });
-                                            }
-                                        });
-                                    }
-                            
-                                    connection.commit(err => {
-                                        if (err) {
-                                            console.error(err);
-                                            return connection.rollback(() => {
-                                                res.status(500).send('Failed to commit transaction');
-                                            });
-                                        }
-                                        console.log("Edited Campaign");
-                                        res.redirect('/hj9h');
-                                    });
-                                });
                             });
                         });
                     }
+                    const candidateid = req.body.candidateid;
+                    upload_query = `UPDATE Candidate_Category SET picture_path = ? WHERE CandidateId = ?`;
+                    query = mysql.format(upload_query, [picture, candidateid]);
+                    await connection.query(query, async (err, results) => {
+                        if (err) throw (err);
+                        await connection.query(removeMedia,  async (err, results) => {
+                            if (err) throw (err);
+                            if (media.length > 0) {
+                                const mediaQuery = `INSERT INTO Candidate_Media (CandidateId, CategoryId, file_path, type) VALUES ?`;
+                                const mediaValues = media.map(file => [candidateid, categoryid, file.path.replace('public', ''), file.mimeType.startsWith('image') ? 'image' : 'video']);
+    
+                                await connection.query(mediaQuery, [mediaValues], async (err, results) => {
+                                    if (err) {
+                                        console.error(err);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    console.log("Edited Campaign");
+                    return res.redirect('/hj9h');
                 });
-            })
+            });
         })
     } catch (err) {
         console.log(err);

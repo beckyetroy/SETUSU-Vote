@@ -1,87 +1,130 @@
-<form action="/hj9h/campaign" method="POST" enctype="multipart/form-data" id="editCampaignForm">
-    <div class= "header-image">
-        <h2 class="campaign-header"><%= data[0].fName %> <%= data[0].lName %>:</h2>
-        <input type="text" name="candidateslogan" id ="candidateslogan" value="<%= data[0].Slogan %>">
-    </div>
+<form action="/hj9h/campaign" method="POST" id="editCampaignForm" autocomplete="off">
+    <div class="content-wrapper">
+        <div class="header-image">
+          <h2 class="campaign-header"><%= data[0].fName %> <%= data[0].lName %> for <%= data[0].CategoryName %>
+            <br><span class="candidateslogan" id="candidateslogan"><%= data[0].Slogan %></span>
+          </h2>
+        </div>
+        <div id="my-dropzone" class="dropzone" style="width: 300px; height: 300px; transform: translate(+10%, -95%); margin: initial !important;">
+            <% if (data[0].Picture_path) { %>
+              <img class="campaign-thumbnail" id="campaign-thumbnail" src="<%=data[0].Picture_path %>" alt="Election Icon" style="display:none;">
+            <% } %>
+        </div>
+        <div class="all-content">
+            <div class = "contact clearfix">
+                <ul>
+                    <li>
+                        <strong>Running in:</strong>
+                        <br><%= data[0].Description %>
+                    </li>
+                    <li>
+                        <strong>Contact Number:</strong>
+                        <br>
+                        <input type="text" placeholder="081 8121212" name="candidatecontactno" id="candidatecontactno" value="<%= data[0].ContactNo %>">
+                    </li>
+                    <li>
+                        <strong>Email:</strong>
+                        <br><%= data[0].Email %>
+                    </li>
+                    <li>
+                        <i class="fab fa-facebook-square fa-3x" style="margin-right: 5%;"></i><strong>Link Here:</strong> <input type="text" placeholder="https://facebook.com/setusu.wd" name="candidatefacebook" id="candidatefacebook" value="<%= data[0].Facebook %>" style="margin-top: 5%; margin-bottom: 5%; font-size: 0.8rem; width: 100%;">
+                        <br>
+                        <i class="fab fa-twitter-square fa-3x" style="margin-right: 5%;"></i><strong>Link Here:</strong> <input type="text" placeholder="https://twitter.com/setusu_wd" name="candidatetwitter" id="candidatetwitter" value="<%= data[0].Twitter %>" style="margin-top: 5%; margin-bottom: 5%; font-size: 0.8rem; width: 100%;">
+                        <br>
+                        <i class="fab fa-instagram fa-3x" style="margin-right: 5%;"></i><strong>Link Here:</strong> <input type="text" placeholder="https://www.instagram.com/setusu.wd" name="candidateinstagram" id="candidateinstagram" value="<%= data[0].Instagram %>" style="margin-top: 5%; margin-bottom: 5%; font-size: 0.8rem; width: 100%;">
+                    </li>
+                </ul>
+            </div>
+            <div class="info clearfix">
+                <div id="errorMessageDiv" class="errorMessageDiv hidden">
+                    <i class="fa fa-exclamation-circle" aria-hidden="true"></i> The image you submitted is not valid. Please try again.
+                  </div>
+                <div class = "manifesto">
+                    <h3 class="manifesto-header">Manifesto</h3>
+                    <p class="instructions">Your manifesto should summarise your overall campaign in a few short paragraphs.</p>
+                    <% var manifestoFound = false;
+                    var manifesto = "";
+                    data.forEach(function(item) {
+                        if (item.Overview) {
+                        manifestoFound = true;
+                        manifesto = item.Overview;
+                        }
+                    }); %>
+                    <div class="form-floating" style="width: 100% !important;">
+                        <textarea placeholder="Enter Manifesto" name="candidateoverview" id="candidateoverview" class="manifesto-content form-control" rows="8"><%= manifesto %></textarea>
+                        <label for="candidateoverview">Enter Manifesto : </label>
+                        <small><i>Max 500 characters</i></small>
+                    </div>
+                </div>
 
-    <%
-        if (data[0].Picture_Path) {
-    %>
-        <img src="<%= data[0].Picture_Path %>" alt="Main Campaign Image" class = "campaign-thumbnail">    <% } %>
+                <div class="agenda">
+                    <h3 class="agenda-header">Agenda</h3>
+                    <p class="instructions">Your campaign agenda should be broken down into concise bullet points. For example,</p>
+                    <ol class ="exampleAgendaList">
+                        <li class = "agenda-content">
+                            Increase Volunteer Opportunities among students
+                        </li>
+                        <li class = "agenda-content">
+                            Expand the Canteen Menu
+                        </li>
+                        <li class = "agenda-content">
+                            etc...
+                        </li>
+                    </ol>
+                    <hr>
+                    <ol class="updatedAgendaList">
+                    <% var agendasFound = false;
+                    var agendas = "";
+                    agendaData = data.filter((v, i, a) => v.AgendaId !== null && a.findIndex(t => (t.AgendaId === v.AgendaId)) === i);
+                    agendaData.forEach(function(item) {
+                        if (item.Summary) {
+                        agendasFound = true;
+                    %>
+                            <li class = "agenda-content">
+                                <div class="form-floating" style="width: 60% !important;">
+                                    <input type="text" value="<%= item.Summary %>" name="addedagenda" id="addedagenda" class="form-control">
+                                    <label for="newagenda">Agenda</label>
+                                </div>
+                                <button type="button" class="addCategory">×</button>
+                            </li>
+                    <%
+                        }
+                    });
+                    %>
+                    </ol>
+                    <%
+                    if (!agendasFound) { %>
+                        <p class="agenda-content"></p>
+                    <% } %>
+                </div>
 
-    <input type="file" id="picture" name="picture">
-
-    <h4>Overview</h4>
-    <br>
-    <input type="textarea" name="candidateoverview" id="candidateoverview" value="<%= data[0].Overview %>">
-    <br>
-
-    <ul>
-        <li>
-            <strong>Contact Number:</strong> <input type="text" name="candidatecontactno" id="candidatecontactno" value="<%= data[0].ContactNo %>">
-        </li>
-        <li>
-            <strong>Email:</strong> <%= data[0].Email %>
-        </li>
-        <li>
-            <i class="fab fa-facebook-square fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidatefacebook" id="candidatefacebook" value="<%= data[0].Facebook %>">
-        </li>
-        <li>
-            <i class="fab fa-twitter-square fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidatetwitter" id="candidatetwitter" value="<%= data[0].Twitter %>">
-        </li>
-        <li>
-            <i class="fab fa-instagram fa-3x"></i><strong>Link Here:</strong> <input type="text" name="candidateinstagram" id="candidateinstagram" value="<%= data[0].Instagram %>">
-        </li>
-    </ul>
-
-    <h5>Agendas</h5>
-    <ul class ="updatedAgendaList">
-        <%
-            var agendasFound = false;
-            agendaData = data.filter((v, i, a) => v.AgendaId !== null && a.findIndex(t => (t.AgendaId === v.AgendaId)) === i);
-            agendaData.forEach(function(item) {
-              if (item.Summary) {
-                agendasFound = true;
-        %>
-                <li>
-                <label>Agenda: </label>
-                <input type="text" value="<%= item.Summary %>" name="addedagenda" id="addedagenda">
-                <br>
-                <button type="button">Remove</button>
-                </li>
-        <%
-                }
-            });
-            if (!agendasFound)
-            {
-        %>
-                Add Agendas below
-        <%
-            }
-        %>
-    </ul>
-                <label>Agenda: </label>
-                <input type="text" placeholder="Short Description" name="newagenda" id="newagenda">
+                <div class="form-floating" style="width: 60% !important;">
+                    <input type="text" placeholder="Enter Name" name="newagenda" id="newagenda" class="form-control">
+                        <label for="newagenda">Agenda : </label>
+                </div>
                 <input type="button" value="Add" class="addNewAgenda"></button>
-                <ul class="agendaList"></ul>
+
+                <div class="candidate-media">
+                    <h3 class="media-header">Upload Additional Content</h3>
+                    <p class="instructions">Any promotional posters, videos, etc. can be uploaded here!</p>
+                    <div id="dropzone-multiple" class="dropzone" style="width: 100%; min-height: 300px;">
+                        <% var mediaData = data.filter((v, i, a) => v.file_id !== null && a.findIndex(t => (t.file_id === v.file_id)) === i); %>
+                        <% mediaData.forEach(function(media) { %>
+                            <% if (media.Type === 'image') { %>
+                            <img src="<%= media.File_Path %>" alt="Campaign Image" class="campaign-image" style="display: none;">
+                            <% } else if (media.Type === 'video') { %>
+                            <video src="<%= media.File_Path %>" controls class="campaign-video" poster="<%= media.File_Path %>" style="display: none;"></video>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                </div>
 
                 <input type="hidden" name="candidateid" id="candidateid" value="<%= data[0].CandidateId %>">
                 <input type="hidden" name="categoryid" id="categoryid" value="<%= data[0].CategoryId %>">
-
-    <input type="file" id="media-upload" name="media-upload" multiple>
-
-    <div class="campaign-media">
-        <%  var mediaData = data.filter((v, i, a) => v.file_id !== null && a.findIndex(t => (t.file_id === v.file_id)) === i); %>
-            <% mediaData.forEach(function(media) { %>
-                <% if (media.Type === 'image') { %>
-                    <img src="<%= media.File_Path %>" alt="Campaign Image" class="campaign-image">
-                <% } else if (media.Type === 'video') { %>
-                    <video src="<%= media.File_Path %>" controls class="campaign-video"></video>
-                <% } %>
-            <% }); %>
+                <button type="submit" value="edit" class="primaryBtn">Save Changes</button>
+            </div>
     </div>
-
-    <button type="submit" value="edit">Save Changes</button>
+    </div>
 
     <script>
         const updatedAgendaList = document.querySelector('.updatedAgendaList');
@@ -89,15 +132,17 @@
         const newAgenda = document.querySelector('#newagenda');
         const buttons = document.getElementsByTagName("button");
         for (let i = 0; i < buttons.length; i++) {
-            if (buttons[i].textContent === "Remove") {
-                buttons[i].addEventListener("click", e => deleteAgenda(e));
+            if (buttons[i].textContent === "×") {
+                buttons[i].addEventListener("click", e => deleteAgenda(e))
+                buttons[i].classList.add('addCategory');
             }
         }
         let updatedAgendas = [];
+        let media = [];
 
         function deleteAgenda(e) {
-        const parent = e.target.parentNode;
-        parent.remove();
+            const parent = e.target.parentNode;
+            parent.remove();
         }
 
         function addAgenda() {
@@ -109,20 +154,29 @@
 
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.textContent = 'Remove';
+            btn.textContent = '×';
+            btn.classList.add('addCategory');
             btn.addEventListener("click", (e) => deleteAgenda(e));
 
-            const nameLabel = document.createElement('label');
-            nameLabel.textContent = "Agenda";
+            const div = document.createElement('div');
+            div.classList.add('form-floating');
+            div.setAttribute('style', 'width: 60% !important;');
+
             const nameField = document.createElement('input');
             nameField.setAttribute("type","text");
             nameField.setAttribute("value", name);
             nameField.setAttribute("name","addedagenda");
             nameField.setAttribute("id","addedagenda");
+            nameField.classList.add('form-control');
+
+            const nameLabel = document.createElement('label');
+            nameLabel.textContent = "Agenda";
+            nameLabel.setAttribute('for', 'newagenda');
 
             updatedAgendaList.append(li);
-            li.appendChild(nameLabel);
-            li.appendChild(nameField);
+            li.appendChild(div);
+            div.appendChild(nameField);
+            div.appendChild(nameLabel);
             li.appendChild(btn);
 
             newagenda.value = "";
@@ -134,6 +188,7 @@
 
         updateForm.addEventListener("submit", function(e) {
             e.preventDefault();
+            updatedAgendas = [];
             const agendaInputs = document.querySelectorAll('input[name="addedagenda"]');
 
             agendaInputs.forEach((input, index) => {
@@ -147,7 +202,188 @@
             hiddenInput.value = JSON.stringify(updatedAgendas);
 
             updateForm.appendChild(hiddenInput);
+
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "media";
+            input.value = JSON.stringify(media);
+            updateForm.appendChild(input);
+
             updateForm.submit();
+        });
+
+        Dropzone.autoDiscover = false;
+
+        var myDropzone = new Dropzone("#my-dropzone", {
+            url: "/hj9h/upload-icon",
+            paramName: "image",
+            acceptedFiles: "image/*",
+            addRemoveLinks: true,
+            dictDefaultMessage: '<i class="fa fa-upload" aria-hidden="true"></i> <br> Drag & Drop Image here <br><span class="orMsg"> or </span><br> Click to Browse',
+            dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+            dictInvalidFileType: "You can't upload files of this type.",
+            dictCancelUpload: "Cancel upload",
+            dictUploadCanceled: "Upload canceled.",
+            dictRemoveFile: "Remove file",
+            dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} file.",
+            maxFiles: 1,
+            autoProcessQueue: true,
+            resizeHeight: 250,
+            resizeWidth: 250,
+            init: function() {
+                var dz = this;
+
+                var defaultImage = document.querySelector('#campaign-thumbnail');
+                if (defaultImage) {
+                    var mockFile = { name: defaultImage.src, size: 0 };
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, defaultImage.src);
+                    dz.emit("complete", mockFile);
+                    var previewElement = mockFile.previewElement;
+                    var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                    previewImage.setAttribute('width', '120px');
+                    previewImage.setAttribute('height', '120px');
+                    var input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "picture";
+                    input.value = previewImage.src;
+                    updateForm.appendChild(input);
+                }
+
+                // Display thumbnail of the selected image
+                this.on("thumbnail", function(file, dataUrl) {
+                    if (!errorMessageDiv.classList.contains('hidden')) {
+                        errorMessageDiv.classList.add('hidden');
+                    }
+                    var previewElement = file.previewElement;
+                    previewElement.classList.remove("dz-file-preview");
+                    var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                    previewImage.src = dataUrl;
+                });
+
+                // Handle upload errors
+                this.on("error", function(file, response) {
+                    errorMessageDiv.classList.remove('hidden');
+                    this.removeFile(file);
+                });
+
+                this.on("success", function(file, response) {
+                    var input = document.querySelector("input[name='picture']");
+                    if (input) {
+                        input.type = "hidden";
+                        input.name = "picture";
+                        input.value = response.filePath;
+                    }
+                    else {
+                        var input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "picture";
+                        input.value = response.filePath;
+                        updateForm.appendChild(input);
+                    }
+                });
+
+                this.on("removedfile", function(file, response) {
+                    var input = document.querySelector("input[name='picture']");
+                    if (input) {
+                        input.parentNode.removeChild(input);
+                    }
+                });
+            }
+        });
+
+        var myDropzone = new Dropzone("#dropzone-multiple", {
+            url: "/hj9h/upload-media",
+            paramName: "file",
+            acceptedFiles: "image/*,video/*",
+            addRemoveLinks: true,
+            dictDefaultMessage: '<i class="fa fa-upload" aria-hidden="true"></i> <br> Drag & Drop Media here <br><span class="orMsg"> or </span><br> Click to Browse',
+            dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
+            dictInvalidFileType: "You can't upload files of this type.",
+            dictCancelUpload: "Cancel upload",
+            dictUploadCanceled: "Upload canceled.",
+            dictRemoveFile: "Remove file",
+            autoProcessQueue: true,
+            init: function() {
+                var dz = this;
+
+                // Display default images and videos
+                var defaultImages = document.querySelectorAll('.campaign-image');
+                var defaultVideos = document.querySelectorAll('.campaign-video');
+
+                if (defaultImages) {
+                    for (var i = 0; i < defaultImages.length; i++) {
+                        var mockFile = { name: defaultImages[i].src, size: 0 };
+                        dz.emit("addedfile", mockFile);
+                        dz.emit("thumbnail", mockFile, defaultImages[i].src);
+                        dz.emit("complete", mockFile);
+                        var previewElement = mockFile.previewElement;
+                        var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                        previewImage.setAttribute('width', '120px');
+                        previewImage.setAttribute('height', '120px');
+
+                        var mediaObject = {
+                            path: defaultImages[i].src,
+                            mimeType: 'image'
+                        };
+                        media.push(mediaObject);
+                    }
+                }
+                
+                if (defaultVideos) {
+                    for (var i = 0; i < defaultVideos.length; i++) {
+                        var mockFile = { name: defaultVideos[i].src, size: 0, type: 'video/mp4' };
+                        dz.emit("addedfile", mockFile);
+                        dz.emit("thumbnail", mockFile, "/assets/video-icon.png");
+                        dz.emit("complete", mockFile);
+                        var previewElement = mockFile.previewElement;
+                        var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                        previewImage.setAttribute('width', '120px');
+                        previewImage.setAttribute('height', '120px');
+
+                        var mediaObject = {
+                            path: defaultVideos[i].src,
+                            mimeType: 'video'
+                        };
+                        media.push(mediaObject);
+                    }
+                }
+
+                // Display thumbnail of the selected image or video
+                this.on("thumbnail", function(file, dataUrl) {
+                    var previewElement = file.previewElement;
+                    previewElement.classList.remove("dz-file-preview");
+                    var previewImage = previewElement.querySelector("[data-dz-thumbnail]");
+                    if (file.type.indexOf('video') === 0) {
+                        previewImage.innerHTML = '<img src="' + dataUrl + '"><i class="fas fa-play-circle"></i>';
+                    } else {
+                        previewImage.src = dataUrl;
+                    }
+                });
+
+                // Handle upload errors
+                this.on("error", function(file, response) {
+                    errorMessageDiv.classList.remove('hidden');
+                    this.removeFile(file);
+                });
+
+                this.on("success", function(files, response) {
+                    for (var i = 0; i < response.filesData.length; i++) {
+                        var mediaObject = {
+                            path: response.filesData[i].path,
+                            mimeType: response.filesData[i].mimeType
+                        };
+                        media.push(mediaObject);
+                    }
+                });
+
+                this.on("removedfile", function(file) {
+                    var path = file.name;
+                    media = media.filter(function(item) {
+                        return item.path !== path;
+                    });
+                });
+            }
         });
     </script>
 </form>

@@ -160,7 +160,7 @@
                                     <% } else if (media.Type === 'video') { %>
                                     <div class="col-12 col-sm-6 col-md-4">
                                         <div class="campaign-video-wrapper">
-                                        <video class="campaign-video" poster="<%= media.File_Path %>?width=400" controls onclick="openFullscreen(this)">
+                                        <video class="campaign-video" poster="<%= media.File_Path %>" controls onclick="openFullscreen(this)">
                                             <source src="<%= media.File_Path %>" type="video/mp4">
                                         </video>
                                         </div>

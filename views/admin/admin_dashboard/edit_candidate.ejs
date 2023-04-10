@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header">Edit</div>
         <div class="card-body">
-            <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="POST" id="editForm">
+            <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="POST" id="editForm" autocomplete="off">
                 <div class="container">
                     <div class="container">
                         <h3 class="formTitle" style="padding:2rem;">Edit Candidate </h3>
@@ -162,6 +162,15 @@
                             repeatPasswordInput.value = "";
                             repeatPasswordInput.classList.add('inputerror');
                             modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Invalid password.';
+                        }
+                        //Password is too long
+                        else if (passwordInput.value.length > 250 || repeatPasswordInputpasswordInput.value.length > 250) {
+                            saveButton.removeAttribute('data-bs-dismiss');
+                            passwordInput.value = "";
+                            passwordInput.classList.add('inputerror');
+                            repeatPasswordInput.value = "";
+                            repeatPasswordInput.classList.add('inputerror');
+                            modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Password too long.';
                         }
                         else {
                             passwordUpdated.value = passwordInput.value;

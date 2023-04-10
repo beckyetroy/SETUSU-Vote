@@ -7,7 +7,7 @@
             <button class="primaryBtn" onclick="location.href='/elections'" type="button"> SEE MORE ELECTIONS </button>
         </div>
     <% } else { %>
-        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate" id="authenticate-basic-form">
+        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate" id="authenticate-basic-form" autocomplete="off">
             <h3 class="formTitle">Please enter your details</h3>
             <div class="vote-error" id="basic-auth-error"><%= message %></div>
             <div class="form-floating">
