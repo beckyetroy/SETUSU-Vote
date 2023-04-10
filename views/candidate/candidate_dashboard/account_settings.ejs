@@ -2,8 +2,9 @@
     <div class="card-header">
         <%= data[0].fName %> <%= data[0].lName %>
     </div>
-    <form action="/hj9h/settings" method="POST">
+    <form action="/hj9h/settings" method="POST" id="saveForm">
         <div class="card-body">
+            <div class="basic-form-error" id="basic-form-error" style="color: red;"></div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -12,7 +13,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidatefname" value="<%= data[0].fName %>">
+                        <input type="text" name="candidatefname" id ="candidatefname" value="<%= data[0].fName %>" class="form-control" style="width:40% !important;">
                     </div>
                 </div>
             </div>
@@ -24,7 +25,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidatelname" value="<%= data[0].lName %>">
+                        <input type="text" name="candidatelname" id="candidatelname" value="<%= data[0].lName %>" class="form-control" style="width:40% !important;">
                     </div>
                 </div>
             </div>
@@ -36,7 +37,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidateemail" value="<%= data[0].Email %>">
+                        <input type="text" name="candidateemail" id="candidateemail" value="<%= data[0].Email %>" class="form-control" style="width:40% !important;">
                     </div>
                 </div>
             </div>
@@ -88,49 +89,50 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" disabled><br>
+                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" disabled class="form-control" style="width:40% !important;"><br>
                         <small>Usernames are uniquely generated and cannot be changed</small>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form">Reset Password</button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="reset-password-form" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Reset Password</h5>
-                    </div>
-                    <div class="modal-body">
-                        <label>Current Password : </label>
-                        <input type="password" placeholder="Enter Current Password" name="currentpassword" id="currentpassword"><br>
-                        <label>New Password : </label>
-                        <input type="password" placeholder="Enter New Password" name="password" id="password"><br>
-                        <label>Confirm Password : </label>
-                        <input type="password" placeholder="Enter Password Again" name="repeatpassword" id="repeatpassword">
-                        <div>
-                            <input type="checkbox" id="showPassword">
-                            <label for="showPassword">Show Password</label>
+            <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
+                <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form" class="primaryBtn" style="background-color: red;">Reset Password</button>
+                <div class="modal fade" id="reset-password-form" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reset Password</h5>
+                        </div>
+                        <div class="modal-body" style="text-align:left;">
+                            <p style="text-align:left;">Passwords must be 8 characters or more and contain the following:
+                                <ul style="text-align:left;">
+                                    <li>At least one upper and lowercase letter</li>
+                                    <li>At least one number</li>
+                                    <li>At least one special character (e.g. !)</li>
+                                </ul>
+                            </p>
+                            <div class="modal-form-error" id="modal-form-error" style="color:red;">
+                            </div>
+                            <div class="form-floating">
+                                <input type="password" placeholder="Enter New Password" name="password" id="password" class="form-control">
+                                    <label for="password">New Password : </label>
+                            </div>
+                            <div class="form-floating">
+                                <input type="password" placeholder="Enter New Password" name="repeatpassword" id="repeatpassword" class="form-control">
+                                    <label for="repeatpassword">Confirm Password : </label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="showPassword">
+                                <label for="showPassword">Show Password</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="cancel-password" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="save-password">Confirm</button>
+                        </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" id="cancel-password" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="save-password">Confirm</button>
-                    </div>
-                    </div>
                 </div>
-            </div>
-            <button type="submit" value="edit">Save Changes</button>
+            <button type="submit" value="edit" class="primaryBtn">Save Changes</button>
         </form>
         <script>
             $(document).ready(function(){
@@ -141,6 +143,7 @@
                 const cancelButton = document.getElementById('cancel-password');
                 const showPasswordCheckbox = document.querySelector('input[type="checkbox"]#showPassword');
                 var passwordUpdated = document.getElementById('candidatepassword');
+                const modalError = document.getElementById('modal-form-error');
 
                 function validatePassword(password) {
                     var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -148,54 +151,59 @@
                 }
 
                 saveButton.addEventListener('click', function() {
-                    //Not all fields entered
-                    if (passwordInput.value === "" || repeatPasswordInput.value ==="" || currentPasswordInput.value ===""
-                        || !passwordInput.value || !repeatPasswordInput.value || !currentPasswordInput.value) {
-                        passwordInput.value = "";
-                        repeatPasswordInput.value = "";
-                        currentPasswordInput.value ="";
-                    }
                     //Passwords don't match
-                    else if (passwordInput.value !== repeatPasswordInput.value) {
+                    if (passwordInput.value !== repeatPasswordInput.value) {
+                        saveButton.removeAttribute('data-bs-dismiss');
                         passwordInput.value = "";
+                        passwordInput.classList.add('inputerror');
                         repeatPasswordInput.value = "";
+                        repeatPasswordInput.classList.add('inputerror');
+                        modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Passwords do not match.';
+                    }
+                    //Not all fields entered
+                    else if (passwordInput.value === "" || repeatPasswordInput.value ===""
+                        || !passwordInput.value || !repeatPasswordInput.value) {
+                        saveButton.removeAttribute('data-bs-dismiss');
+                        passwordInput.value = "";
+                        passwordInput.classList.add('inputerror');
+                        repeatPasswordInput.value = "";
+                        repeatPasswordInput.classList.add('inputerror');
+                        modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please enter all fields.';
                     }
                     //Password is invalid format
                     else if (!validatePassword(passwordInput.value) || !validatePassword(repeatPasswordInput.value)) {
+                        saveButton.removeAttribute('data-bs-dismiss');
                         passwordInput.value = "";
+                        passwordInput.classList.add('inputerror');
                         repeatPasswordInput.value = "";
+                        repeatPasswordInput.classList.add('inputerror');
+                        modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Invalid password.';
                     }
                     else {
-                        $.ajax({
-                            url: '/hj9h/verify-password',
-                            type: 'POST',
-                            data: {
-                                password: currentPasswordInput.value,
-                            },
-                            success: function(data) {
-                                passwordUpdated.value = passwordInput.value;
-                                $('#reset-password-form').modal('hide');
-                            },
-                            error: function(error) {
-                                passwordInput.value = "";
-                                repeatPasswordInput.value = "";
-                                currentPasswordInput.value = "";
-                            },
-                        });
+                        passwordUpdated.value = passwordInput.value;
+                        repeatPasswordInput.classList.remove('inputerror');
+                        passwordInput.classList.remove('inputerror');
+                        modalError.innerHTML = '';
+                        saveButton.setAttribute('data-bs-dismiss', 'modal');
+                        saveButton.click();
                     }
                 });
 
                 cancelButton.addEventListener('click', function() {
                     //Reset form values
                     if (passwordUpdated.value != "unchanged") {
-                        currentPasswordInput.value = "";
                         passwordInput.value = passwordUpdated.value;
                         repeatPasswordInput.value = passwordUpdated.value;
+                        repeatPasswordInput.classList.remove('inputerror');
+                        passwordInput.classList.remove('inputerror');
+                        modalError.innerHTML = '';
                     }
                     else {
-                        currentPasswordInput.value = "";
                         passwordInput.value = "";
                         repeatPasswordInput.value = "";
+                        repeatPasswordInput.classList.remove('inputerror');
+                        passwordInput.classList.remove('inputerror');
+                        modalError.innerHTML = '';
                     }
                 });
 
@@ -210,6 +218,72 @@
                         currentPasswordInput.type = 'password';
                     }
                 });
+            });
+
+            const form = document.getElementById('saveForm');
+            const basicFormError = document.getElementById('basic-form-error');
+
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const emailInput = document.getElementById('candidateemail');
+                const lastNameInput = document.getElementById('candidatelname');
+                const firstNameInput = document.getElementById('candidatefname');
+
+                const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+                const specialCharsRegex = /^(?=[A-Za-z])(?!.*?[ '-]{2})[A-Za-z'-]+(?:\s[A-Za-z'-]+)*$/;
+
+                let isValid = false;
+
+                if (firstNameInput.value && lastNameInput.value && emailInput.value) {
+                    if (emailRegex.test(emailInput.value) && specialCharsRegex.test(firstNameInput.value)
+                        && specialCharsRegex.test(lastNameInput.value)) {
+                            isValid = true;
+                    }
+                    else {
+                        if (!emailRegex.test(emailInput.value)) {
+                            emailInput.classList.add('inputerror');
+                        } else {
+                            emailInput.classList.remove('inputerror');
+                        }
+
+                        if (!specialCharsRegex.test(lastNameInput.value)) {
+                            lastNameInput.classList.add('inputerror');
+                        } else {
+                            lastNameInput.classList.remove('inputerror');
+                        }
+
+                        if (!specialCharsRegex.test(firstNameInput.value)) {
+                            firstNameInput.classList.add('inputerror');
+                        } else {
+                            firstNameInput.classList.remove('inputerror');
+                        }
+                    }
+                } else {
+                    if (!firstNameInput.value) {
+                        firstNameInput.classList.add('inputerror');
+                    } else {
+                        firstNameInput.classList.remove('inputerror');
+                    }
+                    if (!lastNameInput.value){
+                        lastNameInput.classList.add('inputerror');
+                    } else {
+                        lastNameInput.classList.remove('inputerror');
+                    }
+                    if (!emailInput.value) {
+                        emailInput.classList.add('inputerror');
+                    } else {
+                        emailInput.classList.remove('inputerror');
+                    }
+                    basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                    return;
+                }
+
+                if (isValid) {
+                    form.submit();
+                }
+                else {
+                    basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                }
             });
         </script>
     </div>
