@@ -67,8 +67,11 @@
                     const today = new Date();
 
                     function deleteCategory(e) {
-                        const parent = e.target.parentNode;
-                        parent.remove();
+                        const confirmDelete = confirm("Are you sure you want to delete this category?");
+                        if (confirmDelete) {
+                            const parent = e.target.parentNode;
+                            parent.remove();
+                        }
                     }
 
                     function addCategory() {

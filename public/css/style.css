@@ -1626,7 +1626,7 @@ tr.subheading {
 }
 
 #addElectionForm, #editElectionForm,
-#addCandidateForm {
+#addCandidateForm, #editForm {
   text-align: center;
 }
 

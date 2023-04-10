@@ -3,62 +3,93 @@
         <div class="card-body">
             <form action="/hj9h8765qzf5jizwwnua/editcandidate/<%= data[0].CandidateId %>" method="POST" id="editForm">
                 <div class="container">
-                    <label>First Name(s): </label>
-                    <input type="text" name="candidatefname" value="<%= data[0].fName %>"required>
-                    <label>Surname: </label>
-                    <input type="text" name="candidatelname" value="<%= data[0].lName %>" required>
-                    <label>Email Address: </label>
-                    <input type="text" name="candidateemail" value="<%= data[0].Email %>" required>
-                    <label>Registered for Election: </label>
-                        <%
-                        if(data.length > 0)
-                        {
-                            %>
-                            <select name="election" id="electionSelect">
-                                <% electionData.forEach(function(election) { %>
-                                <% if (election.Id === data[0].ElectionId) { %>
-                                    <option value="<%= election.Id %>" selected><%= election.Description %></option>
-                                <% } else { %>
-                                    <option value="<%= election.Id %>"><%= election.Description %></option>
-                                <% } %>
-                                <% }); %>
+                    <div class="container">
+                        <h3 class="formTitle" style="padding:2rem;">Edit Candidate </h3>
+                        <br><small><strong>NOTE:</strong>Usernames are uniquely generated and cannot be changed</small>
+                        <div class="basic-form-error" id="basic-form-error">
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" placeholder="Enter First Name" name="candidatefname" id="candidatefname" class="form-control" value="<%= data[0].fName %>">
+                                <label for="candidatefname">First Name(s) : </label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" placeholder="Enter Last Name" name="candidatelname" id="candidatelname" class="form-control" value="<%= data[0].lName %>">
+                                <label for="candidatelname">Surname : </label>
+                        </div>
+        
+                        <div class="form-floating">
+                            <input type="text" placeholder="Enter Email" name="candidateemail" id="candidateemail" class="form-control" value="<%= data[0].Email %>">
+                                <label for="candidateemail">Email Address : </label>
+                        </div>
+
+                        <div class="form-floating">
+                            <input type="text" name="candidateusername" id="candidateusername" class="form-control" value="<%= data[0].Username %>" disabled>
+                                <label for="candidateusername">Username : </label>
+                        </div>
+        
+                        <div class="select-election">
+                            <h5> Registered for Election:</h5>
+                            <select name="election" id="electionSelect" class="form-select form-select-lg mb-3">
+                                <%
+                                const now = new Date();
+                                const upcomingElections = electionData.filter((election) => new Date(election.ElectionDate) > now);
+                                const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
+                                const filteredElections = sortedElections.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i);
+    
+                                filteredElections.forEach(function(election){
+                                    if (election.Id === data[0].Id) { %>
+                                        <option value="<%= election.Id %>" selected><%= election.Description %></option>
+                                    <% } else { %>
+                                        <option value="<%= election.Id %>"><%= election.Description %></option>
+                                    <% }
+                                });
+                                %>
                             </select>
-                            <select name="category" id="categorySelect">
-                                <% categoryData.forEach(function(category) { %>
-                                <option value="<%= category.CategoryId %>"
-                                    data-election-id="<%= category.ElectionId %>"
-                                <% if (category.CategoryId === data[0].CategoryId) { %>
-                                    selected
-                                <% } %>><%= category.CategoryName %></option>
-                                <% }); %>
-                            </select>
-                            <%
-                        }
-                        else
-                        {
-                            %>
-                            <tr>
-                                <td colspan="5">No Data Found</td>
-                            </tr>
-                        <%
-                        }
-                        %>
-                        <label>Username: </label>
-                        <input type="text" name="candidateusername" value="<%= data[0].Username %>" disabled>
-                        <small>Usernames are uniquely generated and cannot be changed</small>
+                        </div>
+                            <div class="select-election">
+                                <h5 id="categorySelectTitle"> Running for: </h5>
+                                <select name="category" id="categorySelect" class="form-select form-select-lg mb-3">
+                                    <%
+                                    catData = categoryData.filter((v, i, a) => a.findIndex(t => (t.CategoryId === v.CategoryId)) === i);
+                                    catData.forEach(function(category){
+                                        if (category.CategoryId) {
+                                            if (category.CategoryId === data[0].CategoryId) { %>
+                                                <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>" selected><%= category.CategoryName %></option>
+                                            <% } else { %>
+                                                <option value="<%= category.CategoryId %>" data-election-id="<%= category.ElectionId %>"><%= category.CategoryName %></option>
+                                            <% }
+                                        }
+                                    });
+                                    %>
+                                </select>
+                            </div>
+                            <br>
                         <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
-                        <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form">Reset Password</button>
+                        <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form" class="primaryBtn" style="background-color: red;">Reset Password</button>
                         <div class="modal fade" id="reset-password-form" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                             <div class="modal-dialog">
                               <div class="modal-content">
                                 <div class="modal-header">
                                   <h5 class="modal-title">Reset Password</h5>
                                 </div>
-                                <div class="modal-body">
-                                    <label>New Password : </label>
-                                    <input type="password" placeholder="Enter New Password" name="password" id="password">
-                                    <label>Confirm Password : </label>
-                                    <input type="password" placeholder="Enter Password Again" name="repeatpassword" id="repeatpassword">
+                                <div class="modal-body" style="text-align:left;">
+                                    <p style="text-align:left;">Passwords must be 8 characters or more and contain the following:
+                                        <ul style="text-align:left;">
+                                            <li>At least one upper and lowercase letter</li>
+                                            <li>At least one number</li>
+                                            <li>At least one special character (e.g. !)</li>
+                                        </ul>
+                                    </p>
+                                    <div class="modal-form-error" id="modal-form-error" style="color:red;">
+                                    </div>
+                                    <div class="form-floating">
+                                        <input type="password" placeholder="Enter New Password" name="password" id="password" class="form-control">
+                                            <label for="password">New Password : </label>
+                                    </div>
+                                    <div class="form-floating">
+                                        <input type="password" placeholder="Enter New Password" name="repeatpassword" id="repeatpassword" class="form-control">
+                                            <label for="repeatpassword">Confirm Password : </label>
+                                    </div>
                                     <div>
                                         <input type="checkbox" id="showPassword">
                                         <label for="showPassword">Show Password</label>
@@ -71,7 +102,7 @@
                               </div>
                             </div>
                         </div>
-                    <button type="submit" value="edit" id="submitBtn">Save Changes</button>
+                    <button type="submit" value="edit" id="submitBtn" class="primaryBtn">Save Changes</button>
                 </div>
             </form>
             <script>
@@ -96,6 +127,7 @@
                     const cancelButton = document.getElementById('cancel-password');
                     const showPasswordCheckbox = document.querySelector('input[type="checkbox"]#showPassword');
                     var passwordUpdated = document.getElementById('candidatepassword');
+                    const modalError = document.getElementById('modal-form-error');
 
                     function validatePassword(password) {
                         var pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -105,23 +137,39 @@
                     saveButton.addEventListener('click', function() {
                         //Passwords don't match
                         if (passwordInput.value !== repeatPasswordInput.value) {
+                            saveButton.removeAttribute('data-bs-dismiss');
                             passwordInput.value = "";
+                            passwordInput.classList.add('inputerror');
                             repeatPasswordInput.value = "";
+                            repeatPasswordInput.classList.add('inputerror');
+                            modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Passwords do not match.';
                         }
                         //Not all fields entered
                         else if (passwordInput.value === "" || repeatPasswordInput.value ===""
                             || !passwordInput.value || !repeatPasswordInput.value) {
+                            saveButton.removeAttribute('data-bs-dismiss');
                             passwordInput.value = "";
+                            passwordInput.classList.add('inputerror');
                             repeatPasswordInput.value = "";
+                            repeatPasswordInput.classList.add('inputerror');
+                            modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please enter all fields.';
                         }
                         //Password is invalid format
                         else if (!validatePassword(passwordInput.value) || !validatePassword(repeatPasswordInput.value)) {
+                            saveButton.removeAttribute('data-bs-dismiss');
                             passwordInput.value = "";
+                            passwordInput.classList.add('inputerror');
                             repeatPasswordInput.value = "";
+                            repeatPasswordInput.classList.add('inputerror');
+                            modalError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Invalid password.';
                         }
                         else {
                             passwordUpdated.value = passwordInput.value;
-                            $('#reset-password-form').modal('hide');
+                            repeatPasswordInput.classList.remove('inputerror');
+                            passwordInput.classList.remove('inputerror');
+                            modalError.innerHTML = '';
+                            saveButton.setAttribute('data-bs-dismiss', 'modal');
+                            saveButton.click();
                         }
                     });
 
@@ -130,10 +178,16 @@
                         if (passwordUpdated.value != "unchanged") {
                             passwordInput.value = passwordUpdated.value;
                             repeatPasswordInput.value = passwordUpdated.value;
+                            repeatPasswordInput.classList.remove('inputerror');
+                            passwordInput.classList.remove('inputerror');
+                            modalError.innerHTML = '';
                         }
                         else {
                             passwordInput.value = "";
                             repeatPasswordInput.value = "";
+                            repeatPasswordInput.classList.remove('inputerror');
+                            passwordInput.classList.remove('inputerror');
+                            modalError.innerHTML = '';
                         }
                     });
 
@@ -146,6 +200,85 @@
                             repeatPasswordInput.type = 'password';
                         }
                     });
+                });
+
+                const form = document.getElementById('editForm');
+                const basicFormError = document.getElementById('basic-form-error');
+
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    const emailInput = document.getElementById('candidateemail');
+                    const lastNameInput = document.getElementById('candidatelname');
+                    const firstNameInput = document.getElementById('candidatefname');
+                    const electionSelect = document.getElementById('electionSelect');
+                    const categorySelect = document.getElementById('categorySelect');
+
+                    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+                    const specialCharsRegex = /^(?=[A-Za-z])(?!.*?[ '-]{2})[A-Za-z'-]+(?:\s[A-Za-z'-]+)*$/;
+
+                    let isValid = false;
+
+                    if (firstNameInput.value && lastNameInput.value && emailInput.value && !(electionSelect.value === '')
+                        && !(categorySelect.value === '')) {
+                        if (emailRegex.test(emailInput.value) && specialCharsRegex.test(firstNameInput.value)
+                            && specialCharsRegex.test(lastNameInput.value)) {
+                                isValid = true;
+                        }
+                        else {
+                            if (!emailRegex.test(emailInput.value)) {
+                                emailInput.classList.add('inputerror');
+                            } else {
+                                emailInput.classList.remove('inputerror');
+                            }
+
+                            if (!specialCharsRegex.test(lastNameInput.value)) {
+                                lastNameInput.classList.add('inputerror');
+                            } else {
+                                lastNameInput.classList.remove('inputerror');
+                            }
+
+                            if (!specialCharsRegex.test(firstNameInput.value)) {
+                                firstNameInput.classList.add('inputerror');
+                            } else {
+                                firstNameInput.classList.remove('inputerror');
+                            }
+                        }
+                    } else {
+                        if (!firstNameInput.value) {
+                            firstNameInput.classList.add('inputerror');
+                        } else {
+                            firstNameInput.classList.remove('inputerror');
+                        }
+                        if (!lastNameInput.value){
+                            lastNameInput.classList.add('inputerror');
+                        } else {
+                            lastNameInput.classList.remove('inputerror');
+                        }
+                        if (!emailInput.value) {
+                            emailInput.classList.add('inputerror');
+                        } else {
+                            emailInput.classList.remove('inputerror');
+                        }
+                        if (electionSelect.value === '') {
+                            electionSelect.classList.add('inputerror');
+                        } else {
+                            electionSelect.classList.remove('inputerror');
+                        }
+                        if (categorySelect.value === '') {
+                            categorySelect.classList.add('inputerror');
+                        } else {
+                            categorySelect.classList.remove('inputerror');
+                        }
+                        basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
+                        return;
+                    }
+
+                    if (isValid) {
+                        form.submit();
+                    }
+                    else {
+                        basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check the details. <br><small><strong>NOTE:</strong> Limited special characters allowed.</small>';
+                    }
                 });
             </script>
         </div>
