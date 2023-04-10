@@ -311,8 +311,16 @@ router.get('/edit/:id', async function(req, res, next){
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Editing Election");
-                res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    console.log("Editing Election");
+                    res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                }
             })
         })
     } catch (err) {
@@ -351,27 +359,46 @@ router.post('/edit/:id', async function(req, res, next){
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
-                if (err) throw (err);
-                await connection.query(removeCategories, async (err, result) => {
-                    if (err) throw (err);
-                    if (categories) {
-                        for (let i = 0; i < categories.length; i++) {
-                            const category = categories[i];
-                            const categoryName = category.name;
-                            const categoryDescription = category.description;
-                
-                            const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
-                            await connection.query(insert_category_query, async (err, result) => {
-                                if (err) throw (err);
-                            });
-                        }
-                    }
-                });
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+            CategoryName, CategoryDescription, Icon_path
+            from Election left join Category
+            on Election.Id = Category.ElectionId
+            where Id = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
                 connection.release();
-                console.log ("Edited Election");
-                res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+                if (err)
+                    throw (err);
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        if (err) throw (err);
+                        await connection.query(removeCategories, async (err, result) => {
+                            if (err) throw (err);
+                            if (categories) {
+                                for (let i = 0; i < categories.length; i++) {
+                                    const category = categories[i];
+                                    const categoryName = category.name;
+                                    const categoryDescription = category.description;
+                        
+                                    const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                                    await connection.query(insert_category_query, async (err, result) => {
+                                        if (err) throw (err);
+                                    });
+                                }
+                            }
+                        });
+                        connection.release();
+                        console.log ("Edited Election");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    })
+                }
+            });
         })
     } catch (err) {
         console.log(err);
@@ -389,12 +416,31 @@ router.get('/delete/:id', async function(req, res, next){
         const query = mysql.format(remove_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+            CategoryName, CategoryDescription, Icon_path
+            from Election left join Category
+            on Election.Id = Category.ElectionId
+            where Id = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Deleted Election");
-                res.redirect('/hj9h8765qzf5jizwwnua');
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        connection.release();
+                        if (err)
+                            throw (err);
+                        console.log("Deleted Election");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    });
+                }
             })
         })
     } catch (err) {
@@ -500,7 +546,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
-                            CategoryName, NumVotes,
+                            CategoryName, NumVotes, OpenTime, CloseTime, ElectionDate,
                             Description, Username
                             from Candidate join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
@@ -652,13 +698,32 @@ router.get('/deletecandidate/:id', async function(req, res, next){
         const query = mysql.format(delete_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime,
+            CandidateId
+            from Election left join Candidate
+            on Election.Id = Candidate.ElectionId
+            where Candidate.CandidateId = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Deleted Candidate");
-                res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        connection.release();
+                        if (err)
+                            throw (err);
+                        console.log("Deleted Candidate");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    })
+                }
+            });
         })
     } catch (err) {
         res.redirect('/hj9h8765qzf5jizwwnua');

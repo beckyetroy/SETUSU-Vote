@@ -130,7 +130,7 @@
           %>
           <h2>Past Candidates</h2>
         <%
-            const pastElections = data.filter((v, i, a) => v.Id !== null && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now || new Date(v.CloseTime) < now));
+            const pastElections = data.filter((v, i, a) => v.Id !== null && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now && (new Date(v.CloseTime) < now)));
             const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
 
             const candidatePastData = sortedPastElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election');

@@ -3,12 +3,22 @@
         <div class="row">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div class="col"><%= data[0].Description %></div>
+                <%
+                    const now = new Date();
+                    const electionDate = new Date(data[0].ElectionDate);
+                    const openTime = new Date(data[0].OpenTime);
+                    const closeTime = new Date(data[0].CloseTime);
+                    const sameDate = now.toDateString() === electionDate.toDateString();
+                    const withinInterval = now >= openTime && now < closeTime;
+                    if (withinInterval && sameDate) {
+                    } else { %>
                 <form action="/hj9h8765qzf5jizwwnua/edit/<%= data[0].Id %>" method="GET">
                     <button type="submit" class="primaryBtn" style="margin-right: 15% !important; padding-right:1.5rem; padding-left: 1.5rem;"><i class="fas fa-edit"></i></button>
                 </form>
                 <form action="/hj9h8765qzf5jizwwnua/delete/<%= data[0].Id %>" method="GET" id="delete-form">
                     <button type="submit" class="primaryBtn" id="delete-btn" style="margin-left: 15% !important; padding-right:1.5rem; padding-left: 1.5rem; background-color: red;"><i class="fas fa-trash"></i></button>
                 </form>
+                <% } %>
             </div>
         </div>
     </div>

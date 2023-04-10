@@ -79,7 +79,7 @@
                 <th><i>Past Elections</i></th>
             </tr>
             <% 
-            const pastElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now || new Date(v.CloseTime) < now));
+            const pastElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now && (new Date(v.CloseTime) < now)));
             const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
     
             if (sortedPastElections.length > 0) {
