@@ -6,7 +6,7 @@
 
 var app = require('../app');
 var debug = require('debug')('votesystem:server');
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
 
 /**
@@ -20,12 +20,12 @@ app.set('port', port);
  * Create HTTPS server.
  */
 
-const options = {
-  key: fs.readFileSync('https-server/server.key'),
-  cert: fs.readFileSync('https-server/server.cert')
-};
+// const options = {
+//   key: fs.readFileSync('https-server/server.key'),
+//   cert: fs.readFileSync('https-server/server.cert')
+// };
 
-const server = https.createServer(options, app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
