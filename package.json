@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "npm install --build-from-source && npm rebuild argon2 && node ./bin/www"
   },
   "dependencies": {
     "argon2": "^0.30.3",
