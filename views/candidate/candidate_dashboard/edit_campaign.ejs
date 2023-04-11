@@ -38,7 +38,9 @@
             <div class="info clearfix">
                 <div id="errorMessageDiv" class="errorMessageDiv hidden">
                     <i class="fa fa-exclamation-circle" aria-hidden="true"></i> The image you submitted is not valid. Please try again.
-                  </div>
+                </div>
+                <div class="errorMessageDiv hidden" id="basic-form-error">
+                </div>
                 <div class = "manifesto">
                     <h3 class="manifesto-header">Manifesto</h3>
                     <p class="instructions">Your manifesto should summarise your overall campaign in a few short paragraphs.</p>
@@ -150,6 +152,11 @@
 
             if(name.length === 0) return;
 
+            if (name.length > 500) {
+                newAgenda.classList.add('inputerror');
+                return;
+            }
+
             const li = document.createElement('li');
 
             const btn = document.createElement('button');
@@ -188,6 +195,20 @@
 
         updateForm.addEventListener("submit", function(e) {
             e.preventDefault();
+
+            const basicFormError = document.getElementById('basic-form-error');
+            const manifestoInput = document.getElementById('candidateoverview');
+            const contactNoInput = document.getElementById('candidatecontactno');
+            const facebookInput = document.getElementById('candidatefacebook');
+            const twitterInput = document.getElementById('candidatetwitter');
+            const instagramInput = document.getElementById('candidateinstagram');
+
+            let isValid = true;
+            let phoneRegex = /^(\+353|0)?\s*(\(?\d{1,3}\)?[\s-]*)?\d{3}[\s-]*\d{4}$/;
+            let fbRegex = /^https?:\/\/(?:www\.)?facebook\.com\//;
+            let twitterRegex = /^https?:\/\/(?:www\.)?twitter\.com\//;
+            let instaRegex = /^https?:\/\/(?:www\.)?instagram\.com\//;
+
             updatedAgendas = [];
             const agendaInputs = document.querySelectorAll('input[name="addedagenda"]');
 
@@ -196,20 +217,63 @@
                 updatedAgendas.push(name);
             });
 
-            const hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "updatedAgendas";
-            hiddenInput.value = JSON.stringify(updatedAgendas);
+            if (manifestoInput.value && manifestoInput.value.length > 500) {
+                manifestoInput.classList.add('inputerror');
+                isValid = false;
+            } else {
+                manifestoInput.classList.remove('inputerror');
+            }
 
-            updateForm.appendChild(hiddenInput);
+            if (contactNoInput.value && !phoneRegex.test(contactNoInput.value)) {
+                contactNoInput.classList.add('inputerror');
+                isValid = false;
+            } else {
+                contactNoInput.classList.remove('inputerror');
+            }
 
-            var input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "media";
-            input.value = JSON.stringify(media);
-            updateForm.appendChild(input);
+            if (facebookInput.value && !fbRegex.test(facebookInput.value)) {
+                facebookInput.classList.add('inputerror');
+                isValid = false;
+            } else {
+                facebookInput.classList.remove('inputerror');
+            }
 
-            updateForm.submit();
+            if (twitterInput.value && !twitterRegex.test(twitterInput.value)) {
+                twitterInput.classList.add('inputerror');
+                isValid = false;
+            } else {
+                twitterInput.classList.remove('inputerror');
+            }
+
+            if (instagramInput.value && !instaRegex.test(instagramInput.value)) {
+                instagramInput.classList.add('inputerror');
+                isValid = false;
+            } else {
+                instagramInput.classList.remove('inputerror');
+            }
+
+            if (!isValid) {
+                basicFormError.classList.remove('hidden');
+                basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please re-check your details.';
+                return;
+            }
+
+            if (isValid) {
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "updatedAgendas";
+                hiddenInput.value = JSON.stringify(updatedAgendas);
+
+                updateForm.appendChild(hiddenInput);
+
+                var input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "media";
+                input.value = JSON.stringify(media);
+                updateForm.appendChild(input);
+
+                updateForm.submit();
+            }
         });
 
         Dropzone.autoDiscover = false;
@@ -228,8 +292,6 @@
             dictMaxFilesExceeded: "You can only upload a maximum of {{maxFiles}} file.",
             maxFiles: 1,
             autoProcessQueue: true,
-            resizeHeight: 250,
-            resizeWidth: 250,
             init: function() {
                 var dz = this;
 

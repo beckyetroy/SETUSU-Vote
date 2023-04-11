@@ -374,7 +374,6 @@ router.post('/edit/:id', async function(req, res, next){
             where Id = ?`;
             const checkQuery = mysql.format(check_query, [id]);
             await connection.query(checkQuery, async (err, result) => {
-                connection.release();
                 if (err)
                     throw (err);
                 const now = new Date();
@@ -401,7 +400,6 @@ router.post('/edit/:id', async function(req, res, next){
                                 }
                             }
                         });
-                        connection.release();
                         console.log ("Edited Election");
                         res.redirect('/hj9h8765qzf5jizwwnua');
                     })

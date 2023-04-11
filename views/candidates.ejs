@@ -85,7 +85,7 @@
                 const groupEnd = groupStart + 5;
                 const groupCandidates = candidateData.slice(groupStart, groupEnd);
           %>
-                <div class="ui five column stackable grid" id ="electionCards">
+                <div class="ui five column stackable grid" id ="candidateCards">
                   <% 
                     groupCandidates.forEach((candidate) => {
                   %>
@@ -103,7 +103,7 @@
                             <div class="meta">
                             <span><%= candidate.Description %></span>
                             </div>
-                            <div class="description">Running for <%= candidate.CategoryName %> </div>
+                            <div class="description" style="font-size: 1.2rem !important;">Running for <strong><%= candidate.CategoryName %><strong></strong> </div>
                         </div>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
                             <div class="meta">
                             <span><%= candidate.Description %></span>
                             </div>
-                            <div class="description">Running for <%= candidate.CategoryName %> </div>
+                            <div class="description" style="font-size: 1.2rem !important;">Running for <strong><%= candidate.CategoryName %></strong> </div>
                         </div>
                         </div>
                     </div>

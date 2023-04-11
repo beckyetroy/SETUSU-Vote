@@ -107,6 +107,16 @@
 
                         if(name.length === 0 || description.length === 0) return;
 
+                        if (description.length > 500) {
+                            newCategoryDescription.classList.add('inputerror');
+                            return;
+                        }
+
+                        if (name.length > 250) {
+                            newCategoryName.classList.add('inputerror');
+                            return;
+                        }
+
                         const category = { name: name, description: description };
 
                         const btn = document.createElement('button');
@@ -240,9 +250,6 @@
                                     }
                                 } else {
                                     electionDateInput.classList.add('inputerror');
-                                    console.log('today test');
-                                    console.log(today);
-                                    console.log(electionDateInput.value);
                                 }
                             }
                             else {

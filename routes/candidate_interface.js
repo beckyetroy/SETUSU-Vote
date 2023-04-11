@@ -402,7 +402,6 @@ router.post('/campaign', async function(req, res, next){
                             });
                         });
                     }
-                    const candidateid = req.body.candidateid;
                     upload_query = `UPDATE Candidate_Category SET picture_path = ? WHERE CandidateId = ?`;
                     query = mysql.format(upload_query, [picture, candidateid]);
                     await connection.query(query, async (err, results) => {
