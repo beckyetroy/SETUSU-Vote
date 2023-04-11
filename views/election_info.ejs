@@ -76,6 +76,10 @@
                 if (withinInterval && sameDate) {
               %>
                 <button class="primaryBtnBlue" onclick="window.location.href='/vote/<%=data[0].Id%>'">VOTE NOW!</button>
+              <% } else if ((now > closeTime && sameDate) || now > electionDate) {%>
+                <button class="primaryBtnBlue" onclick="window.location.href='/election/<%=data[0].Id%>/results'">RESULTS</button>
+              <% } else {%>
+                <button class="primaryBtnBlue" onclick="window.location.href='/register'">REGISTER NOW</button>
               <% } %>
             </span></h2>
         </div>
