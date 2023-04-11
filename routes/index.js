@@ -158,4 +158,40 @@ router.get('/candidate/:id', function(req, res, next) {
   })
 });
 
+/* GET election results page. */
+router.get('/election/:id/results', function(req, res, next) {
+  const election = req.params.id;
+  database.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlElection =
+        `select Id, Description, ElectionDate, OpenTime, CloseTime, 
+        Category.CategoryId, CategoryName, CategoryDescription,
+        Candidate.CandidateId, fName, lName, Picture_path, Icon_path, NumVotes
+        from Election LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
+          LEFT OUTER JOIN Candidate_Category
+          ON Candidate.CandidateId = Candidate_Category.CandidateId
+          LEFT OUTER JOIN Category
+          ON Candidate_Category.CategoryId = Category.CategoryId
+        where Id = ?;`
+      const query = mysql.format(sqlElection, [election]);
+      await connection.query (query, async (err, result) => {
+        connection.release();
+        if (err) throw (err)
+        if (result.length == 0) {
+          res.redirect('/');
+        }
+        const now = new Date();
+        const electionDate = new Date(result[0].ElectionDate);
+        const openTime = new Date(result[0].OpenTime);
+        const closeTime = new Date(result[0].CloseTime);
+        if ((now > closeTime && now.toDateString() === openTime.toDateString()) || now > openTime) {
+          res.render('election_results', { data:result});
+        }
+        else {
+          res.redirect('/');
+        }
+    })
+  })
+});
+
 module.exports = router;

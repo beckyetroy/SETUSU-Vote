@@ -72,7 +72,7 @@ function renderDashboard(res, title, action, username) {
                 const now = new Date();
                 const openTime = new Date(result[0].OpenTime);
                 const closeTime = new Date(result[0].CloseTime);
-                if (((now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) || now.toDateString() > openTime.toDateString())
+                if (((now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) || now > openTime)
                     && action === 'editCampaign') {
                     return res.redirect('/hj9h');
                 }

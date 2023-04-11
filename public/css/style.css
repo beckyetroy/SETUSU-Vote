@@ -1672,3 +1672,90 @@ tr.subheading {
   text-decoration: none;
   color: #eb2c5c;
 }
+
+.resultsContainer {
+  text-align: center;
+  width: 100%;
+  padding-left: 5rem;
+  padding-right: 5em;
+
+}
+
+#resultCards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.category-result-header {
+  padding-bottom: 5%;
+  color: white;
+  text-decoration: underline;
+}
+
+.runners-up-header {
+  padding-top: 5%;
+  padding-bottom: 2.5%;
+  color: white;
+}
+
+.categoryResult {
+  margin-bottom: 7.5%;
+  padding: 2.5%;
+  background-color: #4666b1;
+  border-radius: 25px;
+}
+
+#winnerImg, #runnerUpImg{
+  max-height: 200px;
+}
+
+#winnerImg img, #runnerUpImg img {
+  max-height: 200px;
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 991px) {
+  .resultsContainer {
+    padding: 0rem;
+  }
+  
+  #resultCards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .category-result-header {
+    padding-bottom: 5%;
+    padding-top: 5%;
+    color: white;
+    text-decoration: underline;
+  }
+  
+  .runners-up-header {
+    padding-top: 5%;
+    padding-bottom: 2.5%;
+    color: white;
+  }
+  
+  .categoryResult {
+    margin-bottom: 7.5%;
+    padding: 2.5%;
+    background-color: #4666b1;
+    border-radius: 0px;
+  }
+  
+  #winnerImg, #runnerUpImg{
+    max-height: 200px;
+  }
+  
+  #winnerImg img, #runnerUpImg img {
+    max-height: 200px;
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+}
