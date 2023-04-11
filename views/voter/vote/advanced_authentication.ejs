@@ -127,17 +127,20 @@
 
         openCameraBtn.addEventListener('click', function() {
             // Show loading screen until ready
-            document.getElementById('loading-screen').style.display = 'flex';
+            //document.getElementById('loading-screen').style.display = 'flex';
             // Show camera container and hide other fields
             cameraContainer.style.display = 'block';
             authenticateAdvancedContainer.classList.add('camera-show');
             instructions.classList.add('hidden');
+            const faceFrame = document.getElementById('face-frame') ? document.getElementById('face-frame') : null;
 
-            const faceFrame = document.createElement('img');
-            faceFrame.src = '/assets/Frame.png';
-            faceFrame.id = 'face-frame';
-            faceFrame.classList.add('white-frame');
-            cameraContainer.appendChild(faceFrame);
+            if (!faceFrame) {
+                const faceFrame = document.createElement('img');
+                faceFrame.src = '/assets/Frame.png';
+                faceFrame.id = 'face-frame';
+                faceFrame.classList.add('white-frame');
+                cameraContainer.appendChild(faceFrame);
+            }
             const frameBox = faceFrame.getBoundingClientRect();
 
             // Get user media

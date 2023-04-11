@@ -281,13 +281,13 @@ footer {
     width: 100%;
   }
   .banner-content h1 {
-    font-size: 2em !important;
+    font-size: 2.5rem !important;
     margin-bottom: 0.5em;
     text-decoration: none;
     transform: none !important;
   }
   .banner-content p {
-    font-size: 2.5vw;
+    font-size: 1.2rem;
     margin-bottom: 1em;
     font-family: 'Aileron', sans-serif !important;
   }
@@ -297,23 +297,21 @@ footer {
     width: 100%;
   }
   .banner-btn button {
-    font-size: 1em;
+    font-size: 1.5rem;
     padding: 0.5em 1em;
     transform: none !important;
   }
   .banner-btn p, .banner-btn a {
-    font-size: 0.8em;
+    font-size: 1rem;
     text-decoration: underline;
     color: white;
     margin-top: 1em;
-    transform: translate(0%, 25%);
   }
   .banner-btn a:hover {
     color:#eb2c5c;
   }
   .banner-content .banner-text {
     text-align: center;
-    transform: translate(0%, 25%);
   }
   .banner-content img {
     width: 40vw !important;
@@ -572,7 +570,7 @@ form.login {
 .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
   width: 300px;
   height: 300px;
-  transform: translate(+10%, -95%);
+  transform: translate(+10%, -75%);
 }
 
 @media (max-width: 991px) {
@@ -610,7 +608,7 @@ form.login {
   .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
     width: 200px;
     height: 200px;
-    transform: translate(+25vw, -50vh);
+    transform: translate(+25vw, -85vw);
   }
 }
 
@@ -652,7 +650,7 @@ form.login {
 @media (max-width: 991px) {
   .all-content {
     display: inline-block;
-    transform: translate(0%, -30vh);
+    transform: translate(0%, -50vw);
   }
   
   .info, .contact {
@@ -1467,8 +1465,6 @@ form.authenticate, form.register {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .container-instructions, .container-image-registration {
@@ -1567,7 +1563,6 @@ form.authenticate, form.register {
   .container-authentication-instructions p,
   .container-instructions p {
     max-width: 90%;
-    font-size: 0.8rem !important;
   }
 }
 
