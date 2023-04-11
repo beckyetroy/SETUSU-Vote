@@ -597,18 +597,18 @@ form.login {
   }
   
   .candidateslogan {
-    font-size: 1.1rem !important;
+    font-size: 1.3rem !important;
     font-style: italic;
   }
 
   .candidateslogan > button {
-    font-size: 1.1rem !important;
+    font-size: 1.3rem !important;
   }
   
   .campaign-thumbnail, .election-thumbnail, #election-thumbnail {
     width: 200px;
     height: 200px;
-    transform: translate(+25vw, -85vw);
+    transform: translate(+25vw, -80vw);
   }
 }
 
@@ -650,7 +650,7 @@ form.login {
 @media (max-width: 991px) {
   .all-content {
     display: inline-block;
-    transform: translate(0%, -50vw);
+    transform: translate(0%, -40vw);
   }
   
   .info, .contact {
@@ -1452,7 +1452,8 @@ form.authenticate, form.register {
 .container-authentication-liveness-instructions, .container-authentication-intro-instructions {
   text-align: center;
   font-family: 'Inter' !important;
-  margin: 1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
   text-align: center;
   max-width: 50%;
   min-height: 75vh;
@@ -1465,6 +1466,7 @@ form.authenticate, form.register {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  transform: translate(+22.5vw);
 }
 
 .container-instructions, .container-image-registration {
@@ -1544,6 +1546,11 @@ form.authenticate, form.register {
   .container-authentication-instructions, .container-authentication-liveness-instructions, 
   .container-instructions, .container-authentication-intro-instructions, .container-image-registration {
     max-width: 80%;
+  }
+
+  .container-authentication-instructions, .container-authentication-intro-instructions,
+  .container-authentication-liveness-instructions {
+    transform: translate(+5vw);
   }
 
   .fas.fa-camera {

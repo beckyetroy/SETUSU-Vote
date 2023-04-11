@@ -322,6 +322,7 @@ router.post('/:id/submit', async function(req, res, next) {
               try {
                 await connection.query(submit_query);
                 await connection.query(update_query);
+                console.log('+1 Vote for Candidate: ' + candidateId);
                 connection.release();
                 resolve();
               } catch (err) {

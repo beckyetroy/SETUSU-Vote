@@ -48,7 +48,7 @@
                     <button class="primaryBtnInverted" id="open-camera-btn">I UNDERSTAND. I'M READY!</button>
                     <br>
                     <div class="d-flex align-items-center justify-content-center">
-                        <p><small><strong>NOTE:</strong> You will get a chance to review or retake your image if you move or blink at the wrong moment!</small></p>
+                        <p><small><strong>NOTE:</strong> You will get a chance to review or retake your image!</small></p>
                     </div>
                 </div>
             </div>
@@ -127,31 +127,30 @@
 
         openCameraBtn.addEventListener('click', function() {
             // Show loading screen until ready
-            //document.getElementById('loading-screen').style.display = 'flex';
+            document.getElementById('loading-screen').style.display = 'flex';
             // Show camera container and hide other fields
             cameraContainer.style.display = 'block';
             authenticateAdvancedContainer.classList.add('camera-show');
             instructions.classList.add('hidden');
-            const faceFrame = document.getElementById('face-frame') ? document.getElementById('face-frame') : null;
+            let faceFrame = document.getElementById('face-frame') ? document.getElementById('face-frame') : null;
 
             if (!faceFrame) {
-                const faceFrame = document.createElement('img');
+                faceFrame = document.createElement('img');
                 faceFrame.src = '/assets/Frame.png';
                 faceFrame.id = 'face-frame';
                 faceFrame.classList.add('white-frame');
                 cameraContainer.appendChild(faceFrame);
             }
-            const frameBox = faceFrame.getBoundingClientRect();
+            let frameBox = faceFrame.getBoundingClientRect();
 
             // Get user media
             if (navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function (mediaStream) {
-                    stream = mediaStream;
-                    video.srcObject = mediaStream;
-                    video.play().then(_ => {
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        video.srcObject = mediaStream;
+                        video.play();
                         document.getElementById('loading-screen').style.display = 'none';
-                    });
                     // When the video is playing, start the face detection and head movement check
                     video.addEventListener('playing', function () {
                         // Resize the canvas to match the video size
@@ -352,6 +351,7 @@
                                 errorMessage.textContent = error;
                             }
                             errorMessageDiv.classList.remove('hidden');
+                            document.getElementById('loading-screen').style.display = 'none';
                         });
                     } else {
                         return response.text().then(htmlStr => {
@@ -360,7 +360,6 @@
                             document.close();
                         });
                     }
-                    document.getElementById('loading-screen').style.display = 'none';
                 });
             } catch (error) {
                 console.error('Error uploading image:', error);

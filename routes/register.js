@@ -108,8 +108,9 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
         }
         };
     
-        // detect text in the image
+       // Detect text in the image
         const detectTextResponse = await rekognition.detectText(detectParams).promise();
+
         // Detect faces in the image
         const detectFacesResponse = await rekognition.detectFaces(detectParams).promise();
 
@@ -124,29 +125,42 @@ router.post('/upload-card', upload.single('image'), async function(req, res, nex
         let studentNoFound = false;
         let faceDetected = false;
 
+        // Split the first and last names into arrays of individual names
+        const fnameArr = fname.toLowerCase().split(" ");
+        const lnameArr = lname.toLowerCase().split(" ");
+
         for (const textDetection of detectTextResponse.TextDetections) {
             const detectedText = textDetection.DetectedText.toLowerCase();
             const confidence = textDetection.Confidence;
-        
+
+            // Check for a match with each individual name in the first name array
+            for (const fnamePart of fnameArr) {
+                if ((detectedText.includes(fnamePart)) && (confidence >= 97)) {
+                    console.log('First name detected:', detectedText);
+                    fnameFound = true;
+                    break;
+                }
+            }
+
+            // Check for a match with each individual name in the last name array
+            for (const lnamePart of lnameArr) {
+                if ((detectedText.includes(lnamePart)) && (confidence >= 97)) {
+                    console.log('Last name detected:', detectedText);
+                    lnameFound = true;
+                    break;
+                }
+            }
+
             if ((detectedText.includes(studentno.toLowerCase())) && (confidence >= 97)) {
                 console.log('Student number detected:', detectedText);
                 studentNoFound = true;
-            }
-        
-            if ((detectedText.includes(fname.toLowerCase())) && (confidence >= 97)) {
-                console.log('First name detected:', detectedText);
-                fnameFound = true;
-            }
-        
-            if ((detectedText.includes(lname.toLowerCase()) && (confidence >= 97))) {
-                console.log('Last name detected:', detectedText);
-                lnameFound = true;
             }
 
             if (fnameFound && lnameFound && studentNoFound) {
                 break;
             }
         }
+
 
         if (detectFacesResponse.FaceDetails.length > 0) {
             const faceDetail = detectFacesResponse.FaceDetails[0];
