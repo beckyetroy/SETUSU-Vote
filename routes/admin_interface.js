@@ -323,7 +323,7 @@ router.get('/edit/:id', async function(req, res, next){
                 const openTime = new Date(result[0].OpenTime);
                 const closeTime = new Date(result[0].CloseTime);
                 if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
-                    res.redirect('/hj9h8765qzf5jizwwnua');
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
                 }
                 else {
                     console.log("Editing Election");
@@ -380,7 +380,7 @@ router.post('/edit/:id', async function(req, res, next){
                 const openTime = new Date(result[0].OpenTime);
                 const closeTime = new Date(result[0].CloseTime);
                 if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
-                    res.redirect('/hj9h8765qzf5jizwwnua');
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
                 }
                 else {
                     connection.query(query, async (err, result) => {
@@ -436,7 +436,7 @@ router.get('/delete/:id', async function(req, res, next){
                 const openTime = new Date(result[0].OpenTime);
                 const closeTime = new Date(result[0].CloseTime);
                 if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
-                    res.redirect('/hj9h8765qzf5jizwwnua');
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
                 }
                 else {
                     connection.query(query, async (err, result) => {
@@ -718,7 +718,7 @@ router.get('/deletecandidate/:id', async function(req, res, next){
                 const openTime = new Date(result[0].OpenTime);
                 const closeTime = new Date(result[0].CloseTime);
                 if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
-                    res.redirect('/hj9h8765qzf5jizwwnua');
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
                 }
                 else {
                     connection.query(query, async (err, result) => {

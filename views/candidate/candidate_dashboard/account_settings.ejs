@@ -13,7 +13,20 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidatefname" id ="candidatefname" value="<%= data[0].fName %>" class="form-control" style="width:40% !important;">
+                        <%
+                            const now = new Date();
+                            const electionDate = new Date(data[0].ElectionDate);
+                            const openTime = new Date(data[0].OpenTime);
+                            const closeTime = new Date(data[0].CloseTime);
+                            const sameDate = now.toDateString() === electionDate.toDateString();
+                            const pastDate =  now.toDateString() > electionDate.toDateString();
+                            const withinInterval = now >= openTime;
+                            if (withinInterval && sameDate || pastDate) {
+                        %>
+                            <input type="text" name="candidatefname" id ="candidatefname" value="<%= data[0].fName %>" class="form-control" style="width:40% !important;" disabled>
+                        <% } else { %>
+                            <input type="text" name="candidatefname" id ="candidatefname" value="<%= data[0].fName %>" class="form-control" style="width:40% !important;">
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -25,7 +38,11 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidatelname" id="candidatelname" value="<%= data[0].lName %>" class="form-control" style="width:40% !important;">
+                        <% if (withinInterval && sameDate || pastDate) { %>
+                            <input type="text" name="candidatelname" id="candidatelname" value="<%= data[0].lName %>" class="form-control" style="width:40% !important;" disabled>
+                        <% } else { %>
+                            <input type="text" name="candidatelname" id="candidatelname" value="<%= data[0].lName %>" class="form-control" style="width:40% !important;">
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -37,7 +54,11 @@
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <input type="text" name="candidateemail" id="candidateemail" value="<%= data[0].Email %>" class="form-control" style="width:40% !important;">
+                        <% if (withinInterval && sameDate || pastDate) { %>
+                            <input type="text" name="candidateemail" id="candidateemail" value="<%= data[0].Email %>" class="form-control" style="width:40% !important;" disabled>
+                        <% } else { %>
+                            <input type="text" name="candidateemail" id="candidateemail" value="<%= data[0].Email %>" class="form-control" style="width:40% !important;">
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -69,6 +90,9 @@
                     </div>
                 </div>
             </div>
+            <%
+                    if (withinInterval && sameDate) {
+                    } else { %>
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -81,6 +105,7 @@
                     </div>
                 </div>
             </div>
+            <% } %>
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -94,6 +119,7 @@
                     </div>
                 </div>
             </div>
+            <% if (withinInterval && sameDate || pastDate) { } else { %>
             <input type="hidden" id="candidatepassword" name="candidatepassword" value="unchanged">
                 <button type="button" id="reset-password" data-bs-toggle="modal" data-bs-target="#reset-password-form" class="primaryBtn" style="background-color: red;">Reset Password</button>
                 <div class="modal fade" id="reset-password-form" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
@@ -133,6 +159,7 @@
                     </div>
                 </div>
             <button type="submit" value="edit" class="primaryBtn">Save Changes</button>
+            <% } %>
         </form>
         <script>
             $(document).ready(function(){

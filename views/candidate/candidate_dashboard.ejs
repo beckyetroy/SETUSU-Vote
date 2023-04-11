@@ -47,10 +47,7 @@
         </div>
     </nav>
 
-        <% if(action == 'viewCampaign') { %>
-            <%- include ('candidate_dashboard/view_campaign.ejs'); %>
-
-        <% } else if(action == 'editCampaign') { %>
+        <% if(action == 'editCampaign') { %>
             <%- include ('candidate_dashboard/edit_campaign.ejs'); %>
 
         <% } else if(action == 'settings') { %>

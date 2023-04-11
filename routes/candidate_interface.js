@@ -42,7 +42,7 @@ function renderDashboard(res, title, action, username) {
                     Instagram, Twitter, Facebook, ContactNo,
                     Category.CategoryId, CategoryName, NumVotes, Slogan, Overview,
                     Description, Username, AgendaId, Summary, Picture_path, 
-                    file_id, File_Path, Type
+                    file_id, File_Path, Type, Election.Id
                     from Candidate join Candidate_Category
                     on Candidate.CandidateId = Candidate_Category.CandidateId
                     left join Category
@@ -58,17 +58,38 @@ function renderDashboard(res, title, action, username) {
                     where Candidate_Credentials.Username = ?`;
         const query = mysql.format(candidate_query, username);
         await connection.query (query, async (err, result) => {
-            connection.release()
-            
-            if (err) throw (err)
-            if (result.length == 0) {
-            console.log("An error occurred. Please verify user details.")
-            res.render('candidate/candidate_dashboard', { title: title, action:action, data:result});
-            }
-            else {
-                res.render('candidate/candidate_dashboard', { title: title, action:action, data:result});
-            }
-        })
+            const data = result;
+            const id = result[0].Id;
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+                CategoryName, CategoryDescription, Icon_path
+                from Election left join Category
+                on Election.Id = Category.ElectionId
+                where Id = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
+                if (err)
+                    console.log(err);
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (((now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) || now.toDateString() > openTime.toDateString())
+                    && action === 'editCampaign') {
+                    return res.redirect('/hj9h');
+                }
+                else {
+                    connection.release()
+                    
+                    if (err) throw (err)
+                    if (result.length == 0) {
+                    console.log("An error occurred. Please verify user details.")
+                    res.render('candidate/candidate_dashboard', { title: title, action:action, data:data});
+                    }
+                    else {
+                        res.render('candidate/candidate_dashboard', { title: title, action:action, data:data});
+                    }
+                }
+            });
+        });
     })
 };
 
