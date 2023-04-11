@@ -1,43 +1,107 @@
 <div class="card">
     <div class="card-header">
         <div class="row">
-            <div class="col">Manage Elections</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="col">Manage Elections</div>
+                <form action="/hj9h8765qzf5jizwwnua/register-election" method="POST" autocomplete="off">
+                    <button type="submit" class="primaryBtn">REGISTER NEW ELECTION</button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered">
-                <%
-                electionData = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => (t.Id === v.Id)) === i);
-                if(electionData.length > 0) {
-                %>
-                <tr>
+                <tr class="subheading">
                     <th>Election</th>
                     <th>Date</th>
                 </tr>
-                <%
-                    electionData.forEach(function(election){
-                %>
                 <tr>
-                    <td><a href="/hj9h8765qzf5jizwwnua/view/<%= election.Id %>" class="btn btn-primary btn-sm"><%= election.Description %></a></td>
-                    <td><%= election.ElectionDate %></td>
+                    <th><i>Ongoing Elections</i></th>
                 </tr>
-                <%
-                    });
-                }
-                else
-                {
+                <% 
+                const now = new Date();
+                const ongoingElections = data.filter((v) => {
+                    const electionDate = new Date(v.ElectionDate);
+                    const openTime = new Date(v.OpenTime);
+                    const closeTime = new Date(v.CloseTime);
+                    const sameDate = now.toDateString() === electionDate.toDateString();
+                    const withinInterval = now >= openTime && now < closeTime;
+                    return v.Id !== null && sameDate && withinInterval;
+                });
+                const filteredOngoingElections = ongoingElections.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i);
+                if (filteredOngoingElections.length > 0) {
                 %>
+                <% 
+                    filteredOngoingElections.forEach((election) => {
+                %>
+                    <tr onclick="location.href='/hj9h8765qzf5jizwwnua/view/<%= election.Id %>'" class="tableRowElection">
+                        <td><%= election.Description %></td>
+                        <td><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+                    </tr>
+                <%
+                });
+            } else {
+            %>
                 <tr>
                     <td colspan="5">No Data Found</td>
                 </tr>
-                <%
-                }
+            <%
+            }
+            %>
+            <tr>
+                <th><i>Upcoming Elections</i></th>
+            </tr>
+            <% 
+            const upcomingElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) >= now || new Date(v.OpenTime) > now));
+            const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
+    
+            if (sortedElections.length > 0) {
+            %>
+                <% 
+                sortedElections.forEach((election) => {
                 %>
+                <tr onclick="location.href='/hj9h8765qzf5jizwwnua/view/<%= election.Id %>'" class="tableRowElection">
+                    <td><%= election.Description %></td>
+                    <td><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+                </tr>
+            <%
+                });
+            } else {
+            %>
+                <tr>
+                    <td colspan="5">No Data Found</td>
+                </tr>
+            <%
+            }
+            %>
+            <tr>
+                <th><i>Past Elections</i></th>
+            </tr>
+            <% 
+            const pastElections = data.filter((v, i, a) => v.Id !== null && a.findIndex(t => t.Id === v.Id) === i && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now && (new Date(v.CloseTime) < now)));
+            const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
+    
+            if (sortedPastElections.length > 0) {
+            %>
+                <% 
+                sortedPastElections.forEach((election) => {
+                %>
+                <tr onclick="location.href='/hj9h8765qzf5jizwwnua/view/<%= election.Id %>'" class="tableRowElection">
+                    <td><%= election.Description %></td>
+                    <td><%= new Date(election.ElectionDate).toLocaleString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+                </tr>
+            <%
+                });
+            } else {
+            %>
+            <tr>
+                <td colspan="5">No Data Found</td>
+            </tr>
+            <%
+            }
+            %>
             </table>
         </div>
-        <form action="/hj9h8765qzf5jizwwnua/register-election" method="POST">
-            <button type="submit" class="primaryBtn">REGISTER NEW ELECTION</button>
-        </form>
     </div>
 </div>

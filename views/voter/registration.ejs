@@ -58,7 +58,7 @@
           <button class="primaryBtn" onclick="location.href='/'">BACK TO HOME</button>
         </div>
         <div class="container-basic-registration">
-            <form action="/register" method="POST" class="register">
+            <form action="/register" method="POST" class="register" autocomplete="off">
                 <h3 class="formTitle">Register to Vote</h3>
                 <div class="basic-form-error" id="basic-form-error">Please enter your details carefully.
                   <br><small><strong>NOTE:</strong> You will not get to update these later.</small>
@@ -266,18 +266,28 @@
     } else {
       if (!firstNameInput.value) {
         firstNameInput.classList.add('inputerror');
+      } else {
+        firstNameInput.classList.remove('inputerror');
       }
       if (!lastNameInput.value){
         lastNameInput.classList.add('inputerror');
+      } else {
+        lastNameInput.classList.remove('inputerror');
       }
       if (!studentNoInput.value) {
         studentNoInput.classList.add('inputerror');
+      } else {
+        studentNoInput.classList.remove('inputerror');
       }
       if (!emailInput.value) {
         emailInput.classList.add('inputerror');
+      } else {
+        emailInput.classList.remove('inputerror');
       }
       if (electionSelect.value === '') {
         electionSelect.classList.add('inputerror');
+      } else {
+        electionSelect.classList.remove('inputerror');
       }
       basicFormError.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
       return;

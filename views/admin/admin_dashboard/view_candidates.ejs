@@ -1,26 +1,79 @@
 <div class="card">
     <div class="card-header">
         <div class="row">
-            <div class="col">Manage Candidates</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="col">Manage Candidates</div>
+                <form action="/hj9h8765qzf5jizwwnua/register-candidate" method="POST" autocomplete="off">
+                    <button type="submit" class="primaryBtn">REGISTER NEW CANDIDATE</button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered">
-                <%
-                candidateData = data.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i);
-                if(candidateData.length > 0) {
-                %>
-                <tr>
+                <tr class="subheading">
                     <th>Name</th>
                     <th>Email</th>
                 </tr>
+                <tr>
+                    <th><i>Upcoming Candidates</i></th>
+                </tr>
+                <%
+                const now = new Date();
+                const upcomingElections = data.filter((election) => new Date(election.ElectionDate) >= now);
+
+                const sortedElections = upcomingElections.sort((a, b) => new Date(a.ElectionDate) - new Date(b.ElectionDate));
+
+                const ongoingElections = data.filter((v) => {
+                const electionDate = new Date(v.ElectionDate);
+                const openTime = new Date(v.OpenTime);
+                const closeTime = new Date(v.CloseTime);
+                const sameDate = now.toDateString() === electionDate.toDateString();
+                const withinInterval = now >= openTime && now < closeTime;
+                return v.Id !== null && sameDate && withinInterval;
+                });
+                const candidateData = ongoingElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election').concat(sortedElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election'));
+
+                if (candidateData.length > 0) {
+                %>
                 <%
                     candidateData.forEach(function(candidate){
                         if (candidate.CandidateId) {
                 %>
+                <tr onclick="location.href='/hj9h8765qzf5jizwwnua/viewcandidate/<%= candidate.CandidateId %>'" class="tableRowElection">
+                    <td><%= candidate.fName %> <%= candidate.lName %></td>
+                    <td><%= candidate.Email %></td>
+                </tr>
+                <%
+                        } else {}
+                    });
+                }
+                else
+                {
+                %>
                 <tr>
-                    <td><a href="/hj9h8765qzf5jizwwnua/viewcandidate/<%= candidate.CandidateId %>" class="btn btn-primary btn-sm"><%= candidate.fName %> <%= candidate.lName %></a></td>
+                    <td colspan="5">No Data Found</td>
+                </tr>
+                <%
+                }
+                %>
+                <tr>
+                    <th><i>Past Candidates</i></th>
+                </tr>
+                <%
+                const pastElections = data.filter((v, i, a) => v.Id !== null && (new Date(v.ElectionDate).setHours(0, 0, 0, 0) < now && (new Date(v.CloseTime) < now)));
+                const sortedPastElections = pastElections.sort((a, b) => new Date(a.ElectionDate) + new Date(b.ElectionDate));
+
+                const candidatePastData = sortedPastElections.filter((v, i, a) => v.CandidateId !== null && a.findIndex(t => (t.CandidateId === v.CandidateId)) === i && v.fName !== 'Reopen' && v.lName !== 'Election');
+                if (candidatePastData.length > 0) {
+                %>
+                <%
+                    candidatePastData.forEach(function(candidate){
+                        if (candidate.CandidateId) {
+                %>
+                <tr onclick="location.href='/hj9h8765qzf5jizwwnua/viewcandidate/<%= candidate.CandidateId %>'" class="tableRowElection">
+                    <td><%= candidate.fName %> <%= candidate.lName %></td>
                     <td><%= candidate.Email %></td>
                 </tr>
                 <%
@@ -38,8 +91,5 @@
                 %>
             </table>
         </div>
-        <form action="/hj9h8765qzf5jizwwnua/register-candidate" method="POST">
-            <button type="submit" class="primaryBtn">REGISTER NEW CANDIDATE</button>
-        </form>
     </div>
 </div>

@@ -8,7 +8,20 @@
           <p class="card-text">Edit your own campaign page as it appears on the website, until it's just how
             you like it!
           </p>
+          <%
+                    const now = new Date();
+                    const electionDate = new Date(data[0].ElectionDate);
+                    const openTime = new Date(data[0].OpenTime);
+                    const closeTime = new Date(data[0].CloseTime);
+                    const sameDate = now.toDateString() === electionDate.toDateString();
+                    const pastDate =  now.toDateString() > electionDate.toDateString();
+                    const withinInterval = now >= openTime;
+                    if (withinInterval && sameDate || pastDate) {
+          %>
+          <p><small>This option is unavailable after voting begins</small></p>
+          <% } else { %>
           <a href="/hj9h/campaign" class="btn btn-primary">Manage</a>
+          <% } %>
         </div>
       </div>
     </div>

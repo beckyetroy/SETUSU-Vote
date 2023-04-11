@@ -1041,7 +1041,7 @@ ol li:before {
   padding: 2%;
 }
 
-#errorMessageDiv {
+#errorMessageDiv, .errorMessageDiv {
   background-color: #ffcccc;
   border: 1px solid #ff0000;
   color: #000000;
@@ -1051,7 +1051,7 @@ ol li:before {
   text-align: left;
 }
 
-#errorMessageDiv i {
+#errorMessageDiv i .errorMessageDiv i {
   color: #ff0000;
   margin-right: 0.5rem;
 }
@@ -1059,6 +1059,10 @@ ol li:before {
 .register .form-control.inputerror, .inputerror {
   background-color: #ffe6e6 !important;
   border: 1px solid #ff0000 !important;
+}
+
+.form-floating textarea {
+  height: auto !important;
 }
 
 .register-suggest {
@@ -1607,4 +1611,64 @@ form.authenticate, form.register {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.tableRowElection {
+  background-color: #4666b1;
+  cursor: pointer;
+  color: white;
+}
+
+tr.subheading {
+  background-color: #eb2c5c;
+  color: white;
+  font-family: 'Aileron', sans-serif;
+}
+
+#addElectionForm, #editElectionForm,
+#addCandidateForm, #editForm {
+  text-align: center;
+}
+
+.addCategory, .addNewAgenda {
+  background-color: #4666b1;
+  color: white;
+  font-family: 'Inter' !important;
+  font-weight: bold;
+  padding: 0.5em;
+  border: none;
+  font-size: 1rem;
+  padding-right: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.categoryList, .updatedCategoryList {
+  text-align: center;
+  background-color: #c4c4c4;
+  max-width: 60%;
+  transform: translate(+30%, +0%);
+}
+
+.categoryList li, updatedCategoryList li {
+  padding-left: 1.5rem;
+  border: 2px solid #4666b1;
+  margin-top: 2%;
+}
+
+.containerCategories {
+  background-color: #b3b3b3;
+  border-radius: 25px;
+  padding: 1rem;
+}
+
+.candidateBulletList a {
+  text-decoration: none;
+  color: #4666b1;
+  font-family: 'Inter';
+  font-size: 1.1rem;
+}
+
+.candidateBulletList a:hover {
+  text-decoration: none;
+  color: #eb2c5c;
 }

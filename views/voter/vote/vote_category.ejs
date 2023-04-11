@@ -14,7 +14,7 @@
     <% } else if (currentcategory >= categorydata.length) { %>
         <h3>Confirm your choices</h3>
         <div class ="choices">
-            <form method="POST" action="/vote/<%= data[0].Id %>/submit">
+            <form method="POST" action="/vote/<%= data[0].Id %>/submit" autocomplete="off">
             <% Object.keys(selectedOptions).forEach(function(categoryIndex) { %>
                 <h4><%= categorydata[categoryIndex].CategoryName %></h4>
                 <% if (selectedOptions[categoryIndex] !== '-1') { %>

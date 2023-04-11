@@ -7,7 +7,7 @@
             <button class="primaryBtn" onclick="location.href='/elections'" type="button"> SEE MORE ELECTIONS </button>
         </div>
     <% } else { %>
-        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate" id="authenticate-basic-form">
+        <form action="/vote/<%= data[0].Id %>" method="POST" class="authenticate" id="authenticate-basic-form" autocomplete="off">
             <h3 class="formTitle">Please enter your details</h3>
             <div class="vote-error" id="basic-auth-error"><%= message %></div>
             <div class="form-floating">
@@ -99,15 +99,23 @@
                 } else {
                     if (!firstNameInput.value) {
                         firstNameInput.classList.add('inputerror');
+                    } else {
+                        firstNameInput.classList.remove('inputerror');
                     }
                     if (!lastNameInput.value){
                         lastNameInput.classList.add('inputerror');
+                    } else {
+                        lastNameInput.classList.remove('inputerror');
                     }
                     if (!studentNoInput.value) {
                         studentNoInput.classList.add('inputerror');
+                    } else {
+                        studentNoInput.classList.remove('inputerror');
                     }
                     if (!emailInput.value) {
                         emailInput.classList.add('inputerror');
+                    } else {
+                        emailInput.classList.remove('inputerror');
                     }
                     error.innerHTML = '<i class="fa fa-exclamation-circle" aria-hidden="true"></i> Please fill out all fields.';
                     return;

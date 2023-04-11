@@ -6,7 +6,28 @@ const randomstring = require("randomstring");
 var mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 var crypto = require('crypto');
+const multer = require('multer');
 const blockTime = 15; //15 minutes
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/uploads/');
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 1000 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|webp|mp4)$/)) {
+        return cb(new Error('Only image and video files are allowed'));
+        }
+        cb(null, true);
+    }
+});
 
 function renderDashboard(res, title, action) {
     database.getConnection ( async (err, connection)=> {
@@ -173,6 +194,20 @@ router.post('/register-election', async function(req, res, next) {
     }
 });
 
+/* Upload Election Icon */
+router.post('/upload-icon', upload.single('image'), (req, res) => {
+    const token = req.cookies.token;
+    try {
+        const decoded = jwt.verify(token, process.env.secretKey1);
+        if (decoded) {
+            const filePath = req.file.path;
+            res.status(200).json({ message: "File uploaded successfully!", filePath: filePath});
+        }
+    } catch {
+        res.redirect('/hj9h8765qzf5jizwwnua');
+    }
+});
+
 /* Register Election */
 router.post('/election-add', async function(req, res, next) {
     const token = req.cookies.token;
@@ -184,11 +219,12 @@ router.post('/election-add', async function(req, res, next) {
             const opentime = date + ' ' + req.body.electionopeningtime + ':00';
             const closetime = date + ' ' + req.body.electionclosingtime + ':00';
             const categories = JSON.parse(req.body.categories);
+            const picture = req.body.picture ? req.body.picture.replace('public', '') : null;
 
             database.getConnection( async (err, connection) => {
                 if (err) throw (err)
-                const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime) values (?,?,?,?)";
-                const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime]);
+                const sqlInsert = "insert into Election (Description, ElectionDate, OpenTime, CloseTime, Icon_path) values (?,?,?,?,?)";
+                const insert_query = mysql.format(sqlInsert,[description, date, opentime, closetime, picture]);
                 const sqlInsertCategory = "insert into Category (CategoryName, CategoryDescription, ElectionId) values (?,?,?)";
                 const sqlInsertDefaultCandidate = "insert into Candidate (fName, lName, Email, ElectionId) values (?,?,?,?)";
                 const sqlInsertDefaultPerCategory = "insert into Candidate_Category (CategoryId, CandidateId) values (?,?)";
@@ -244,7 +280,7 @@ router.get('/view/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select concat(fName, ' ', lName) AS 'CandidateName', CandidateId, Id, Description, ElectionDate, OpenTime, CloseTime,
-                    CategoryName, CategoryDescription
+                    CategoryName, CategoryId, CategoryDescription
                     from Election
                     left join Candidate on Election.Id = Candidate.ElectionId
                     left join Category on Election.Id = Category.ElectionId
@@ -271,7 +307,8 @@ router.get('/edit/:id', async function(req, res, next){
     try {
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
-        const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryName, CategoryDescription
+        const edit_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+                            CategoryName, CategoryDescription, Icon_path
                             from Election left join Category
                             on Election.Id = Category.ElectionId
                             where Id = ?`;
@@ -282,8 +319,16 @@ router.get('/edit/:id', async function(req, res, next){
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Editing Election");
-                res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    console.log("Editing Election");
+                    res.render('admin/admin_dashboard', { title: 'Edit Election', action: 'edit', data: result});
+                }
             })
         })
     } catch (err) {
@@ -298,19 +343,23 @@ router.post('/edit/:id', async function(req, res, next){
         jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         var description = req.body.electiondescription;
-        var date = req.body.electiondate;
-        var opentime = date + ' ' + req.body.electionopeningtime + ':00';
-        var closetime = date + ' ' + req.body.electionclosingtime + ':00';
-        const categories = JSON.parse(req.body.updatedCategories);
+        var date = new Date(req.body.electiondate);
+        const formatted_date = date.toISOString().slice(0, 10);
+
+        var opentime = new Date(formatted_date + 'T' + req.body.electionopeningtime + ':00');
+        var closetime = new Date(formatted_date + 'T' + req.body.electionclosingtime + ':00');
+        const categories = req.body.updatedCategories ? JSON.parse(req.body.updatedCategories) : null;
+        const picture = req.body.picture ? req.body.picture.replace('public', '') : null;
 
         var id = req.params.id;
         const update_query = `UPDATE Election
                             SET Description = ?, 
                             ElectionDate = ?, 
                             OpenTime = ?, 
-                            CloseTime = ? 
+                            CloseTime = ?,
+                            Icon_path =?
                             WHERE id = ?`;
-        const query = mysql.format(update_query, [description, date, opentime, closetime, id]);
+        const query = mysql.format(update_query, [description, formatted_date, opentime, closetime, picture, id]);
 
         const remove_category_query = `DELETE FROM Category WHERE ElectionId = ?`;
         const removeCategories = mysql.format(remove_category_query, [id]);
@@ -318,27 +367,47 @@ router.post('/edit/:id', async function(req, res, next){
 
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
-                if (err) throw (err);
-                await connection.query(removeCategories, async (err, result) => {
-                    if (err) throw (err);
-                    for (let i = 0; i < categories.length; i++) {
-                        const category = categories[i];
-                        const categoryName = category.name;
-                        const categoryDescription = category.description;
-            
-                        const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
-                        await connection.query(insert_category_query, async (err, result) => {
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+            CategoryName, CategoryDescription, Icon_path
+            from Election left join Category
+            on Election.Id = Category.ElectionId
+            where Id = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
+                if (err)
+                    throw (err);
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        if (err) throw (err);
+                        await connection.query(removeCategories, async (err, result) => {
                             if (err) throw (err);
+                            if (categories) {
+                                for (let i = 0; i < categories.length; i++) {
+                                    const category = categories[i];
+                                    const categoryName = category.name;
+                                    const categoryDescription = category.description;
+                        
+                                    const insert_category_query = mysql.format(sqlInsertCategory,[categoryName, categoryDescription, id]);
+                                    await connection.query(insert_category_query, async (err, result) => {
+                                        if (err) throw (err);
+                                    });
+                                }
+                            }
                         });
-                    }
-                });
-                connection.release();
-                console.log ("Edited Election");
-                res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+                        console.log ("Edited Election");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    })
+                }
+            });
         })
     } catch (err) {
+        console.log(err);
         res.redirect('/hj9h8765qzf5jizwwnua');
     }
 });
@@ -353,12 +422,31 @@ router.get('/delete/:id', async function(req, res, next){
         const query = mysql.format(remove_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime, CategoryId,
+            CategoryName, CategoryDescription, Icon_path
+            from Election left join Category
+            on Election.Id = Category.ElectionId
+            where Id = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Deleted Election");
-                res.redirect('/hj9h8765qzf5jizwwnua');
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        connection.release();
+                        if (err)
+                            throw (err);
+                        console.log("Deleted Election");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    });
+                }
             })
         })
     } catch (err) {
@@ -464,7 +552,7 @@ router.get('/viewcandidate/:id', async function(req, res, next){
         const decoded = jwt.verify(token, process.env.secretKey1);
         var id = req.params.id;
         const view_query = `select Candidate.CandidateId, fName, lName, Email,
-                            CategoryName, NumVotes,
+                            CategoryName, NumVotes, OpenTime, CloseTime, ElectionDate,
                             Description, Username
                             from Candidate join Candidate_Category
                             on Candidate.CandidateId = Candidate_Category.CandidateId
@@ -616,13 +704,32 @@ router.get('/deletecandidate/:id', async function(req, res, next){
         const query = mysql.format(delete_query, [id]);
         database.getConnection( async (err, connection) => {
             if (err) console.log(err)
-            connection.query(query, async (err, result) => {
+            const check_query = `select Id, Description, ElectionDate, OpenTime, CloseTime,
+            CandidateId
+            from Election left join Candidate
+            on Election.Id = Candidate.ElectionId
+            where Candidate.CandidateId = ?`;
+            const checkQuery = mysql.format(check_query, [id]);
+            await connection.query(checkQuery, async (err, result) => {
                 connection.release();
                 if (err)
                     throw (err);
-                console.log("Deleted Candidate");
-                res.redirect('/hj9h8765qzf5jizwwnua');
-            })
+                const now = new Date();
+                const openTime = new Date(result[0].OpenTime);
+                const closeTime = new Date(result[0].CloseTime);
+                if (now >= openTime && now <= closeTime && now.toDateString() === openTime.toDateString()) {
+                    return res.redirect('/hj9h8765qzf5jizwwnua');
+                }
+                else {
+                    connection.query(query, async (err, result) => {
+                        connection.release();
+                        if (err)
+                            throw (err);
+                        console.log("Deleted Candidate");
+                        res.redirect('/hj9h8765qzf5jizwwnua');
+                    })
+                }
+            });
         })
     } catch (err) {
         res.redirect('/hj9h8765qzf5jizwwnua');

@@ -98,7 +98,7 @@ router.get('/election/:id', function(req, res, next) {
     const sqlElection =
         `select Id, Description, ElectionDate, OpenTime, CloseTime, 
         Category.CategoryId, CategoryName, CategoryDescription,
-        Candidate.CandidateId, fName, lName, Picture_path
+        Candidate.CandidateId, fName, lName, Picture_path, Icon_path
         from Election LEFT OUTER JOIN Candidate ON Election.Id = Candidate.ElectionId
           LEFT OUTER JOIN Candidate_Category
           ON Candidate.CandidateId = Candidate_Category.CandidateId
